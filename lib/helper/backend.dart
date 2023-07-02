@@ -9,10 +9,11 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:sphplaner/helper/sph.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sphplaner/helper/school.dart';
+import 'package:sphplaner/helper/sph.dart';
 
 import 'defaults.dart';
 
@@ -23,6 +24,8 @@ class Backend extends PropertyChangeNotifier<String> {
   bool init = false;
   bool _sphLogin = false;
   String userDir = "";
+
+  List<School> schools = List<School>.empty();
 
   String _status = "Aktualisiere Vertretung...";
   Map _stundenplan = getDefaultTable();
@@ -54,6 +57,36 @@ class Backend extends PropertyChangeNotifier<String> {
   Future<void> initBackend() async {
     _prefs = await SharedPreferences.getInstance();
     _dir = await getApplicationDocumentsDirectory();
+  }
+
+  Future<bool> downloadSchoolInfo() async {
+    try {
+      schools = <School>[];
+      http.Response response = await http
+          .get(Uri.parse("https://start.schulportal.hessen.de"))
+          .timeout(const Duration(seconds: 3), onTimeout: () {
+        throw TimeoutException;
+      });
+
+      dom.Document startpage = parse(response.body);
+
+      dom.Element schoolList = startpage.getElementById("accordion")!;
+
+      for (dom.Element school
+          in schoolList.getElementsByClassName("list-group-item")) {
+        String schoolInfo = school.innerHtml
+            .replaceAll(" <small>", ";(")
+            .replaceAll("</small>", ")");
+        String schoolName = schoolInfo.split(";")[0];
+        String schoolCity = schoolInfo.split(";")[1];
+        String schoolId = school.attributes['data-id'] ?? "";
+        schools.add(School(name: schoolName, city: schoolCity, id: schoolId));
+      }
+
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> initApp() async {
@@ -262,15 +295,18 @@ class Backend extends PropertyChangeNotifier<String> {
 
       final file = File('$userDir/image.png');
       file.writeAsBytesSync(userImage.bodyBytes);
-      pictureChange = DateTime.now().add(const Duration(days: 10)).millisecondsSinceEpoch;
+      pictureChange =
+          DateTime.now().add(const Duration(days: 10)).millisecondsSinceEpoch;
       lastUserUpdate = DateTime.now().millisecondsSinceEpoch;
-    } else if (DateTime.now().millisecondsSinceEpoch >= pictureChange + 900000) {
+    } else if (DateTime.now().millisecondsSinceEpoch >=
+        pictureChange + 900000) {
       http.Response userImage =
-      await sph.get("/benutzerverwaltung.php?a=userFoto&b=show");
+          await sph.get("/benutzerverwaltung.php?a=userFoto&b=show");
 
       final file = File('$userDir/image.png');
       file.writeAsBytesSync(userImage.bodyBytes);
-      pictureChange = DateTime.now().add(const Duration(days: 10)).millisecondsSinceEpoch;
+      pictureChange =
+          DateTime.now().add(const Duration(days: 10)).millisecondsSinceEpoch;
     }
     return true;
   }
@@ -280,22 +316,28 @@ class Backend extends PropertyChangeNotifier<String> {
 
     Map newVertretung = getDefaultVertretung();
 
-    http.Response vertretungsplanResponse = await sph.get("/vertretungsplan.php");
+    http.Response vertretungsplanResponse =
+        await sph.get("/vertretungsplan.php");
 
     if (vertretungsplanResponse.statusCode == 419) {
       return false;
     }
 
-    List<dom.Element> panels = parse(vertretungsplanResponse.body).getElementsByClassName("panel");
+    List<dom.Element> panels =
+        parse(vertretungsplanResponse.body).getElementsByClassName("panel");
 
-    for (int i=1;i<=2;i++) {
+    for (int i = 1; i <= 2; i++) {
       dom.Element panel = panels[i];
-      String heading = panel.getElementsByClassName("panel-heading")[0].text.trim();
-      newVertretung[i==1 ? "heute" : "morgen"]["day"] = heading.split(",")[0];
-      newVertretung[i==1 ? "heute" : "morgen"]["date"] = heading.split(" ")[2];
-      List vertretungen =  [];
+      String heading =
+          panel.getElementsByClassName("panel-heading")[0].text.trim();
+      newVertretung[i == 1 ? "heute" : "morgen"]["day"] = heading.split(",")[0];
+      newVertretung[i == 1 ? "heute" : "morgen"]["date"] =
+          heading.split(" ")[2];
+      List vertretungen = [];
 
-      for (dom.Element tr in panel.getElementsByTagName("tbody")[0].getElementsByTagName("tr")) {
+      for (dom.Element tr in panel
+          .getElementsByTagName("tbody")[0]
+          .getElementsByTagName("tr")) {
         List<dom.Element> td = tr.getElementsByTagName("td");
         if (td.length != 1 && !td[0].text.startsWith("Keine Einträge!")) {
           String fach = td[3].text.trim();
@@ -315,7 +357,6 @@ class Backend extends PropertyChangeNotifier<String> {
             raum = "---";
           }
 
-
           Map vertretung = {
             "klasse": klasse,
             "stunde": td[1].text.trim(),
@@ -327,15 +368,12 @@ class Backend extends PropertyChangeNotifier<String> {
           };
           vertretungen.add(vertretung);
         }
-
       }
-      newVertretung[i==1 ? "heute" : "morgen"]['vertretung'] = vertretungen;
+      newVertretung[i == 1 ? "heute" : "morgen"]['vertretung'] = vertretungen;
     }
 
-
-
     newVertretung['last'] =
-    "${DateFormat("dd.MM.yy").format(DateTime.now())} ${DateFormat("HH:mm").format(DateTime.now())}";
+        "${DateFormat("dd.MM.yy").format(DateTime.now())} ${DateFormat("HH:mm").format(DateTime.now())}";
     _vertretungsplan = newVertretung;
     _buildStundenplan();
     File("$userDir/vertretungsplan.json")
@@ -376,13 +414,13 @@ class Backend extends PropertyChangeNotifier<String> {
               for (int k = 0; k <= rowspan; k++) {
                 String fach = stunde.getElementsByTagName("b")[0].text.trim();
                 String lehrkraft =
-                stunde.getElementsByTagName("small")[0].text.trim();
+                    stunde.getElementsByTagName("small")[0].text.trim();
                 newtable[days[j - 1]]['${i + k + 1}']["R"] =
                     stunde.text.split(fach)[1].split(lehrkraft)[0].trim();
                 if (fach.startsWith("Q")) {
                   fach.substring(2);
                   fach =
-                  "${fach.substring(0, fach.length - 3)}-${fach.substring(fach.length - 2)}${int.parse(fach.substring(fach.length - 2))}";
+                      "${fach.substring(0, fach.length - 3)}-${fach.substring(fach.length - 2)}${int.parse(fach.substring(fach.length - 2))}";
                 }
 
                 newtable[days[j - 1]]['${i + k + 1}']["F"] = fach;
@@ -463,7 +501,8 @@ class Backend extends PropertyChangeNotifier<String> {
         String classes =
             mailinfo.getElementsByTagName("span")[0].attributes['class']!;
         if (classes.contains("label-success")) {
-          email = mailinfo.getElementsByTagName("input")[0].attributes['value']!;
+          email =
+              mailinfo.getElementsByTagName("input")[0].attributes['value']!;
           emailChange = false;
           return "";
         } else if (classes.contains("label-warning")) {
@@ -587,7 +626,7 @@ class Backend extends PropertyChangeNotifier<String> {
     if (value.startsWith("ERROR")) {
       _status = value.split("=")[1];
       notifyListeners('status');
-       Future.delayed(const Duration(seconds: 3)).then((value) {
+      Future.delayed(const Duration(seconds: 3)).then((value) {
         _status = "Letztes Update: $lastUpdate";
         notifyListeners('status');
       });
@@ -785,8 +824,7 @@ class Backend extends PropertyChangeNotifier<String> {
                 vertretungs['altesFach'].toString().toUpperCase();
             String fachNormal = vertretungs['fach'].toString().toUpperCase();
 
-            if ((faecher.contains(altesFach) ||
-                    faecher.contains(fachNormal)) &&
+            if ((faecher.contains(altesFach) || faecher.contains(fachNormal)) &&
                 ((_stundenplan[meineVertretung[day]['day'].toLowerCase()]
                                 ['$stunde']["F"] ==
                             fachNormal ||

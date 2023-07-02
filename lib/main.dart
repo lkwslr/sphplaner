@@ -4,21 +4,22 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
 import 'package:sphplaner/helper/backend.dart';
 import 'package:sphplaner/helper/drawer.dart';
 import 'package:sphplaner/routes/hausaufgaben.dart';
-import 'package:sphplaner/routes/login.dart';
 import 'package:sphplaner/routes/settings.dart';
 import 'package:sphplaner/routes/stundenplan.dart';
 import 'package:sphplaner/routes/vertretung.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
+import 'package:sphplaner/routes/welcome.dart';
 
 import 'helper/theme.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   app_info.init();
 
@@ -81,109 +82,108 @@ class _SPHPlaner extends State<SPHPlaner> {
         builder: (context, backend, child) {
           return DynamicColorBuilder(
               builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-                ColorScheme lightColorScheme;
-                ColorScheme darkColorScheme;
+            ColorScheme lightColorScheme;
+            ColorScheme darkColorScheme;
 
-                if (lightDynamic != null && darkDynamic != null) {
-                  lightColorScheme = lightDynamic.harmonized();
+            if (lightDynamic != null && darkDynamic != null) {
+              lightColorScheme = lightDynamic.harmonized();
 
-                  darkColorScheme = darkDynamic.harmonized();
-                  if (!backend!.materialYou) {
-                    lightColorScheme = lightColorScheme.copyWith(
-                      primary: sphBlue,
-                      onPrimary: const Color(0xffdde3ee),
-                      primaryContainer: sphBlue,
-                    );
-                    darkColorScheme = darkColorScheme.copyWith(
-                      primary: sphBlue,
-                      onPrimary: const Color(0xffdde3ee),
-                      primaryContainer: sphBlue,
-                    );
-                  }
-                } else {
-                  lightColorScheme = defaultLightColorScheme;
-                  darkColorScheme = defaultDarkColorScheme;
-                }
-
-                InputDecorationTheme customLightInputTheme = InputDecorationTheme(
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 1, color: lightColorScheme.outline),
-                        borderRadius: BorderRadius.circular(4)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 2, color: lightColorScheme.primary),
-                        borderRadius: BorderRadius.circular(4)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 1, color: lightColorScheme.error),
-                        borderRadius: BorderRadius.circular(4)),
-                    focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 2, color: lightColorScheme.error),
-                        borderRadius: BorderRadius.circular(4)));
-
-                InputDecorationTheme customDarkInputTheme = InputDecorationTheme(
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 1, color: darkColorScheme.outline),
-                        borderRadius: BorderRadius.circular(4)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 2, color: darkColorScheme.primary),
-                        borderRadius: BorderRadius.circular(4)),
-                    errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 1, color: darkColorScheme.error),
-                        borderRadius: BorderRadius.circular(4)),
-                    focusedErrorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            width: 2, color: darkColorScheme.error),
-                        borderRadius: BorderRadius.circular(4)));
-
-                return MaterialApp(
-                  title: 'SPH Planer',
-                  theme: ThemeData(
-                    colorScheme: lightColorScheme,
-                    useMaterial3: true,
-                    inputDecorationTheme: customLightInputTheme,
-                  ),
-                  darkTheme: ThemeData(
-                    colorScheme: darkColorScheme,
-                    useMaterial3: true,
-                    inputDecorationTheme: customDarkInputTheme,
-                  ),
-                  themeMode: backend!.themeMode,
-                  home: PropertyChangeConsumer<Backend, String>(
-                      properties: const ['loggedIn', 'viewMode'],
-                      builder: (context, backend, child) {
-                        return Scaffold(
-                          appBar: AppBar(
-                            title: Text(backend!.title),
-                            bottom: backend.isLoggedIn &&
-                                !backend.viewMode
-                                    .contains(RegExp(r"hausaufgaben"))
-                                ? bottomAppBar(context)
-                                : null,
-                            actions: backend.isLoggedIn
-                                ? buildActions(backend.viewMode, context, false)
-                                : null,
-                          ),
-                          drawer: backend.isLoggedIn ? getDrawer() : null,
-                          body: backend.isLoggedIn
-                              ? buildApp(backend.viewMode)
-                              : const Login(),
-                        );
-                      }),
+              darkColorScheme = darkDynamic.harmonized();
+              if (!backend!.materialYou) {
+                lightColorScheme = lightColorScheme.copyWith(
+                  primary: sphBlue,
+                  onPrimary: const Color(0xffdde3ee),
+                  primaryContainer: sphBlue,
                 );
-              });
+                darkColorScheme = darkColorScheme.copyWith(
+                  primary: sphBlue,
+                  onPrimary: const Color(0xffdde3ee),
+                  primaryContainer: sphBlue,
+                );
+              }
+            } else {
+              lightColorScheme = defaultLightColorScheme;
+              darkColorScheme = defaultDarkColorScheme;
+            }
+
+            InputDecorationTheme customLightInputTheme = InputDecorationTheme(
+                enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 1, color: lightColorScheme.outline),
+                    borderRadius: BorderRadius.circular(4)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 2, color: lightColorScheme.primary),
+                    borderRadius: BorderRadius.circular(4)),
+                errorBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 1, color: lightColorScheme.error),
+                    borderRadius: BorderRadius.circular(4)),
+                focusedErrorBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 2, color: lightColorScheme.error),
+                    borderRadius: BorderRadius.circular(4)));
+
+            InputDecorationTheme customDarkInputTheme = InputDecorationTheme(
+                enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 1, color: darkColorScheme.outline),
+                    borderRadius: BorderRadius.circular(4)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 2, color: darkColorScheme.primary),
+                    borderRadius: BorderRadius.circular(4)),
+                errorBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 1, color: darkColorScheme.error),
+                    borderRadius: BorderRadius.circular(4)),
+                focusedErrorBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(width: 2, color: darkColorScheme.error),
+                    borderRadius: BorderRadius.circular(4)));
+
+            return MaterialApp(
+              title: 'SPH Planer',
+              theme: ThemeData(
+                colorScheme: lightColorScheme,
+                useMaterial3: true,
+                inputDecorationTheme: customLightInputTheme,
+              ),
+              darkTheme: ThemeData(
+                colorScheme: darkColorScheme,
+                useMaterial3: true,
+                inputDecorationTheme: customDarkInputTheme,
+              ),
+              themeMode: backend!.themeMode,
+              home: PropertyChangeConsumer<Backend, String>(
+                  properties: const ['loggedIn', 'viewMode'],
+                  builder: (context, backend, child) {
+                    if (backend!.isLoggedIn) {
+                      return Scaffold(
+                        appBar: AppBar(
+                          title: Text(backend.title),
+                          bottom: !backend.viewMode
+                                  .contains(RegExp(r"hausaufgaben"))
+                              ? bottomAppBar(context)
+                              : null,
+                          actions:
+                              buildActions(backend.viewMode, context, false),
+                        ),
+                        drawer: getDrawer(),
+                        body: buildApp(backend.viewMode),
+                      );
+                    } else {
+                      return const WelcomeScreen();
+                    }
+                  }),
+            );
+          });
         },
       );
     });
   }
 
   Widget buildApp(String view) {
-
     switch (view) {
       case "vertretung":
         return const Vertretung();
@@ -200,8 +200,7 @@ class _SPHPlaner extends State<SPHPlaner> {
         .value;
 
     return PreferredSize(
-        preferredSize:
-            Size.fromHeight(backend.sphLogin ? 32 : 64),
+        preferredSize: Size.fromHeight(backend.sphLogin ? 32 : 64),
         child: ValueListenableBuilder(
             valueListenable: loading,
             builder: (BuildContext context, bool value, Widget? child) {
@@ -223,7 +222,6 @@ class _SPHPlaner extends State<SPHPlaner> {
                         backend.updateData();
                       }
                     });
-
                   },
                   child: loading.value
                       ? SizedBox(
@@ -278,13 +276,11 @@ class _SPHPlaner extends State<SPHPlaner> {
             builder: (context, backend, child) {
               return GestureDetector(
                 onTap: () {
-                  if (!backend!.updateLock &&
-                      (backend.sphLogin)) {
+                  if (!backend!.updateLock && (backend.sphLogin)) {
                     backend.updateData();
                   }
                 },
-                child: backend!.updateLock &&
-                        (backend.sphLogin)
+                child: backend!.updateLock && (backend.sphLogin)
                     ? Center(
                         child: SizedBox(
                         width: 16,
