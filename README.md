@@ -2,7 +2,7 @@
 
 Mit dieser App wird es Schülerinnen und Schülern erleichtert den Stundenplan des Schulportals abzurufen ohne sich jedesmal erneut anmelden zu müssen.
 Der Stundenplan wird übersichtlich dargestellt. Änderungen aus dem Vertretungsplan werden hervorgehoben.
-Falls der Stundenplan und Vertretungsplan für deine Schule nicht funktioniert oder du dir weitere Funktionen des Schulportals in der App benutzen willst, wende dich an: [schulportal@lkwslr.de](mailto:schulportal@lkwslr.de)
+Falls der Stundenplan und Vertretungsplan für deine Schule nicht funktioniert oder du dir weitere Funktionen des Schulportals in der App benutzen willst, wende dich an: [schulportal@lkwslr.de](mailto:sphplaner@lkwslr.de)
 Ich kann nur Funktionen des Schulportals unterstützen, auf die ich Zugriff habe.
 
 ***Datensicherheit***
