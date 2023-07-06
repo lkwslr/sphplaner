@@ -9,19 +9,13 @@ import 'package:http/http.dart' as http;
 import 'crypto.dart';
 
 String generateUUID() {
-  int d = int.parse("${DateTime.now().microsecondsSinceEpoch}000");
-  String uuid = "";
-
-  for (var rune in 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx-xxxxxx3xx'.runes) {
-    String char = String.fromCharCode(rune);
-    int r = (d + Random().nextInt(16)) % 16 | 0;
-
-    if (char == "x") {
-      uuid += r.toRadixString(16);
-    } else if (char == "y") {
-      uuid += (r & 0x3 | 0x8).toRadixString(16);
+  const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx-xxxxxx3xx';
+  var uuid = '';
+  for (var i = 0; i < pattern.length; i++) {
+    if (pattern[i] == 'x' || pattern[i] == 'y') {
+      uuid += Random().nextInt(16).toRadixString(16);
     } else {
-      uuid += char;
+      uuid += pattern[i];
     }
   }
   return uuid;
@@ -53,7 +47,7 @@ class SPH {
   }
 
   SPH(this.user, this.password, this.schoolID) {
-    _cookie = {"i": "$schoolID"};
+    _cookie = {"i": schoolID};
   }
 
   Future<String> login() async {
@@ -125,7 +119,7 @@ class SPH {
 
   Future<void> ajaxLoginUser() async {
     String formData =
-        "f=alllogin&art=all&sid=&ikey=$ikey&user=$user&passw=$password";
+        "f=alllogin&art=all&sid=&ikey=$ikey&user=$user&passw=${Uri.encodeComponent(password)}";
 
     String encryptedFormData = aes.encrypt(formData, sessionKey);
     Map data = {'crypt': encryptedFormData};
@@ -133,7 +127,7 @@ class SPH {
     http.Response response = await post("/ajax.php", data);
 
     if (response.body.isEmpty || response.body.contains("Fehler")) {
-      throw Exception("Failed to login");
+      throw Exception("Failed to login<");
     }
   }
 
@@ -142,7 +136,8 @@ class SPH {
   }
 
   Future<http.Response> get(String url) async {
-    if (sessionKey.isEmpty && !(url.startsWith("/index") || url.startsWith("/ajax"))) {
+    if (sessionKey.isEmpty &&
+        !(url.startsWith("/index") || url.startsWith("/ajax"))) {
       String status = await login();
       if (status.isNotEmpty) {
         throw TimeoutException;
@@ -166,7 +161,8 @@ class SPH {
   }
 
   Future<http.Response> post(String url, Map data) async {
-    if (sessionKey.isEmpty && !(url.startsWith("/index") || url.startsWith("/ajax"))) {
+    if (sessionKey.isEmpty &&
+        !(url.startsWith("/index") || url.startsWith("/ajax"))) {
       String status = await login();
       if (status.isNotEmpty) {
         throw TimeoutException;

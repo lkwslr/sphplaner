@@ -119,6 +119,8 @@ class Backend extends PropertyChangeNotifier<String> {
       String login = await sph.login();
       if (login != "") {
         sphLogin = false;
+      } else {
+        sphLogin = true;
       }
     });
 

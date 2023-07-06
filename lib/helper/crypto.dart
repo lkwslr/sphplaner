@@ -41,6 +41,14 @@ List<int> bytesToKey(List<int> data, List<int> salt) {
 class AESCrypto {
   final int blockSize = 16;
 
+  Uint8List createUint8ListFromString(String s) {
+    var ret = Uint8List(s.length);
+    for (var i = 0; i < s.length; i++) {
+      ret[i] = s.codeUnitAt(i);
+    }
+    return ret;
+  }
+
   String encrypt(String plaintext, String passphrase) {
     List<int> passphraseUTF8 = utf8.encode(passphrase);
     List<int> salt = utf8.encode(StringUtils.generateRandomString(8));
@@ -49,10 +57,11 @@ class AESCrypto {
     Key key = Key(Uint8List.fromList(keyIv.getRange(0, 32).toList()));
     IV iv = IV(Uint8List.fromList(keyIv.getRange(32, keyIv.length).toList()));
 
-    Encrypter encrypter = Encrypter(AES(key, mode: AESMode.cbc));
-
-    Uint8List encrypted = encrypter.encrypt(plaintext, iv: iv).bytes;
-    return base64Encode(utf8.encode("Salted__") + salt + encrypted);
+    final encrypter = Encrypter(AES(key, mode: AESMode.cbc, padding: "PKCS7"));
+    final encrypted = encrypter.encrypt(plaintext, iv: iv);
+    Uint8List encryptedBytesWithSalt = Uint8List.fromList(
+        createUint8ListFromString("Salted__") + salt + encrypted.bytes);
+    return base64.encode(encryptedBytesWithSalt);
   }
 
   String decrypt(String encrypted, String passphrase) {
