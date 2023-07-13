@@ -98,6 +98,7 @@ class _StundenplanState extends State<Stundenplan> {
             Color color = Colors.transparent;
             Color textcolor = Colors.black;
             String type = " ";
+            String note = " ";
 
             if (StorageProvider.isar.vertretungs
                     .where()
@@ -125,7 +126,13 @@ class _StundenplanState extends State<Stundenplan> {
                       .findFirstSync()
                       ?.type ??
                   " ";
-              if (["Entfall", "Freisetzung"].contains(type)) {
+              note = StorageProvider.isar.vertretungs
+                  .where()
+                  .dayOfWeekHourEqualTo(day, hour)
+                  .findFirstSync()
+                  ?.note ??
+                  " ";
+              if (["Entfall", "Freisetzung"].contains(type) || ["fällt aus"].contains(note)) {
                 subject = "---";
                 room = "---";
               }
