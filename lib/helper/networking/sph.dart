@@ -302,12 +302,12 @@ class SPH {
   }
 
   static Future<void> update(StorageNotifier notify) async {
-    StorageProvider.settings.updateLockText = "Update Vertretungsplan...";
-    notify.notify("main");
-    await Vertretungsplan.download();
     StorageProvider.settings.updateLockText = "Update Stundenplan...";
     notify.notify("main");
     await TimeTable.downloadTimetable();
+    StorageProvider.settings.updateLockText = "Update Vertretungsplan...";
+    notify.notify("main");
+    await Vertretungsplan.download();
     StorageProvider.settings.updateLockText = "Update Benutzerdaten...";
     notify.notify("main");
     await updateUser();
