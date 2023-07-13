@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-
-import '../helper/backend.dart';
 
 class Email extends StatefulWidget {
   const Email({Key? key}) : super(key: key);
@@ -11,9 +8,9 @@ class Email extends StatefulWidget {
 }
 
 class _EmailState extends State<Email> {
-  late Backend backend;
   bool _loading = false;
-  bool _loadingPending = false;
+
+  //bool _loadingPending = false;
   bool loadedPending = false;
   bool result = false;
   String pendingText = "";
@@ -30,12 +27,8 @@ class _EmailState extends State<Email> {
 
   @override
   Widget build(BuildContext context) {
-    backend =
-        PropertyChangeProvider.of<Backend, String>(context, listen: false)!
-            .value;
-
     if (current == "") {
-      current = backend.email;
+      //current = backend.email;
     }
 
     return Scaffold(
@@ -48,9 +41,9 @@ class _EmailState extends State<Email> {
                 children: [
                   _info(),
                   const Divider(height: 32, thickness: 3),
-                  if (backend.emailChange) _changePending(),
-                  if (backend.emailChange)
-                    const Divider(height: 32, thickness: 3),
+                  //TODO: if (backend.emailChange) _changePending(),
+                  //if (backend.emailChange)
+                  const Divider(height: 32, thickness: 3),
                   if (current.contains("@")) _delete(),
                   if (current.contains("@"))
                     const Divider(height: 32, thickness: 3),
@@ -104,14 +97,13 @@ class _EmailState extends State<Email> {
                           child: const Text("Nein")),
                       TextButton(
                           onPressed: () async {
-                            await backend.deleteEMail().then((value) {
+                            /*await backend.deleteEMail().then((value) {
                               if (value) {
                                 Navigator.of(context).pop("1");
                               } else {
                                 Navigator.of(context).pop("0");
                               }
-                            });
-
+                            });*/
                           },
                           child: const Text("Ja")),
                     ],
@@ -206,7 +198,7 @@ class _EmailState extends State<Email> {
                       ? null
                       : () async {
                           if (currentPW == "") {
-                            currentPW = await backend.password;
+                            //currentPW = await backend.password;
                           }
                           if (_formKey.currentState!.validate()) {
                             setState(() {
@@ -214,8 +206,7 @@ class _EmailState extends State<Email> {
                             });
                             _formKey.currentState!.save();
 
-
-                            try {
+                            /*try {
                               bool result = await backend.changeEMail(email);
                               if (result) {
                                 current = backend.email;
@@ -234,8 +225,7 @@ class _EmailState extends State<Email> {
                             } catch (_) {
 
                               changedText = "\n\nE-Mail-Adresse konnte nicht geändert werden.";
-                            }
-
+                            }*/
                           }
                           warning = "";
                           setState(() {
@@ -251,7 +241,7 @@ class _EmailState extends State<Email> {
         ));
   }
 
-  Widget _changePending() {
+/*Widget _changePending() {
     if (pendingText == "") {
       _loadPending();
     }
@@ -289,7 +279,7 @@ class _EmailState extends State<Email> {
                             _loadingPending = true;
                           });
 
-                          await backend.requestEMailLink();
+                          //TODO: await backend.requestEMailLink();
 
                           setState(() {
                             pendingText = "";
@@ -317,10 +307,10 @@ class _EmailState extends State<Email> {
               )
       ],
     );
-  }
+  }*/
 
-  Future<void> _loadPending() async {
-    pendingText = await backend.checkEMail();
+/*Future<void> _loadPending() async {
+    //pendingText = await backend.checkEMail();
     if (pendingText == "") {
       pendingText = "E-Mail-Adresse wurde erfolgreich verifiziert";
       result = true;
@@ -337,5 +327,5 @@ class _EmailState extends State<Email> {
     setState(() {
       loadedPending = true;
     });
-  }
+  }*/
 }

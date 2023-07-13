@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-
-import '../helper/backend.dart';
 
 class Password extends StatefulWidget {
   const Password({Key? key}) : super(key: key);
@@ -11,7 +8,6 @@ class Password extends StatefulWidget {
 }
 
 class _PasswordState extends State<Password> {
-  late Backend backend;
   bool _loading = false;
   bool? change;
   List obscure = [true, true, true];
@@ -27,10 +23,6 @@ class _PasswordState extends State<Password> {
 
   @override
   Widget build(BuildContext context) {
-    backend =
-        PropertyChangeProvider.of<Backend, String>(context, listen: false)!
-            .value;
-
     return Scaffold(
         appBar: AppBar(title: const Text('Passwort ändern')),
         body: Stack(
@@ -132,7 +124,7 @@ class _PasswordState extends State<Password> {
             autocorrect: false,
             onChanged: (value) async {
               if (currentPW == "") {
-                currentPW = await backend.password;
+                //currentPW = await backend.password;
               }
 
               setState(() {
@@ -140,23 +132,22 @@ class _PasswordState extends State<Password> {
               });
             },
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: current
-                          ? Colors.green
-                          : Colors.red,
-                      width: 2)),
-              labelText: 'Aktuelles Passwort',
-              suffixIcon: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    obscure[0] = !obscure[0];
-                  });
-                },
-                child: Icon(Icons.remove_red_eye, color: obscure[0] ? null : Theme.of(context).colorScheme.primary),
-              )
-            ),
+                border: const OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: current ? Colors.green : Colors.red, width: 2)),
+                labelText: 'Aktuelles Passwort',
+                suffixIcon: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      obscure[0] = !obscure[0];
+                    });
+                  },
+                  child: Icon(Icons.remove_red_eye,
+                      color: obscure[0]
+                          ? null
+                          : Theme.of(context).colorScheme.primary),
+                )),
           ),
         ),
         Container(
@@ -170,17 +161,19 @@ class _PasswordState extends State<Password> {
               });
             },
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              labelText: 'Neues Passwort',
+                border: const OutlineInputBorder(),
+                labelText: 'Neues Passwort',
                 suffixIcon: GestureDetector(
                   onTap: () {
                     setState(() {
                       obscure[1] = !obscure[1];
                     });
                   },
-                  child: Icon(Icons.remove_red_eye, color: obscure[1] ? null : Theme.of(context).colorScheme.primary),
-                )
-            ),
+                  child: Icon(Icons.remove_red_eye,
+                      color: obscure[1]
+                          ? null
+                          : Theme.of(context).colorScheme.primary),
+                )),
           ),
         ),
         Container(
@@ -194,23 +187,25 @@ class _PasswordState extends State<Password> {
               });
             },
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                      color: password == passwordRepeat && password.isNotEmpty
-                          ? Colors.green
-                          : Colors.red,
-                      width: 2)),
-              labelText: 'Wiederholung des neuen Passwortes',
+                border: const OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: password == passwordRepeat && password.isNotEmpty
+                            ? Colors.green
+                            : Colors.red,
+                        width: 2)),
+                labelText: 'Wiederholung des neuen Passwortes',
                 suffixIcon: GestureDetector(
                   onTap: () {
                     setState(() {
                       obscure[2] = !obscure[2];
                     });
                   },
-                  child: Icon(Icons.remove_red_eye, color: obscure[2] ? null : Theme.of(context).colorScheme.primary),
-                )
-            ),
+                  child: Icon(Icons.remove_red_eye,
+                      color: obscure[2]
+                          ? null
+                          : Theme.of(context).colorScheme.primary),
+                )),
           ),
         ),
         ElevatedButton(
@@ -229,15 +224,18 @@ class _PasswordState extends State<Password> {
                 if (password == currentPW) {
                   setState(() {
                     change = false;
-                    changedText = "Das neue Passwort darf nicht bereits verwendet werden.";
+                    changedText =
+                        "Das neue Passwort darf nicht bereits verwendet werden.";
                   });
                 } else if (passwordRepeat == password) {
                   try {
-                    bool result = await backend.changePassword(password);
+                    //bool result = await backend.changePassword(password);
+                    bool result = true;
                     if (result) {
                       changedText = "Das Passwort wurde geändert.";
                     } else {
-                      changedText = "Die Passwort konnte nicht geändert werden.";
+                      changedText =
+                          "Die Passwort konnte nicht geändert werden.";
                     }
                     setState(() {
                       change = result;

@@ -2,9 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-
-import '../helper/backend.dart';
+import 'package:sphplaner/helper/networking/sph.dart';
 import 'login.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -17,14 +15,9 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   String buttonText = "Jetzt anmelden";
   bool loading = false;
-  Backend? backend;
 
   @override
   Widget build(BuildContext context) {
-    backend ??=
-        PropertyChangeProvider.of<Backend, String>(context, listen: false)!
-            .value;
-
     return Scaffold(
         appBar: AppBar(
           title: const Text('SPH Planer'),
@@ -116,9 +109,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       loading = true;
                     });
 
-                    bool result = await backend!.downloadSchoolInfo();
+                    List schools = await SPH.downloadSchoolInfo();
 
-                    if (result) {
+                    if (schools.isNotEmpty) {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(

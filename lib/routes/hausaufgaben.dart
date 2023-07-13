@@ -1,11 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sphplaner/helper/defaults.dart';
+import 'package:isar/isar.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
-
-import '../helper/backend.dart';
+import 'package:sphplaner/helper/storage/homework.dart';
+import 'package:sphplaner/helper/storage/storage_notifier.dart';
+import 'package:sphplaner/helper/storage/storage_provider.dart';
+import 'package:sphplaner/helper/storage/subject.dart';
 
 class HomeWork extends StatefulWidget {
   const HomeWork({Key? key}) : super(key: key);
@@ -18,58 +18,54 @@ class _HomeWorkState extends State<HomeWork> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PropertyChangeConsumer<Backend, String>(
-          properties: const ["homework", "colors", "stundenplan"],
-          builder: (context, backend, child) {
-            List ha = backend!.homework;
-            if (ha.isNotEmpty) {
+      body: PropertyChangeConsumer<StorageNotifier, String>(
+          properties: const ["homework"],
+          builder: (context, notify, child) {
+            List<Homework> homeworks = StorageProvider.isar.homeworks
+                .filter()
+                .finishedEqualTo(false)
+                .findAllSync();
+            if (homeworks.isNotEmpty) {
               return ListView.builder(
                 padding: const EdgeInsets.all(8),
-                itemCount: ha.length,
+                itemCount: homeworks.length,
                 itemBuilder: (context, index) {
-                  Map homework = json.decode(ha[index]);
-
-                  String fachId = homework['fach'];
-                  RegExp reg = RegExp(
-                    r"[A-Z]+-[GLT]\d",
-                    caseSensitive: false,
-                    multiLine: false,
-                  );
-                  if (fachId.startsWith("W")) {
-                    fachId = fachId.split("_")[2];
-                  }
-                  if (reg.hasMatch(fachId)) {
-                    fachId = fachId.split("-")[0];
-                  }
+                  Homework homework = homeworks[index];
 
                   return Dismissible(
-                      key: Key(
-                          "${homework['titel']}${homework['fach']}${homework['beschreibung']}"),
-                      onDismissed: (direction) {
-                        setState(() {
-                          ha.removeAt(index);
+                      key: Key("${homework.id}"),
+                      onDismissed: (direction) async {
+                        await StorageProvider.isar.writeTxn(() async {
+                          await StorageProvider.isar.homeworks
+                              .delete(homework.id);
+                        }).then((value) {
+                          notify!.notify("homework");
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              clipBehavior: Clip.none,
+                              behavior: SnackBarBehavior.floating,
+                              action: SnackBarAction(
+                                  label: "Rückgängig",
+                                  onPressed: () async {
+                                    await StorageProvider.isar
+                                        .writeTxn(() async {
+                                      await StorageProvider.isar.homeworks
+                                          .put(homework);
+                                      notify.notify("homework");
+                                    });
+                                  }),
+                              content:
+                                  Text('${homework.title} wurde entfernt.')));
                         });
-                        backend.removeHomework(index);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          clipBehavior: Clip.none,
-                            behavior: SnackBarBehavior.floating,
-                            action: SnackBarAction(
-                                label: "Rückgängig",
-                                onPressed: () {
-                                  backend.saveHomework(homework);
-                                }),
-                            content: Text(
-                                '${homework['titel'].toString()} wurde entfernt.')));
                       },
                       background: Container(color: Colors.red),
                       child: ListTile(
                         isThreeLine: true,
                         title: Text(
-                          homework['titel'],
+                          homework.title ?? "???",
                           style: TextStyle(
                               color: DateTime.now().isAfter(
                                       DateTime.fromMillisecondsSinceEpoch(
-                                          homework['due']))
+                                          homework.due ?? 0))
                                   ? Colors.red
                                   : Theme.of(context)
                                       .textTheme
@@ -79,14 +75,16 @@ class _HomeWorkState extends State<HomeWork> {
                         leading: Container(
                           height: double.infinity,
                           width: 16,
-                          color: Color(backend.colors[fachId]),
+                          color: Color(homework.subject.value?.color ??
+                              Colors.white.value),
                           child: RotatedBox(
                               quarterTurns: -1,
                               child: Align(
                                 alignment: Alignment.center,
-                                child: Text(fachId,
+                                child: Text(
+                                    homework.subject.value?.subject ?? "???",
                                     style: const TextStyle(
-                                        color: Colors.black, fontSize: 15)),
+                                        color: Colors.black, fontSize: 12)),
                               )),
                         ),
                         minLeadingWidth: 8,
@@ -96,7 +94,7 @@ class _HomeWorkState extends State<HomeWork> {
                                 style: TextStyle(
                                     color: DateTime.now().isAfter(
                                             DateTime.fromMillisecondsSinceEpoch(
-                                                homework['due']))
+                                                homework.due ?? 0))
                                         ? Colors.red
                                         : Theme.of(context)
                                             .textTheme
@@ -108,22 +106,22 @@ class _HomeWorkState extends State<HomeWork> {
                             Text(
                               DateFormat("dd.MM.").format(
                                   DateTime.fromMillisecondsSinceEpoch(
-                                      homework["due"])),
+                                      homework.due ?? 0)),
                               style: TextStyle(
                                   color: DateTime.now().isAfter(
                                           DateTime.fromMillisecondsSinceEpoch(
-                                              homework['due']))
+                                              homework.due ?? 0))
                                       ? Colors.red
                                       : Theme.of(context).colorScheme.secondary,
                                   fontSize: 24),
                             )
                           ],
                         ),
-                        subtitle: Text(homework['beschreibung'],
+                        subtitle: Text(homework.description ?? "???",
                             style: TextStyle(
                                 color: DateTime.now().isAfter(
                                         DateTime.fromMillisecondsSinceEpoch(
-                                            homework['due']))
+                                            homework.due ?? 0))
                                     ? Colors.red
                                     : Theme.of(context)
                                         .textTheme
@@ -132,7 +130,7 @@ class _HomeWorkState extends State<HomeWork> {
                             maxLines: 3,
                             overflow: TextOverflow.fade),
                         onTap: () {
-                          if (homework['beschreibung'].toString().isNotEmpty) {
+                          if ((homework.description ?? "???").isNotEmpty) {
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -142,19 +140,22 @@ class _HomeWorkState extends State<HomeWork> {
                                         children: [
                                           Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(homework['titel']),
+                                            child:
+                                                Text(homework.title ?? "???"),
                                           ),
                                           Align(
                                             alignment: Alignment.centerRight,
-                                            child: Text(DateFormat("dd.MM.").format(
-                                                DateTime.fromMillisecondsSinceEpoch(
-                                                    homework["due"]))),
+                                            child: Text(DateFormat("dd.MM.")
+                                                .format(DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        homework.due ?? 0))),
                                           )
                                         ],
                                       ),
                                       content: Padding(
-                                        padding: const EdgeInsets.all(8),
-                                          child: Text(homework['beschreibung'])));
+                                          padding: const EdgeInsets.all(8),
+                                          child: Text(
+                                              homework.description ?? "???")));
                                 });
                           }
                         },
@@ -177,7 +178,10 @@ class _HomeWorkState extends State<HomeWork> {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const CreateHA()));
         },
-        child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary,),
+        child: Icon(
+          Icons.add,
+          color: Theme.of(context).colorScheme.onPrimary,
+        ),
       ),
     );
   }
@@ -191,7 +195,7 @@ class CreateHA extends StatefulWidget {
 }
 
 class _CreateHAState extends State<CreateHA> {
-  String fach = "";
+  Subject? subject;
   DateTime date = DateTime.now();
   bool error = false;
   TextEditingController titel = TextEditingController();
@@ -199,10 +203,13 @@ class _CreateHAState extends State<CreateHA> {
 
   @override
   Widget build(BuildContext context) {
-    return PropertyChangeConsumer<Backend, String>(
-        properties: const [],
-        builder: (context, backend, child) {
-          if (backend!.faecher.isEmpty) {
+    return PropertyChangeConsumer<StorageNotifier, String>(
+        properties: const ["homework"],
+        builder: (context, notify, child) {
+          List<Subject> subjects =
+              StorageProvider.isar.subjects.where().findAllSync();
+
+          if (subjects.isEmpty) {
             return Scaffold(
                 appBar: AppBar(title: const Text('Hausaufgabe erstellen')),
                 body: const Padding(
@@ -210,28 +217,14 @@ class _CreateHAState extends State<CreateHA> {
                   child: Center(
                     child: Align(
                       alignment: Alignment.center,
-                      child: Text(
-                          "Bitte gib zuerst deinen Stundenplan an.",
+                      child: Text("Bitte gib zuerst deinen Stundenplan an.",
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 20)),
                     ),
                   ),
                 ));
-          } else if (fach == "") {
-            fach = backend.faecher.first;
           }
-          String fachId = fach;
-          RegExp reg = RegExp(
-            r"[A-Z]+-[GLT]\d",
-            caseSensitive: false,
-            multiLine: false,
-          );
-          if (fachId.startsWith("W")) {
-            fachId = fachId.split("_")[2];
-          }
-          if (reg.hasMatch(fach)) {
-            fachId = fach.split("-")[0];
-          }
+          subject ??= subjects.first;
           return Scaffold(
             appBar: AppBar(title: const Text('Hausaufgabe erstellen')),
             body: ListView(
@@ -246,54 +239,45 @@ class _CreateHAState extends State<CreateHA> {
                   ),
                   subtitle: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(backend.colors[fachId] ?? Theme.of(context).colorScheme.error.value)),
+                        backgroundColor: Color(subject!.color)),
                     onPressed: () {
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              contentPadding: const EdgeInsets.all(8),
-                              scrollable: true,
-                              title: const Text("Fach auswählen"),
-                              content: Column(
-                                  children: backend.faecher.map<Widget>((e) {
-                                String eId = e;
-                                if (eId.startsWith("W")) {
-                                  eId = eId.split("_")[2];
-                                }
-                                if (reg.hasMatch(e)) {
-                                  eId = e.split("-")[0];
-                                }
-
-                                return Container(
-                                  padding: const EdgeInsets.all(4),
-                                  width: double.infinity,
-                                  height: 40,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            Color(backend.colors[eId] ?? Theme.of(context).colorScheme.error.value)),
-                                    onPressed: () {
-                                      Navigator.of(context).pop(e);
-                                    },
-                                    child: Text(
-                                      getFach(eId),
-                                      style:
-                                          const TextStyle(color: Colors.black),
-                                    ),
-                                  ),
-                                );
-                              }).toList()),
-                            );
+                                contentPadding: const EdgeInsets.all(8),
+                                scrollable: true,
+                                title: const Text("Fach auswählen"),
+                                content: Column(
+                                  children: subjects.map<Widget>((e) {
+                                    return Container(
+                                      padding: const EdgeInsets.all(4),
+                                      width: double.infinity,
+                                      height: 40,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(e.color)),
+                                        onPressed: () {
+                                          Navigator.of(context).pop(e);
+                                        },
+                                        child: Text(
+                                          e.subjectName ?? "???",
+                                          style: const TextStyle(
+                                              color: Colors.black),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ));
                           }).then((value) {
                         if (value != null) {
                           setState(() {
-                            fach = value;
+                            subject = value;
                           });
                         }
                       });
                     },
-                    child: Text(getFach(fachId),
+                    child: Text(subject!.subjectName ?? "???",
                         style: const TextStyle(color: Colors.black)),
                   ),
                 ),
@@ -351,24 +335,31 @@ class _CreateHAState extends State<CreateHA> {
               ],
             ),
             floatingActionButton: FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 if (titel.text.isNotEmpty) {
-                  Map ha = {
-                    "fach": fach,
-                    "due": date.millisecondsSinceEpoch,
-                    "titel": titel.text,
-                    "beschreibung": beschreibung.text
-                  };
-                  backend.saveHomework(ha).then((value) {
-                    Navigator.of(context).pop();
-                  });
+                  Homework homework = Homework()
+                    ..user.value = StorageProvider.user
+                    ..subject.value = subject
+                    ..title = titel.text
+                    ..description = beschreibung.text
+                    ..due = date.millisecondsSinceEpoch;
+
+                  await StorageProvider.isar.writeTxn(() async {
+                    await StorageProvider.isar.homeworks.put(homework);
+                    await homework.subject.save();
+                    await homework.user.save();
+                    notify!.notify("homework");
+                  }).then((value) => Navigator.of(context).pop());
                 } else {
                   setState(() {
                     error = true;
                   });
                 }
               },
-              child: Icon(Icons.save_outlined, color: Theme.of(context).colorScheme.onPrimary,),
+              child: Icon(
+                Icons.save_outlined,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           );
         });

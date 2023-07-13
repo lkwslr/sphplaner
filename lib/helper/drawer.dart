@@ -1,27 +1,27 @@
-import 'dart:io';
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
 import 'package:property_change_notifier/property_change_notifier.dart';
+import 'package:sphplaner/helper/storage/storage_notifier.dart';
+import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../routes/easteregg.dart';
 import '../routes/settings.dart';
-import 'backend.dart';
 
 Widget getDrawer() {
-  return PropertyChangeConsumer<Backend, String>(
-    properties: const ['userNames', 'image', 'viewMode', 'klasse'],
-    builder: (context, backend, child) {
-      String name = "";
-      Map userNames = backend!.userNames;
-
-      for (String key in userNames.keys) {
-        if (userNames[key]) {
-          name += " $key";
-        }
+  return PropertyChangeConsumer<StorageNotifier, String>(
+    properties: const ['main'],
+    builder: (context, notify, child) {
+      String username = "${StorageProvider.user!.displayName}";
+      String hey;
+      if (username.trim().isEmpty) {
+        hey = "Hey";
+      } else {
+        hey = "Hey, ${username.trim()}";
       }
 
       return Drawer(
@@ -68,23 +68,26 @@ Widget getDrawer() {
                                         children: [
                                           ListTile(
                                             title: const Text("Name"),
-                                            subtitle: Text(backend.name),
+                                            subtitle: Text(
+                                                "${StorageProvider.user!.firstName} ${StorageProvider.user!.lastName}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("E-Mail"),
-                                            subtitle: Text(backend.email),
+                                            subtitle: Text(
+                                                "${StorageProvider.user!.email}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Geburtsdatum"),
-                                            subtitle:
-                                                Text(backend.geburtsdatum),
+                                            subtitle: Text(
+                                                "${StorageProvider.user!.birthDate}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Klasse"),
-                                            subtitle: Text(backend.klasse),
+                                            subtitle: Text(
+                                                "${StorageProvider.user!.course}"),
                                           ),
                                           const Divider(),
                                           ListTile(
@@ -98,8 +101,10 @@ Widget getDrawer() {
                                                 borderRadius:
                                                     BorderRadius.circular(5),
                                                 child: Image(
-                                                  image: FileImage(File(
-                                                      '${backend.userDir}/image.png')),
+                                                  image: MemoryImage(
+                                                      base64Decode(
+                                                          StorageProvider.user!
+                                                              .profileImage!)),
                                                 ),
                                               )),
                                         ],
@@ -121,17 +126,17 @@ Widget getDrawer() {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
-                                    image: FileImage(
-                                        File('${backend.userDir}/image.png'))),
+                                    image: MemoryImage(base64Decode(
+                                        StorageProvider.user!.profileImage!))),
                               ),
                             ),
                           ),
                           GestureDetector(
-                              onTap: () => anzeigeNameDialog(backend, context),
+                              onTap: () => anzeigeNameDialog(context),
                               child: Container(
                                 alignment: Alignment.bottomLeft,
                                 child: Text(
-                                  "Hey,$name",
+                                  hey,
                                   style: const TextStyle(
                                       fontSize: 32,
                                       fontWeight: FontWeight.bold,
@@ -146,7 +151,7 @@ Widget getDrawer() {
               ),
             ),
             ListTile(
-              selected: backend.viewMode == "vertretung",
+              selected: StorageProvider.settings.viewMode == "vertretung",
               title: const Text(
                 'Vertretungsplan',
               ),
@@ -154,34 +159,37 @@ Widget getDrawer() {
                 Icons.list,
               ),
               onTap: () {
-                backend.viewMode = "vertretung";
+                StorageProvider.settings.viewMode = "vertretung";
+                notify!.notify("main");
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              selected: backend.viewMode == "plan",
+              selected: StorageProvider.settings.viewMode == "stundenplan",
               title: const Text('Stundenplan'),
               leading: const Icon(
                 Icons.calendar_month_outlined,
               ),
               onTap: () {
-                backend.viewMode = "plan";
+                StorageProvider.settings.viewMode = "stundenplan";
+                notify!.notify("main");
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              selected: backend.viewMode == "hausaufgaben",
+              selected: StorageProvider.settings.viewMode == "hausaufgaben",
               title: const Text('Hausaufgaben'),
               leading: const Icon(
                 Icons.book_outlined,
               ),
               onTap: () {
-                backend.viewMode = "hausaufgaben";
+                StorageProvider.settings.viewMode = "hausaufgaben";
+                notify!.notify("main");
                 Navigator.of(context).pop();
               },
             ),
             ListTile(
-              selected: backend.viewMode == "settings",
+              selected: StorageProvider.settings.viewMode == "settings",
               title: const Text(
                 'Einstellungen',
               ),
@@ -230,16 +238,14 @@ Widget _feedback(BuildContext ctx) {
           child: RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(
+                const TextSpan(
                     text:
                         "Falls dir diese App gefällt oder du weitere Vorschläge zur Verbesserung hast, klicke ",
-                    style: TextStyle(
-                        color: Theme.of(ctx).textTheme.bodyMedium?.color,
-                        fontSize: 16)),
+                    style: TextStyle(fontSize: 16)),
                 TextSpan(
                     text: 'hier',
-                    style: const TextStyle(
-                        color: Color(0xFF0575E6),
+                    style: TextStyle(
+                        color: Theme.of(ctx).colorScheme.primary,
                         fontSize: 16,
                         fontStyle: FontStyle.italic),
                     recognizer: TapGestureRecognizer()
@@ -247,10 +253,7 @@ Widget _feedback(BuildContext ctx) {
                         launchUrl(Uri.parse('https://www.lkwslr.de/sphplaner'),
                             mode: LaunchMode.externalApplication);
                       }),
-                TextSpan(
-                    text: ".",
-                    style: TextStyle(
-                        color: Theme.of(ctx).textTheme.bodyMedium?.color))
+                const TextSpan(text: ".")
               ],
             ),
           )),
@@ -274,15 +277,11 @@ Widget _created(BuildContext ctx) {
                 Navigator.push(ctx,
                     MaterialPageRoute(builder: (context) => const EasterEgg()));
               }),
-        TextSpan(
-            text: 'made by ',
-            style: TextStyle(
-                color: Theme.of(ctx).textTheme.bodyMedium?.color,
-                fontSize: 16)),
+        const TextSpan(text: 'made by ', style: TextStyle(fontSize: 16)),
         TextSpan(
             text: 'Leon Wisseler ',
-            style: const TextStyle(
-                color: Color(0xFF0575E6),
+            style: TextStyle(
+                color: Theme.of(ctx).colorScheme.primary,
                 fontSize: 16,
                 fontStyle: FontStyle.italic),
             recognizer: TapGestureRecognizer()

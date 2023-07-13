@@ -1,30 +1,56 @@
+//TODO: Funktionen für passwort change etc müssen check haben, dass SID da ist und ggf sessionKey. Siehe bei updateUser
+
+//TODO: Login flow, bei dem Stundenplan geladen wird. Danach hat man die Option Fächer und Kurse auszuwählen, wenn es mehr als eine Option gibt.
+
+//TODO: während/nach fach auswahl option, um die Farben der einzelnen Fächer anzupassen
+
+//TODO: wenn stundenplan geupdatet wird überprüfen, ob die fächer immer noch die gleichen sind, wenn sich fächer im Stundenplan geändert haben erneut Bildschim vom Login-Flow anzeigen
+
+//TODO: user update, checked nach email change
+
+//TODO: settings (email, password, photo)
+
+//TODO: Notifier-Options
+/*
+      theme -> läd ab Beginn neu, da design änderung
+      main -> läd Ansicht neu, z.B. appbar, status oder offener Tab
+      settings -> läd Settings neu
+      homework -> läd Homework neu
+     */
+
 import 'dart:async';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:intl/intl.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
-import 'package:sphplaner/helper/backend.dart';
+import 'package:sphplaner/helper/networking/sph.dart';
+import 'package:sphplaner/helper/storage/storage_notifier.dart';
+import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/drawer.dart';
+import 'package:sphplaner/helper/theme.dart';
 import 'package:sphplaner/routes/hausaufgaben.dart';
 import 'package:sphplaner/routes/settings.dart';
 import 'package:sphplaner/routes/stundenplan.dart';
-import 'package:sphplaner/routes/vertretung.dart';
-import 'package:sphplaner/routes/welcome.dart';
-
-import 'helper/theme.dart';
+import 'package:sphplaner/routes/vertretungsviewer.dart';
+import 'package:sphplaner/routes/welcome/welcome.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  initializeDateFormatting();
+  Intl.defaultLocale = "de_DE";
   app_info.init();
+  await StorageProvider.initializeStorage();
 
-  runApp(PropertyChangeProvider<Backend, String>(
-      value: Backend(), child: const SPHPlaner()));
+  runApp(PropertyChangeProvider<StorageNotifier, String>(
+      value: StorageNotifier(), child: const SPHPlaner()));
 }
 
 class SPHPlaner extends StatefulWidget {
@@ -42,30 +68,16 @@ class _SPHPlaner extends State<SPHPlaner> {
   @override
   void initState() {
     super.initState();
-    Backend backend =
-        PropertyChangeProvider.of<Backend, String>(context, listen: false)!
-            .value;
-    backend.initBackend().then((_) {
-      if (backend.isLoggedIn) {
-        backend.initApp().then((_) {
-          setState(() {
-            loaded = true;
-          });
-          if (backend.autoUpdate) {
-            backend.sphLogin = true;
-          }
-          FlutterNativeSplash.remove();
-          if (backend.autoUpdate) {
-            backend.initSPH().then((_) => backend.updateData());
-          }
-        });
-      } else {
-        setState(() {
-          loaded = true;
-        });
+    if (StorageProvider.settings.loggedIn) {
+      SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
+        StorageProvider.settings.updateLockText = "";
         FlutterNativeSplash.remove();
-      }
+      });
+    }
+    setState(() {
+      loaded = true;
     });
+    FlutterNativeSplash.remove();
   }
 
   @override
@@ -77,9 +89,14 @@ class _SPHPlaner extends State<SPHPlaner> {
     }
 
     return OrientationBuilder(builder: (context, _) {
-      return PropertyChangeConsumer<Backend, String>(
-        properties: const ['themeMode'],
-        builder: (context, backend, child) {
+      return PropertyChangeConsumer<StorageNotifier, String>(
+        properties: const ['theme'],
+        builder: (context, notify, child) {
+          /*bool autoUpdate = StorageProvider.user?.autoUpdate ?? true;
+        if (autoUpdate) {
+          SPH.update(notify!);
+        }*/
+
           return DynamicColorBuilder(
               builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
             ColorScheme lightColorScheme;
@@ -89,18 +106,16 @@ class _SPHPlaner extends State<SPHPlaner> {
               lightColorScheme = lightDynamic.harmonized();
 
               darkColorScheme = darkDynamic.harmonized();
-              if (!backend!.materialYou) {
-                lightColorScheme = lightColorScheme.copyWith(
-                  primary: sphBlue,
-                  onPrimary: const Color(0xffdde3ee),
-                  primaryContainer: sphBlue,
-                );
-                darkColorScheme = darkColorScheme.copyWith(
-                  primary: sphBlue,
-                  onPrimary: const Color(0xffdde3ee),
-                  primaryContainer: sphBlue,
-                );
-              }
+              lightColorScheme = lightColorScheme.copyWith(
+                primary: sphBlue,
+                onPrimary: const Color(0xffdde3ee),
+                primaryContainer: sphBlue,
+              );
+              darkColorScheme = darkColorScheme.copyWith(
+                primary: sphBlue,
+                onPrimary: const Color(0xffdde3ee),
+                primaryContainer: sphBlue,
+              );
             } else {
               lightColorScheme = defaultLightColorScheme;
               darkColorScheme = defaultDarkColorScheme;
@@ -154,23 +169,23 @@ class _SPHPlaner extends State<SPHPlaner> {
                 useMaterial3: true,
                 inputDecorationTheme: customDarkInputTheme,
               ),
-              themeMode: backend!.themeMode,
-              home: PropertyChangeConsumer<Backend, String>(
-                  properties: const ['loggedIn', 'viewMode'],
-                  builder: (context, backend, child) {
-                    if (backend!.isLoggedIn) {
+              themeMode: StorageProvider.settings.theme,
+              home: PropertyChangeConsumer<StorageNotifier, String>(
+                  properties: const ['main'],
+                  builder: (context, notify, child) {
+                    if (StorageProvider.loggedIn.isNotEmpty) {
                       return Scaffold(
                         appBar: AppBar(
-                          title: Text(backend.title),
-                          bottom: !backend.viewMode
+                          title: Text(StorageProvider.settings.title),
+                          bottom: !StorageProvider.settings.viewMode
                                   .contains(RegExp(r"hausaufgaben"))
                               ? bottomAppBar(context)
                               : null,
-                          actions:
-                              buildActions(backend.viewMode, context, false),
+                          actions: buildActions(
+                              StorageProvider.settings.viewMode, context),
                         ),
                         drawer: getDrawer(),
-                        body: buildApp(backend.viewMode),
+                        body: buildApp(StorageProvider.settings.viewMode),
                       );
                     } else {
                       return const WelcomeScreen();
@@ -186,7 +201,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   Widget buildApp(String view) {
     switch (view) {
       case "vertretung":
-        return const Vertretung();
+        return const VertretungsViewer();
       case "hausaufgaben":
         return const HomeWork();
       default:
@@ -195,92 +210,35 @@ class _SPHPlaner extends State<SPHPlaner> {
   }
 
   PreferredSize? bottomAppBar(BuildContext context) {
-    Backend backend = PropertyChangeProvider.of<Backend, String>(context,
-            listen: true, properties: const ['status', 'online'])!
-        .value;
-
     return PreferredSize(
-        preferredSize: Size.fromHeight(backend.sphLogin ? 32 : 64),
-        child: ValueListenableBuilder(
-            valueListenable: loading,
-            builder: (BuildContext context, bool value, Widget? child) {
-              if (backend.sphLogin) {
-                return Container(
-                  height: 32,
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                  child: Center(child: Text(backend.status)),
-                );
-              } else {
-                return GestureDetector(
-                  onTap: () async {
-                    loading.value = true;
-                    await backend.initSPH().then((value) {
-                      loading.value = false;
-                      backend.status = value;
-                      if (value.isEmpty) {
-                        backend.updateData();
-                      }
-                    });
-                  },
-                  child: loading.value
-                      ? SizedBox(
-                          width: double.infinity,
-                          height: 64,
-                          child: Center(
-                            child: SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.color,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            const Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                  "Offline-Modus - Manche Funktionen sind nicht verfügbar"),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: Text(result),
-                            ),
-                            Container(
-                              height: 32,
-                              width: double.infinity,
-                              padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                              child: Center(child: Text(backend.status)),
-                            )
-                          ],
-                        ),
-                );
-              }
-            }));
+        preferredSize: const Size.fromHeight(16),
+        child: Container(
+          height: 20,
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+          child: Center(
+              child: Text(StorageProvider.settings.updateLock
+                  ? StorageProvider.settings.updateLockText
+                  : StorageProvider.settings.status)),
+        ));
   }
 
-  List<Widget>? buildActions(String view, BuildContext context, bool dsbLogin) {
+  List<Widget>? buildActions(String view, BuildContext context) {
     List<Widget> actions = [];
 
-    if (view == "plan" || view == "vertretung") {
+    if (view == "stundenplan" || view == "vertretung") {
       actions.add(Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
-          child: PropertyChangeConsumer<Backend, String>(
+          child: PropertyChangeConsumer<StorageNotifier, String>(
             properties: const ['updateLock'],
-            builder: (context, backend, child) {
+            builder: (context, notify, child) {
               return GestureDetector(
-                onTap: () {
-                  if (!backend!.updateLock && (backend.sphLogin)) {
-                    backend.updateData();
+                onTap: () async {
+                  if (!StorageProvider.settings.updateLock) {
+                    await SPH.update(notify!);
                   }
                 },
-                child: backend!.updateLock && (backend.sphLogin)
+                child: StorageProvider.settings.updateLock
                     ? Center(
                         child: SizedBox(
                         width: 16,
@@ -290,40 +248,12 @@ class _SPHPlaner extends State<SPHPlaner> {
                           color: Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                       ))
-                    : Icon(
+                    : const Icon(
                         Icons.refresh,
-                        color: backend.sphLogin
-                            ? null
-                            : Theme.of(context)
-                                .colorScheme
-                                .onPrimary
-                                .withOpacity(.5),
                       ),
               );
             },
           )));
-
-      if (dsbLogin) {
-        actions.add(Padding(
-            padding: const EdgeInsets.only(right: 10, left: 10),
-            child: PropertyChangeConsumer<Backend, String>(
-              properties: const ['viewMode'],
-              builder: (context, backend, child) {
-                return GestureDetector(
-                  onTap: () async {
-                    if (backend!.viewMode == "plan") {
-                      backend.viewMode = "vertretung";
-                    } else {
-                      backend.viewMode = "plan";
-                    }
-                  },
-                  child: backend!.viewMode == "plan"
-                      ? const Icon(Icons.calendar_month_outlined)
-                      : const Icon(Icons.list),
-                );
-              },
-            )));
-      }
     }
 
     actions.add(Padding(

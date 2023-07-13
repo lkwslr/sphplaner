@@ -1,11 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-
-import '../helper/backend.dart';
 
 class Profilbild extends StatefulWidget {
   const Profilbild({Key? key}) : super(key: key);
@@ -15,7 +10,6 @@ class Profilbild extends StatefulWidget {
 }
 
 class _ProfilbildState extends State<Profilbild> {
-  late Backend backend;
   bool _loading = false;
   bool _loadingDelete = false;
   String path = "";
@@ -24,10 +18,6 @@ class _ProfilbildState extends State<Profilbild> {
 
   @override
   Widget build(BuildContext context) {
-    backend =
-        PropertyChangeProvider.of<Backend, String>(context, listen: true, properties: const ['image'])!
-            .value;
-
     return Scaffold(
         appBar: AppBar(title: const Text('Profilbild ändern')),
         body: Stack(
@@ -95,13 +85,15 @@ class _ProfilbildState extends State<Profilbild> {
       style: ElevatedButton.styleFrom(
         minimumSize: const Size.fromHeight(40),
       ),
-      onPressed: path == "" ? null : () async {
-        if (!_loading) {
-          if (path != "") {
-            setState(() {
-              _loading = true;
-            });
-            backend.changeImage(path).then((value) {
+      onPressed: path == ""
+          ? null
+          : () async {
+              if (!_loading) {
+                if (path != "") {
+                  setState(() {
+                    _loading = true;
+                  });
+                  /*backend.changeImage(path).then((value) {
               if (value) {
                 setState(() {
                   _loading = false;
@@ -115,10 +107,10 @@ class _ProfilbildState extends State<Profilbild> {
                   status = "Profilbild konnte nicht geändert werden!";
                 });
               }
-            });
-          }
-        }
-      },
+            });*/
+                }
+              }
+            },
       child: SizedBox(
           width: double.infinity,
           height: 32,
@@ -183,9 +175,9 @@ class _ProfilbildState extends State<Profilbild> {
         const SizedBox(
           height: 16,
         ),
-        path != ""
-            ? Image.file(File(path))
-            : Image.file(File("${backend.userDir}/image.png")),
+        //path != ""
+        //    ? Image.file(File(path))
+        //    : Image.file(File("${backend.userDir}/image.png")),
         const SizedBox(
           height: 16,
         ),
@@ -198,7 +190,7 @@ class _ProfilbildState extends State<Profilbild> {
               setState(() {
                 _loadingDelete = true;
               });
-              backend.deleteImage().then((value) {
+              /*backend.deleteImage().then((value) {
                 if (value) {
                   setState(() {
                     _loadingDelete = false;
@@ -212,7 +204,7 @@ class _ProfilbildState extends State<Profilbild> {
                     status = "Profilbild konnte nicht gelöscht werden!";
                   });
                 }
-              });
+              });*/
             }
           },
           child: SizedBox(
@@ -257,14 +249,13 @@ class _ProfilbildState extends State<Profilbild> {
               initAspectRatio: CropAspectRatioPreset.square,
               lockAspectRatio: true),
           IOSUiSettings(
-            title: 'Bild zuschneiden',
-            aspectRatioLockEnabled: true,
-            aspectRatioPickerButtonHidden: true,
-            rectHeight: 400,
-            rectWidth: 400,
-            rectX: 400,
-            rectY: 400
-          ),
+              title: 'Bild zuschneiden',
+              aspectRatioLockEnabled: true,
+              aspectRatioPickerButtonHidden: true,
+              rectHeight: 400,
+              rectWidth: 400,
+              rectX: 400,
+              rectY: 400),
         ],
       );
       if (croppedFile != null) {
