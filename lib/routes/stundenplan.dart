@@ -49,7 +49,7 @@ class _StundenplanState extends State<Stundenplan> {
               .format(DateFormat("dd.MM.yyyy").parse(e.date ?? "01.01.1970"))
               .substring(0, 2))
           .toList();
-      if (dates.isEmpty) {
+      if (dates.length <= 2) {
         dates = ["", ""];
       }
       List<Widget> columns = [buildHeader(dates[0], dates[1])];

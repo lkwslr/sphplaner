@@ -46,11 +46,12 @@ class SPH {
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
-    if (_lastSid < DateTime.now().millisecondsSinceEpoch + 15 * 60 * 1000) {
+    if (_lastSid  + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch) {
+      CookieStore.clearCookies();
       http.Response loginResponse =
           await post("https://login.schulportal.hessen.de", {
-        "user": "$_school.$_username",
-        "password": _password,
+        "value":
+            "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
       });
 
       if (loginResponse.statusCode == 302 &&
@@ -253,9 +254,12 @@ class SPH {
 
     http.Response response;
     try {
-      response = await http.get(Uri.parse(url), headers: {
-        'Cookie': CookieStore.getCookies()
-      }).timeout(const Duration(seconds: _timeout), onTimeout: () {
+      response = await http
+          .get(Uri.parse(url),
+              headers: CookieStore.getCookies().toString().isNotEmpty
+                  ? {'Cookie': CookieStore.getCookies()}
+                  : {})
+          .timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
     } catch (_) {
@@ -271,10 +275,19 @@ class SPH {
     if (url.startsWith("/")) {
       url = "$_baseURL$url";
     }
+
+    dynamic finalData;
+    if (data.containsKey("value")) {
+      finalData = data["value"];
+    } else {
+      finalData = data;
+    }
+
     http.Response response;
     try {
-      response = await http.post(Uri.parse(url), body: data, headers: {
-        'Cookie': CookieStore.getCookies(),
+      response = await http.post(Uri.parse(url), body: finalData, headers: {
+        if (CookieStore.getCookies().toString().isNotEmpty)
+          'Cookie': CookieStore.getCookies(),
         'Content-Type': "application/x-www-form-urlencoded"
       }).timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;

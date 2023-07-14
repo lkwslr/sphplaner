@@ -78,7 +78,7 @@ class SettingsProvider {
 
   set viewMode(String value) => _setSharedPrefs("viewMode", value);
 
-  bool get updateLock => _getSharedPrefs("updateLock") != "";
+  bool get updateLock => _getSharedPrefs("updateLock") ?? "" != "";
 
   set updateLockText(String value) => _setSharedPrefs("updateLock", value);
 

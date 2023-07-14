@@ -31,7 +31,7 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
               .map((e) => e.date ?? "01.01.1970")
               .toList();
 
-          if (dates.isEmpty) {
+          if (dates.length <= 2) {
             dates = ['heute', 'morgen'];
           }
 
