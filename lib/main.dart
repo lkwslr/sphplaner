@@ -47,7 +47,6 @@ Future<void> main() async {
   initializeDateFormatting();
   Intl.defaultLocale = "de_DE";
   app_info.init();
-  await StorageProvider.initializeStorage();
 
   runApp(PropertyChangeProvider<StorageNotifier, String>(
       value: StorageNotifier(), child: const SPHPlaner()));
@@ -68,16 +67,23 @@ class _SPHPlaner extends State<SPHPlaner> {
   @override
   void initState() {
     super.initState();
-    if (StorageProvider.settings.loggedIn) {
-      SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
-        StorageProvider.settings.updateLockText = "";
-        FlutterNativeSplash.remove();
+    StorageProvider.initializeStorage().then((value) {
+      if (StorageProvider.settings.update) {
+        StorageProvider.deleteAll().then((value) {
+          StorageProvider.initializeStorage().then((value) => StorageProvider.settings.update = true);
+        });
+      }
+      if (StorageProvider.settings.loggedIn) {
+        SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
+          StorageProvider.settings.updateLockText = "";
+          FlutterNativeSplash.remove();
+        });
+      }
+      setState(() {
+        loaded = true;
       });
-    }
-    setState(() {
-      loaded = true;
+      FlutterNativeSplash.remove();
     });
-    FlutterNativeSplash.remove();
   }
 
   @override

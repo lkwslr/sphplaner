@@ -47,13 +47,21 @@ class SPH {
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
-    if (_lastSid + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch) {
+    if (_lastSid + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch || _sid.isEmpty) {
       CookieStore.clearCookies();
       http.Response loginResponse =
           await post("https://login.schulportal.hessen.de", {
         "value":
             "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
       });
+
+      if (loginResponse.statusCode == 200) {
+        loginResponse =
+        await post("https://login.schulportal.hessen.de", {
+          "value":
+          "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+        });
+      }
 
       if (loginResponse.statusCode == 302 &&
           loginResponse.headers['location'] != null) {
@@ -70,7 +78,7 @@ class SPH {
         }
       } else {
         _sid = "";
-        return _sid;
+        return "ERROR=Der Benutzername oder das Passwort sind falsch.";
       }
     }
     return _sid;
@@ -317,11 +325,13 @@ class SPH {
 
   static Future<void> update(StorageNotifier notify) async { //TODO TIMEOUTS
     StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
-    notify.notify("stundenplan");
+    notify.notify("main");
     await TimeTable.downloadTimetable();
+    notify.notifyAll(["stundenplan"]);
     StorageProvider.settings.updateLockText = "Aktualisiere Vertretungsplan...";
-    notify.notifyAll(["stundenplan", "vertretung"]);
+    notify.notify("main");
     await Vertretungsplan.download();
+    notify.notifyAll(["stundenplan", "vertretung"]);
     StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
     notify.notify("main");
     await updateUser();
@@ -329,5 +339,15 @@ class SPH {
     StorageProvider.settings.status =
         "Letztes Update: ${DateFormat('dd.MM.y HH:mm').format(DateTime.now())}";
     notify.notify("main");
+  }
+
+  static clear() {
+    schools = <School>[];
+    _username = null;
+    _password = null;
+    _sid = "";
+    _lastSid = 0;
+    _sessionKey = "";
+    rsa = null;
   }
 }

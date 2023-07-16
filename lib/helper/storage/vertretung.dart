@@ -17,6 +17,8 @@ class Vertretung {
   int? hour;
   String? room;
   String? teacher;
+  String? classes;
+  String? vertrSubject;
   final subject = IsarLink<Subject>();
 
   String? type;

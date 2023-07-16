@@ -17,39 +17,49 @@ const VertretungSchema = CollectionSchema(
   name: r'Vertretung',
   id: -3664050377336799535,
   properties: {
-    r'date': PropertySchema(
+    r'classes': PropertySchema(
       id: 0,
+      name: r'classes',
+      type: IsarType.string,
+    ),
+    r'date': PropertySchema(
+      id: 1,
       name: r'date',
       type: IsarType.string,
     ),
     r'dayOfWeek': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'dayOfWeek',
       type: IsarType.long,
     ),
     r'hour': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'hour',
       type: IsarType.long,
     ),
     r'note': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'note',
       type: IsarType.string,
     ),
     r'room': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'room',
       type: IsarType.string,
     ),
     r'teacher': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'teacher',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'type',
+      type: IsarType.string,
+    ),
+    r'vertrSubject': PropertySchema(
+      id: 8,
+      name: r'vertrSubject',
       type: IsarType.string,
     )
   },
@@ -111,6 +121,12 @@ int _vertretungEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.classes;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.date;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -140,6 +156,12 @@ int _vertretungEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  {
+    final value = object.vertrSubject;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -149,13 +171,15 @@ void _vertretungSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.date);
-  writer.writeLong(offsets[1], object.dayOfWeek);
-  writer.writeLong(offsets[2], object.hour);
-  writer.writeString(offsets[3], object.note);
-  writer.writeString(offsets[4], object.room);
-  writer.writeString(offsets[5], object.teacher);
-  writer.writeString(offsets[6], object.type);
+  writer.writeString(offsets[0], object.classes);
+  writer.writeString(offsets[1], object.date);
+  writer.writeLong(offsets[2], object.dayOfWeek);
+  writer.writeLong(offsets[3], object.hour);
+  writer.writeString(offsets[4], object.note);
+  writer.writeString(offsets[5], object.room);
+  writer.writeString(offsets[6], object.teacher);
+  writer.writeString(offsets[7], object.type);
+  writer.writeString(offsets[8], object.vertrSubject);
 }
 
 Vertretung _vertretungDeserialize(
@@ -165,14 +189,16 @@ Vertretung _vertretungDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Vertretung();
-  object.date = reader.readStringOrNull(offsets[0]);
-  object.dayOfWeek = reader.readLongOrNull(offsets[1]);
-  object.hour = reader.readLongOrNull(offsets[2]);
+  object.classes = reader.readStringOrNull(offsets[0]);
+  object.date = reader.readStringOrNull(offsets[1]);
+  object.dayOfWeek = reader.readLongOrNull(offsets[2]);
+  object.hour = reader.readLongOrNull(offsets[3]);
   object.id = id;
-  object.note = reader.readStringOrNull(offsets[3]);
-  object.room = reader.readStringOrNull(offsets[4]);
-  object.teacher = reader.readStringOrNull(offsets[5]);
-  object.type = reader.readStringOrNull(offsets[6]);
+  object.note = reader.readStringOrNull(offsets[4]);
+  object.room = reader.readStringOrNull(offsets[5]);
+  object.teacher = reader.readStringOrNull(offsets[6]);
+  object.type = reader.readStringOrNull(offsets[7]);
+  object.vertrSubject = reader.readStringOrNull(offsets[8]);
   return object;
 }
 
@@ -186,16 +212,20 @@ P _vertretungDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readLongOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -698,6 +728,155 @@ extension VertretungQueryWhere
 
 extension VertretungQueryFilter
     on QueryBuilder<Vertretung, Vertretung, QFilterCondition> {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'classes',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      classesIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'classes',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      classesGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'classes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'classes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'classes',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'classes',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      classesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'classes',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1624,6 +1803,160 @@ extension VertretungQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'vertrSubject',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'vertrSubject',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vertrSubject',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vertrSubject',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vertrSubject',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertrSubject',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertrSubjectIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vertrSubject',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension VertretungQueryObject
@@ -1660,6 +1993,18 @@ extension VertretungQueryLinks
 
 extension VertretungQuerySortBy
     on QueryBuilder<Vertretung, Vertretung, QSortBy> {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByClasses() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByClassesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classes', Sort.desc);
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -1743,10 +2088,34 @@ extension VertretungQuerySortBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertrSubject() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vertrSubject', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertrSubjectDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vertrSubject', Sort.desc);
+    });
+  }
 }
 
 extension VertretungQuerySortThenBy
     on QueryBuilder<Vertretung, Vertretung, QSortThenBy> {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByClasses() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByClassesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'classes', Sort.desc);
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDate() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'date', Sort.asc);
@@ -1842,10 +2211,29 @@ extension VertretungQuerySortThenBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertrSubject() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vertrSubject', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertrSubjectDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'vertrSubject', Sort.desc);
+    });
+  }
 }
 
 extension VertretungQueryWhereDistinct
     on QueryBuilder<Vertretung, Vertretung, QDistinct> {
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByClasses(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'classes', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByDate(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1892,6 +2280,13 @@ extension VertretungQueryWhereDistinct
       return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByVertrSubject(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'vertrSubject', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension VertretungQueryProperty
@@ -1899,6 +2294,12 @@ extension VertretungQueryProperty
   QueryBuilder<Vertretung, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Vertretung, String?, QQueryOperations> classesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'classes');
     });
   }
 
@@ -1941,6 +2342,12 @@ extension VertretungQueryProperty
   QueryBuilder<Vertretung, String?, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<Vertretung, String?, QQueryOperations> vertrSubjectProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'vertrSubject');
     });
   }
 }

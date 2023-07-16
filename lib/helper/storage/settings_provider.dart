@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sphplaner/helper/app_info.dart';
 import 'package:sphplaner/helper/storage/user.dart';
 
 // Für runtime Einstellungen
@@ -83,4 +84,21 @@ class SettingsProvider {
   set updateLockText(String value) => _setSharedPrefs("updateLock", value);
 
   String get updateLockText => _getSharedPrefs("updateLock") ?? "";
+
+  bool get update {
+    int versionCode = int.tryParse(buildNumber) ?? 0;
+    return (_prefs?.getInt("version") ?? versionCode) < versionCode;
+  }
+
+  set update(bool value) {
+    _prefs?.setInt("version", int.tryParse(buildNumber) ?? 0);
+  }
+
+  bool get showVertretung => _prefs?.getBool("showVertretung") ?? false;
+
+  set showVertretung(bool value) => _prefs?.setBool("showVertretung", value);
+
+  bool get loadAllVertretung => _prefs?.getBool("loadAllVertretung") ?? false;
+
+  set loadAllVertretung(bool value) => _prefs?.setBool("loadAllVertretung", value);
 }

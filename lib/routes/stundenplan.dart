@@ -20,6 +20,7 @@ class Stundenplan extends StatefulWidget {
 class _StundenplanState extends State<Stundenplan> {
   double cellWidth = 1;
   double cellHeight = 64;
+  double hourCellWidth = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class _StundenplanState extends State<Stundenplan> {
           Size logicalScreenSize =
               View.of(context).physicalSize / View.of(context).devicePixelRatio;
           if (MediaQuery.of(context).orientation == Orientation.portrait) {
-            cellWidth = (logicalScreenSize.width / 6) - 8;
+            cellWidth = (logicalScreenSize.width / 5.5) - 9;
             if (Platform.isAndroid) {
               double appBarHeight =
                   (Scaffold.of(context).appBarMaxHeight ?? 0) +
@@ -51,8 +52,9 @@ class _StundenplanState extends State<Stundenplan> {
             List<Widget> row = [];
             for (int day = 0; day <= 5; day++) {
               if (day == 0) {
+                print(cellWidth);
                 row.add(Container(
-                  width: cellWidth,
+                  width: cellWidth / 2,
                   height: cellHeight,
                   margin: const EdgeInsets.all(4),
                   padding: const EdgeInsets.all(2),
@@ -63,7 +65,7 @@ class _StundenplanState extends State<Stundenplan> {
                   child: Column(
                     children: [
                       SizedBox(
-                          height: (cellHeight - 4) / 2,
+                          height: (cellWidth > 128) ? (cellHeight - 4) / 2 : cellHeight - 4,
                           child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(hour.toString(),
@@ -73,16 +75,17 @@ class _StundenplanState extends State<Stundenplan> {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSecondaryContainer)))),
-                      SizedBox(
-                          height: (cellHeight - 4) / 2,
-                          child: FittedBox(
-                              fit: BoxFit.fitWidth,
-                              child: Text(StorageProvider.timelist[hour - 1],
-                                  style: TextStyle(
-                                      fontStyle: FontStyle.italic,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSecondaryContainer))))
+                      if (cellWidth > 128)
+                        SizedBox(
+                            height: (cellHeight - 4) / 2,
+                            child: FittedBox(
+                                fit: BoxFit.fitWidth,
+                                child: Text(StorageProvider.timelist[hour - 1],
+                                    style: TextStyle(
+                                        fontStyle: FontStyle.italic,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondaryContainer))))
                     ],
                   ),
                 ));
@@ -93,13 +96,15 @@ class _StundenplanState extends State<Stundenplan> {
                 Color textcolor = Colors.black;
                 String type = " ";
                 String note = " ";
+                String date = " ";
+                try {
+                  date = dates.firstWhere(
+                          (element) =>
+                      DateFormat("dd.MM.yyyy").parse(element).weekday == day,
+                      orElse: () => "01.01.1970");
+                } on FormatException catch (_) {}
 
-                String date = dates.firstWhere(
-                    (element) =>
-                        DateFormat("dd.MM.yyyy").parse(element).weekday == day,
-                    orElse: () => "01.01.1970");
-
-                if (StorageProvider.isar.vertretungs
+                if (StorageProvider.settings.showVertretung && StorageProvider.isar.vertretungs
                         .where()
                         .dateDayOfWeekHourEqualTo(date, day, hour)
                         .findFirstSync() !=
@@ -112,7 +117,11 @@ class _StundenplanState extends State<Stundenplan> {
                           ?.subject
                           .value
                           ?.subjectName ??
-                      " ";
+                      StorageProvider.isar.vertretungs
+                          .where()
+                          .dateDayOfWeekHourEqualTo(date, day, hour)
+                          .findFirstSync()
+                          ?.vertrSubject ?? "???";
                   room = StorageProvider.isar.vertretungs
                           .where()
                           .dateDayOfWeekHourEqualTo(date, day, hour)
@@ -142,8 +151,7 @@ class _StundenplanState extends State<Stundenplan> {
                           .findFirstSync()
                           ?.subject
                           .value
-                          ?.color ??
-                      Theme.of(context).colorScheme.secondaryContainer.value);
+                          ?.color ?? Colors.white.value);
                 } else {
                   subject = StorageProvider.isar.lessons
                           .where()
@@ -151,7 +159,7 @@ class _StundenplanState extends State<Stundenplan> {
                           .findFirstSync()
                           ?.subject
                           .value
-                          ?.subject ??
+                          ?.subjectName ??
                       " ";
                   room = StorageProvider.isar.lessons
                           .where()
@@ -194,7 +202,7 @@ class _StundenplanState extends State<Stundenplan> {
                         Container(
                           height: (cellHeight - 4) / 2,
                           padding: const EdgeInsets.all(2),
-                          child: Text(room, style: TextStyle(color: textcolor)),
+                          child: Text(room, style: TextStyle(color: textcolor, fontStyle: FontStyle.italic)),
                         ),
                       ],
                     )));
@@ -220,14 +228,43 @@ class _StundenplanState extends State<Stundenplan> {
   Row buildHeader(String today, String tomorrow) {
     return Row(
       children: ['Stunde', 'Mo', 'Di', 'Mi', 'Do', 'Fr'].map((e) {
-        String shortToday = DateFormat('EEEE')
-            .format(DateFormat("dd.MM.yyyy").parse(today))
-            .substring(0, 2);
+        String shortToday = " ";
+        String shortTomorrow = " ";
+        try {
+          shortToday = DateFormat('EEEE')
+              .format(DateFormat("dd.MM.yyyy").parse(today))
+              .substring(0, 2);
 
-        String shortTomorrow = DateFormat('EEEE')
-            .format(DateFormat("dd.MM.yyyy").parse(tomorrow))
-            .substring(0, 2);
+          shortTomorrow = DateFormat('EEEE')
+              .format(DateFormat("dd.MM.yyyy").parse(tomorrow))
+              .substring(0, 2);
+        } on FormatException catch (_) {}
 
+        if (e == "Stunde") {
+          return Container(
+            width: cellWidth / 2,
+            height: cellHeight,
+            margin: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: RotatedBox(
+              quarterTurns: cellWidth < 128 ? 3 : 0,
+              child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(e,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 23,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer)))
+            ),
+          );
+        }
+        
         return Container(
           width: cellWidth,
           height: cellHeight,

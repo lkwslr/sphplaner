@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/homework.dart';
 import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/settings_provider.dart';
@@ -112,7 +113,7 @@ class StorageProvider {
 
   static List<String> get vertretungsDate {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
-    return _prefs!.getStringList("vertretungsDate") ?? ["", ""];
+    return _prefs!.getStringList("vertretungsDate") ?? [" ", " "];
   }
 
   static set vertretungsDate(List<String> value) {
@@ -124,7 +125,15 @@ class StorageProvider {
     await isar.writeTxn(() async {
       await isar.clear();
     });
+    await isar.close();
     await _prefs!.clear();
     await _secure.deleteAll();
+
+    _isar = null;
+    _prefs = null;
+    settings = SettingsProvider();
+    user = null;
+    SPH.clear();
+    return;
   }
 }

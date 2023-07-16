@@ -71,19 +71,17 @@ class Vertretungsplan {
                     .getBySubjectSync(content['Fach'].toString().trim());
 
                 if (subject == null) {
-                  subject = Subject()
-                    ..subject = content['Fach'].toString().trim()
-                    ..subjectName = content['Fach'].toString().trim();
-                  await isar.writeTxn(() async {
-                    await isar.subjects.putBySubject(subject!);
-                  });
-                }
-
-                if (content["Klasse"].toString().trim().isEmpty ||
-                    content["Klasse"]
-                        .toString()
-                        .trim()
-                        .contains(StorageProvider.user?.course ?? "")) {
+                  vertretungs.add(Vertretung()
+                    ..vertrSubject = content['Fach'].toString().trim()
+                    ..room = content['Raum'].toString().trim()
+                    ..teacher = content['Vertreter'].toString().trim()
+                    ..hour = hour
+                    ..dayOfWeek = weekday
+                    ..date = date
+                    ..classes = content["Klasse"].toString().trim()
+                    ..note = content['Hinweis'].toString().trim()
+                    ..type = content['Art'].toString().trim());
+                } else {
                   vertretungs.add(Vertretung()
                     ..subject.value = subject
                     ..room = content['Raum'].toString().trim()
@@ -91,6 +89,7 @@ class Vertretungsplan {
                     ..hour = hour
                     ..dayOfWeek = weekday
                     ..date = date
+                    ..classes = content["Klasse"].toString().trim()
                     ..note = content['Hinweis'].toString().trim()
                     ..type = content['Art'].toString().trim());
                 }
@@ -101,12 +100,24 @@ class Vertretungsplan {
 
         StorageProvider.vertretungsDate = dates;
         if (vertretungs.isNotEmpty) {
-          await isar.writeTxn(() async {
-            await isar.vertretungs.putAll(vertretungs);
-            for (Vertretung vertretung in vertretungs) {
-              await vertretung.subject.save();
+          for (Vertretung vertretung in vertretungs) {
+            if ((vertretung.classes?.trim() ?? "").isEmpty || StorageProvider.settings.loadAllVertretung ||
+                (vertretung.classes?.trim().toLowerCase() ?? "").contains(
+                    StorageProvider.user?.course?.toLowerCase() ?? "")) {
+              Vertretung? test = await isar.vertretungs
+                  .where()
+                  .dateDayOfWeekHourEqualTo(
+                  vertretung.date, vertretung.dayOfWeek, vertretung.hour)
+                  .findFirst();
+              if (test == null || test.subject.value != null) {
+                await isar.writeTxn(() async {
+                  await isar.vertretungs.put(vertretung);
+                  await vertretung.subject.save();
+                });
+              }
             }
-          });
+          }
+
         }
       }
     }

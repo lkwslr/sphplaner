@@ -66,12 +66,19 @@ class TimeTable {
                       .replaceAll(teacher, "")
                       .trim();
 
-                  Subject subject = (await StorageProvider.isar.subjects
-                          .getBySubject(subjectName)) ??
-                      Subject()
-                    ..subject = subjectName
-                    ..subjectName = subjectName
-                    ..teacher = teacher;
+                  Subject? subject = await StorageProvider.isar.subjects
+                          .getBySubject(subjectName);
+
+                  if (subject == null) {
+                    subject = Subject()
+                      ..subject = subjectName
+                      ..subjectName = subjectName
+                      ..teacher = teacher;
+
+                    await isar.writeTxn(() async {
+                      await isar.subjects.putBySubject(subject!);
+                    });
+                  }
 
                   List<Lesson> lessons = [
                     Lesson()

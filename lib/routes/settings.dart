@@ -12,8 +12,8 @@ import 'package:sphplaner/routes/settings_password.dart';
 import 'package:sphplaner/routes/settings_profilbild.dart';*/
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sphplaner/routes/fach_settings.dart';
 
-import 'fach_farbe.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -24,7 +24,6 @@ class Settings extends StatefulWidget {
 
 class _Settings extends State<Settings> {
   StorageNotifier? notify;
-  String klasse = "Klasse";
   String information = "";
   ValueNotifier<bool> loading = ValueNotifier(false);
   String result = "";
@@ -61,9 +60,9 @@ class _Settings extends State<Settings> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     _userSettings(),
-                    //_plan(),
+                    _plan(),
                     _theme(),
-                    _autoUpdate(),
+                    //_autoUpdate(),
                     colors(context, buttonSizeFactorSmall),
                     _imexport(),
                     _logout()
@@ -121,6 +120,61 @@ class _Settings extends State<Settings> {
     );
   }*/
 
+  Widget _plan() {
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.center,
+          child: Text("Stundenplan & Vertretungsplan",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        ),
+        Row(
+          children: [
+            const Expanded(
+              child: ListTile(
+                title: Text("Vertretung im Stundenplan"),
+                subtitle: Text(
+                  "Achtung, es kann bei manchen Schulen zu Fehlern kommen, wenn der Vertretungsplan in den Stundenplan integriert wird, da manchmal Vertretung für Fächer angezeigt wird, die nicht belegt sind.\n"
+                      "Bitte berücksichtige dies bei der Aktivierung!",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            Switch(
+              value: StorageProvider.settings.showVertretung,
+              onChanged: (changed) {
+                StorageProvider.settings.showVertretung = changed;
+                notify!.notifyAll(["stundenplan", "settings"]);
+              },
+            )
+          ],
+        ),
+        Row(
+          children: [
+            const Expanded(
+              child: ListTile(
+                title: Text("Gesamten Vertretungsplan laden"),
+                subtitle: Text(
+                  "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
+                      "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            Switch(
+              value: StorageProvider.settings.loadAllVertretung,
+              onChanged: (changed) {
+                StorageProvider.settings.loadAllVertretung = changed;
+                notify!.notifyAll(["stundenplan", "settings"]);
+              },
+            )
+          ],
+        ),
+        const Divider(height: 32, thickness: 3)
+      ],
+    );
+  }
+
   Widget _theme() {
     return Column(
       children: [
@@ -158,7 +212,7 @@ class _Settings extends State<Settings> {
     );
   }
 
-  Widget _autoUpdate() {
+  /* Widget _autoUpdate() {
     return Column(
       children: [
         const Align(
@@ -182,7 +236,7 @@ class _Settings extends State<Settings> {
         const Divider(height: 32, thickness: 3)
       ],
     );
-  }
+  } */
 
   Widget _userSettings() {
     return Column(
@@ -482,7 +536,7 @@ Widget colors(BuildContext context, double buttonSizeFactorSmall) {
   List<Widget> faecher = [
     const Align(
       alignment: Alignment.center,
-      child: Text("Farbwahl für deine Fächer",
+      child: Text("Einstellungen für deine Fächer",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
     )
   ];
@@ -496,7 +550,7 @@ Widget colors(BuildContext context, double buttonSizeFactorSmall) {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => FachFarbe(subject: subject)));
+                  builder: (context) => FachSettings(subject: subject)));
         },
         style: ElevatedButton.styleFrom(
             backgroundColor: Color(subject.color),

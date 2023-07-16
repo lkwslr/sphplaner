@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
@@ -29,7 +27,6 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
               .findAllSync()
               .map((e) => e.date ?? "01.01.1970")
               .toList();
-
           if (dates.isEmpty) {
             dates = ['Keine Vertretung vorhanden'];
           }
@@ -80,24 +77,11 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
         .dateEqualToAnyDayOfWeekHour(date)
         .findAllSync();
 
-    Size logicalScreenSize =
-        View.of(context).physicalSize / View.of(context).devicePixelRatio;
-
-    double cellHeight = 64;
-    if (Platform.isAndroid) {
-      double appBarHeight =
-          (Scaffold.of(context).appBarMaxHeight ?? 0) + kToolbarHeight + 40;
-      cellHeight = (logicalScreenSize.height - appBarHeight) * 0.2;
-    } else if (Platform.isIOS) {
-      cellHeight = logicalScreenSize.height * 0.2;
-    }
-
     return RefreshIndicator(
         child: ListView.builder(
             itemCount: vertretungs.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
-                height: cellHeight,
                 margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -125,7 +109,8 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                                     .value
                                     ?.subjectName
                                     .toString() ??
-                                "?",
+                                vertretungs[index]
+                                    .vertrSubject ?? "?",
                             overflow: TextOverflow.fade,
                             maxLines: 1,
                             style: const TextStyle(
@@ -179,6 +164,18 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                                       textAlign: TextAlign.left,
                                       overflow: TextOverflow.fade,
                                       maxLines: 1)),
+                            ],
+                          ),
+                        if (vertretungs[index].classes?.isNotEmpty ?? false)
+                          Row(
+                            children: [
+                              const Expanded(
+                                  child: Text("Klasse:",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold))),
+                              Expanded(
+                                  child: Text("${vertretungs[index].classes}",
+                                    textAlign: TextAlign.left,)),
                             ],
                           ),
                       ],
