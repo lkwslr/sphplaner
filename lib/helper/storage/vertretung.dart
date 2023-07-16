@@ -8,8 +8,11 @@ part 'vertretung.g.dart';
 class Vertretung {
   Id id = Isar.autoIncrement;
 
+  @Index(
+      unique: true,
+      replace: true,
+      composite: [CompositeIndex('dayOfWeek'), CompositeIndex('hour')])
   String? date;
-  @Index(unique: true, replace: true, composite: [CompositeIndex('hour')])
   int? dayOfWeek;
   int? hour;
   String? room;

@@ -101,12 +101,23 @@ class StorageProvider {
 
   static List<String> get timelist {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
-    return _prefs!.getStringList("timelist") ?? [" ", " ", " ", " ", " ", " "," ", " ", " ", " ", " ", " "];
+    return _prefs!.getStringList("timelist") ??
+        [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "];
   }
 
   static set timelist(List<String> value) {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
     _prefs!.setStringList("timelist", value);
+  }
+
+  static List<String> get vertretungsDate {
+    assert(_prefs != null, 'SharedPreferences have not been initialized');
+    return _prefs!.getStringList("vertretungsDate") ?? ["", ""];
+  }
+
+  static set vertretungsDate(List<String> value) {
+    assert(_prefs != null, 'SharedPreferences have not been initialized');
+    _prefs!.setStringList("vertretungsDate", value);
   }
 
   static Future<void> deleteAll() async {

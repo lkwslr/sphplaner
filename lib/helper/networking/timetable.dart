@@ -26,8 +26,8 @@ class TimeTable {
       if (page.getElementById("own") != null) {
         dom.Element timetableContainer = page.getElementById("own")!;
 
-        dom.Element timetable = timetableContainer.getElementsByTagName(
-            "tbody")[0];
+        dom.Element timetable =
+            timetableContainer.getElementsByTagName("tbody")[0];
 
         for (dom.Element tr in timetable.getElementsByTagName("tr")) {
           timelist.add(tr.getElementsByClassName("VonBis")[0].text);
@@ -36,53 +36,61 @@ class TimeTable {
 
         StorageProvider.timelist = timelist;
 
-        for (int currentHour = 0; currentHour <
-            availableLesson.length; currentHour++) {
+        for (int currentHour = 0;
+            currentHour < availableLesson.length;
+            currentHour++) {
           dom.Element tr = timetable.getElementsByTagName("tr")[currentHour];
-          for (int currentDay = 1; currentDay <
-              availableLesson[currentHour].length + 1; currentDay++) {
-            if (availableLesson[currentHour][currentDay-1]) {
-              int skippedHours = availableLesson[currentHour].sublist(0, currentDay).where((element) => !element).length;
-              if (tr.getElementsByTagName("td").length > currentDay-skippedHours) {
-                dom.Element current = tr.getElementsByTagName("td")[currentDay-skippedHours];
+          for (int currentDay = 1;
+              currentDay < availableLesson[currentHour].length + 1;
+              currentDay++) {
+            if (availableLesson[currentHour][currentDay - 1]) {
+              int skippedHours = availableLesson[currentHour]
+                  .sublist(0, currentDay)
+                  .where((element) => !element)
+                  .length;
+              if (tr.getElementsByTagName("td").length >
+                  currentDay - skippedHours) {
+                dom.Element current =
+                    tr.getElementsByTagName("td")[currentDay - skippedHours];
                 if (current.attributes['rowspan'] != null) {
-                  dom.Element course = current.querySelector("div.stunde")!;//TODO: auswahl ermöglichen, wenn mehrere Fächer möglich
-                  String subjectName = course.getElementsByTagName("b")[0].text
-                      .trim();
-                  String teacher = course.getElementsByTagName("small")[0].text
-                      .trim();
-                  String room = course.text.trim().replaceAll(RegExp(r'\s+'), " ")
-                      .replaceAll(subjectName, "").replaceAll(teacher, "")
+                  dom.Element course = current.querySelector(
+                      "div.stunde")!; //TODO: auswahl ermöglichen, wenn mehrere Fächer möglich
+                  String subjectName =
+                      course.getElementsByTagName("b")[0].text.trim();
+                  String teacher =
+                      course.getElementsByTagName("small")[0].text.trim();
+                  String room = course.text
+                      .trim()
+                      .replaceAll(RegExp(r'\s+'), " ")
+                      .replaceAll(subjectName, "")
+                      .replaceAll(teacher, "")
                       .trim();
 
-                  Subject subject = (await StorageProvider.isar.subjects.getBySubject(subjectName)) ?? Subject()
+                  Subject subject = (await StorageProvider.isar.subjects
+                          .getBySubject(subjectName)) ??
+                      Subject()
                     ..subject = subjectName
                     ..subjectName = subjectName
                     ..teacher = teacher;
 
-                  int subjectId = 0;
-                  await isar.writeTxn(() async {
-                    subjectId = await isar.subjects.putBySubject(subject);
-                  });
-
-                  subject = (await isar.subjects.get(subjectId))!;
-
-                  List<Lesson> lessons = [Lesson()
-                    ..subject.value = subject
-                    ..dayOfWeek = currentDay
-                    ..hour = currentHour + 1
-                    ..room = room];
+                  List<Lesson> lessons = [
+                    Lesson()
+                      ..subject.value = subject
+                      ..dayOfWeek = currentDay
+                      ..hour = currentHour + 1
+                      ..room = room
+                  ];
 
                   if (current.attributes['rowspan'] == "2" &&
-                      currentHour < availableLesson.length-1) {
-                    availableLesson[currentHour + 1][currentDay-1] = false;
+                      currentHour < availableLesson.length - 1) {
+                    availableLesson[currentHour + 1][currentDay - 1] = false;
                     lessons.add(Lesson()
                       ..subject.value = subject
                       ..dayOfWeek = currentDay
                       ..hour = currentHour + 2
                       ..room = room);
-                  } else if (currentHour < availableLesson.length-1) {
-                    availableLesson[currentHour + 1][currentDay-1] = true;
+                  } else if (currentHour < availableLesson.length - 1) {
+                    availableLesson[currentHour + 1][currentDay - 1] = true;
                   }
                   await isar.writeTxn(() async {
                     await isar.lessons.putAll(lessons);
@@ -93,15 +101,13 @@ class TimeTable {
                 }
               }
             } else {
-              if (currentHour < availableLesson.length-1) {
-                availableLesson[currentHour + 1][currentDay-1] = true;
+              if (currentHour < availableLesson.length - 1) {
+                availableLesson[currentHour + 1][currentDay - 1] = true;
               }
             }
           }
         }
       }
-
     }
   }
-
 }

@@ -28,6 +28,11 @@ String getDefaultColors() {
   });
 }
 
+int getDefaultColor(String fach) {
+  //TODO: regex for fächer
+  return 4294967295;
+}
+
 String getFach(String fach) {
   switch (fach) {
     case "REV":

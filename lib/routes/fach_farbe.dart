@@ -66,7 +66,7 @@ class _FachFarbe extends State<FachFarbe> {
                 await StorageProvider.isar.writeTxn(() async {
                   await StorageProvider.isar.subjects.putBySubject(subject);
                 }).then((value) {
-                  notify.notifyAll(["main", "settings"]);
+                  notify.notifyAll(["stundenplan", "settings"]);
                   Navigator.pop(context);
                 });
               },
@@ -83,7 +83,7 @@ class _FachFarbe extends State<FachFarbe> {
                 await StorageProvider.isar.writeTxn(() async {
                   await StorageProvider.isar.subjects.putBySubject(subject);
                 }).then((value) {
-                  notify.notifyAll(["main", "settings"]);
+                  notify.notifyAll(["stundenplan", "settings"]);
                   Navigator.pop(context);
                 });
               },

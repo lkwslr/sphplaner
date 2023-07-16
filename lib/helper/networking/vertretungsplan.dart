@@ -16,9 +16,10 @@ class Vertretungsplan {
     http.Response response = await SPH.get("/vertretungsplan.php");
     if (response.statusCode == 200) {
       dom.Document page = parse(response.body);
-      if (page.getElementById("content") != null) {
+      if (page.getElementById("content") != null &&
+          page.getElementById("menue_tag") != null) {
         dom.Element tableHead = page.getElementById("menue_tag")!;
-        List dates = tableHead
+        List<String> dates = tableHead
             .getElementsByClassName("btn")
             .map((e) => e.attributes['data-tag']!.replaceAll("_", "."))
             .toList();
@@ -31,7 +32,7 @@ class Vertretungsplan {
               page.getElementById("vtable${date.replaceAll('.', '_')}")!;
           if (!table.text.contains("Keine Einträge!")) {
             dom.Element head = table.getElementsByTagName("thead")[0];
-            Map availableColumns = {} ;
+            Map availableColumns = {};
             for (int index = 0;
                 index < head.getElementsByTagName("th").length;
                 index++) {
@@ -51,7 +52,8 @@ class Vertretungsplan {
               "Raum": "",
               "Art": "",
               "Hinweis": "",
-              "Vertreter": ""
+              "Vertreter": "",
+              "Klasse": ""
             };
             for (dom.Element row in body.getElementsByTagName("tr")) {
               for (MapEntry entry in availableColumns.entries) {
@@ -67,25 +69,39 @@ class Vertretungsplan {
               for (int hour in hours) {
                 Subject? subject = StorageProvider.isar.subjects
                     .getBySubjectSync(content['Fach'].toString().trim());
-                if (subject != null) {
+
+                if (subject == null) {
+                  subject = Subject()
+                    ..subject = content['Fach'].toString().trim()
+                    ..subjectName = content['Fach'].toString().trim();
+                  await isar.writeTxn(() async {
+                    await isar.subjects.putBySubject(subject!);
+                  });
+                }
+
+                if (content["Klasse"].toString().trim().isEmpty ||
+                    content["Klasse"]
+                        .toString()
+                        .trim()
+                        .contains(StorageProvider.user?.course ?? "")) {
                   vertretungs.add(Vertretung()
                     ..subject.value = subject
-                    ..room = content['Raum']
-                    ..teacher = content['Vertreter']
+                    ..room = content['Raum'].toString().trim()
+                    ..teacher = content['Vertreter'].toString().trim()
                     ..hour = hour
                     ..dayOfWeek = weekday
                     ..date = date
-                    ..note = content['Hinweis']
-                    ..type = content['Art']);
+                    ..note = content['Hinweis'].toString().trim()
+                    ..type = content['Art'].toString().trim());
                 }
               }
             }
           }
         }
 
+        StorageProvider.vertretungsDate = dates;
         if (vertretungs.isNotEmpty) {
           await isar.writeTxn(() async {
-            await isar.vertretungs.where().deleteAll();
             await isar.vertretungs.putAll(vertretungs);
             for (Vertretung vertretung in vertretungs) {
               await vertretung.subject.save();

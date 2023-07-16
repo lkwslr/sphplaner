@@ -38,7 +38,8 @@ class SPH {
   static Future<void> setCredetialsFor(String userID) async {
     _username = await StorageProvider.getUsername(userID);
     _password = await StorageProvider.getPassword(userID);
-    _school = (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
+    _school =
+        (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
   }
 
   static Future<String> getSID() async {
@@ -46,7 +47,7 @@ class SPH {
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
-    if (_lastSid  + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch) {
+    if (_lastSid + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch) {
       CookieStore.clearCookies();
       http.Response loginResponse =
           await post("https://login.schulportal.hessen.de", {
@@ -314,14 +315,14 @@ class SPH {
     return uuid;
   }
 
-  static Future<void> update(StorageNotifier notify) async {
-    StorageProvider.settings.updateLockText = "Update Stundenplan...";
-    notify.notify("main");
+  static Future<void> update(StorageNotifier notify) async { //TODO TIMEOUTS
+    StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
+    notify.notify("stundenplan");
     await TimeTable.downloadTimetable();
-    StorageProvider.settings.updateLockText = "Update Vertretungsplan...";
-    notify.notify("main");
+    StorageProvider.settings.updateLockText = "Aktualisiere Vertretungsplan...";
+    notify.notifyAll(["stundenplan", "vertretung"]);
     await Vertretungsplan.download();
-    StorageProvider.settings.updateLockText = "Update Benutzerdaten...";
+    StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
     notify.notify("main");
     await updateUser();
     StorageProvider.settings.updateLockText = "";

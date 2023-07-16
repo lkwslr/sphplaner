@@ -59,12 +59,17 @@ const VertretungSchema = CollectionSchema(
   deserializeProp: _vertretungDeserializeProp,
   idName: r'id',
   indexes: {
-    r'dayOfWeek_hour': IndexSchema(
-      id: -2986024609497221214,
-      name: r'dayOfWeek_hour',
+    r'date_dayOfWeek_hour': IndexSchema(
+      id: 2896883763141730327,
+      name: r'date_dayOfWeek_hour',
       unique: true,
       replace: true,
       properties: [
+        IndexPropertySchema(
+          name: r'date',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
         IndexPropertySchema(
           name: r'dayOfWeek',
           type: IndexType.value,
@@ -212,89 +217,93 @@ void _vertretungAttach(IsarCollection<dynamic> col, Id id, Vertretung object) {
 }
 
 extension VertretungByIndex on IsarCollection<Vertretung> {
-  Future<Vertretung?> getByDayOfWeekHour(int? dayOfWeek, int? hour) {
-    return getByIndex(r'dayOfWeek_hour', [dayOfWeek, hour]);
+  Future<Vertretung?> getByDateDayOfWeekHour(
+      String? date, int? dayOfWeek, int? hour) {
+    return getByIndex(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
   }
 
-  Vertretung? getByDayOfWeekHourSync(int? dayOfWeek, int? hour) {
-    return getByIndexSync(r'dayOfWeek_hour', [dayOfWeek, hour]);
+  Vertretung? getByDateDayOfWeekHourSync(
+      String? date, int? dayOfWeek, int? hour) {
+    return getByIndexSync(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
   }
 
-  Future<bool> deleteByDayOfWeekHour(int? dayOfWeek, int? hour) {
-    return deleteByIndex(r'dayOfWeek_hour', [dayOfWeek, hour]);
+  Future<bool> deleteByDateDayOfWeekHour(
+      String? date, int? dayOfWeek, int? hour) {
+    return deleteByIndex(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
   }
 
-  bool deleteByDayOfWeekHourSync(int? dayOfWeek, int? hour) {
-    return deleteByIndexSync(r'dayOfWeek_hour', [dayOfWeek, hour]);
+  bool deleteByDateDayOfWeekHourSync(String? date, int? dayOfWeek, int? hour) {
+    return deleteByIndexSync(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
   }
 
-  Future<List<Vertretung?>> getAllByDayOfWeekHour(
+  Future<List<Vertretung?>> getAllByDateDayOfWeekHour(List<String?> dateValues,
       List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dayOfWeekValues.length;
-    assert(
-        hourValues.length == len, 'All index values must have the same length');
+    final len = dateValues.length;
+    assert(dayOfWeekValues.length == len && hourValues.length == len,
+        'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dayOfWeekValues[i], hourValues[i]]);
+      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
     }
 
-    return getAllByIndex(r'dayOfWeek_hour', values);
+    return getAllByIndex(r'date_dayOfWeek_hour', values);
   }
 
-  List<Vertretung?> getAllByDayOfWeekHourSync(
+  List<Vertretung?> getAllByDateDayOfWeekHourSync(List<String?> dateValues,
       List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dayOfWeekValues.length;
-    assert(
-        hourValues.length == len, 'All index values must have the same length');
+    final len = dateValues.length;
+    assert(dayOfWeekValues.length == len && hourValues.length == len,
+        'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dayOfWeekValues[i], hourValues[i]]);
+      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
     }
 
-    return getAllByIndexSync(r'dayOfWeek_hour', values);
+    return getAllByIndexSync(r'date_dayOfWeek_hour', values);
   }
 
-  Future<int> deleteAllByDayOfWeekHour(
+  Future<int> deleteAllByDateDayOfWeekHour(List<String?> dateValues,
       List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dayOfWeekValues.length;
-    assert(
-        hourValues.length == len, 'All index values must have the same length');
+    final len = dateValues.length;
+    assert(dayOfWeekValues.length == len && hourValues.length == len,
+        'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dayOfWeekValues[i], hourValues[i]]);
+      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
     }
 
-    return deleteAllByIndex(r'dayOfWeek_hour', values);
+    return deleteAllByIndex(r'date_dayOfWeek_hour', values);
   }
 
-  int deleteAllByDayOfWeekHourSync(
+  int deleteAllByDateDayOfWeekHourSync(List<String?> dateValues,
       List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dayOfWeekValues.length;
-    assert(
-        hourValues.length == len, 'All index values must have the same length');
+    final len = dateValues.length;
+    assert(dayOfWeekValues.length == len && hourValues.length == len,
+        'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([dayOfWeekValues[i], hourValues[i]]);
+      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
     }
 
-    return deleteAllByIndexSync(r'dayOfWeek_hour', values);
+    return deleteAllByIndexSync(r'date_dayOfWeek_hour', values);
   }
 
-  Future<Id> putByDayOfWeekHour(Vertretung object) {
-    return putByIndex(r'dayOfWeek_hour', object);
+  Future<Id> putByDateDayOfWeekHour(Vertretung object) {
+    return putByIndex(r'date_dayOfWeek_hour', object);
   }
 
-  Id putByDayOfWeekHourSync(Vertretung object, {bool saveLinks = true}) {
-    return putByIndexSync(r'dayOfWeek_hour', object, saveLinks: saveLinks);
+  Id putByDateDayOfWeekHourSync(Vertretung object, {bool saveLinks = true}) {
+    return putByIndexSync(r'date_dayOfWeek_hour', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByDayOfWeekHour(List<Vertretung> objects) {
-    return putAllByIndex(r'dayOfWeek_hour', objects);
+  Future<List<Id>> putAllByDateDayOfWeekHour(List<Vertretung> objects) {
+    return putAllByIndex(r'date_dayOfWeek_hour', objects);
   }
 
-  List<Id> putAllByDayOfWeekHourSync(List<Vertretung> objects,
+  List<Id> putAllByDateDayOfWeekHourSync(List<Vertretung> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'dayOfWeek_hour', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'date_dayOfWeek_hour', objects,
+        saveLinks: saveLinks);
   }
 }
 
@@ -303,14 +312,6 @@ extension VertretungQueryWhereSort
   QueryBuilder<Vertretung, Vertretung, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhere> anyDayOfWeekHour() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'dayOfWeek_hour'),
-      );
     });
   }
 }
@@ -383,20 +384,20 @@ extension VertretungQueryWhere
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekIsNullAnyHour() {
+      dateIsNullAnyDayOfWeekHour() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'dayOfWeek_hour',
+        indexName: r'date_dayOfWeek_hour',
         value: [null],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekIsNotNullAnyHour() {
+      dateIsNotNullAnyDayOfWeekHour() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
+        indexName: r'date_dayOfWeek_hour',
         lower: [null],
         includeLower: false,
         upper: [],
@@ -405,44 +406,44 @@ extension VertretungQueryWhere
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToAnyHour(int? dayOfWeek) {
+      dateEqualToAnyDayOfWeekHour(String? date) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'dayOfWeek_hour',
-        value: [dayOfWeek],
+        indexName: r'date_dayOfWeek_hour',
+        value: [date],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekNotEqualToAnyHour(int? dayOfWeek) {
+      dateNotEqualToAnyDayOfWeekHour(String? date) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
+              indexName: r'date_dayOfWeek_hour',
               lower: [],
-              upper: [dayOfWeek],
+              upper: [date],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date],
               includeLower: false,
               upper: [],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
+              indexName: r'date_dayOfWeek_hour',
               lower: [],
-              upper: [dayOfWeek],
+              upper: [date],
               includeUpper: false,
             ));
       }
@@ -450,37 +451,109 @@ extension VertretungQueryWhere
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekGreaterThanAnyHour(
-    int? dayOfWeek, {
-    bool include = false,
-  }) {
+      dateEqualToDayOfWeekIsNullAnyHour(String? date) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [dayOfWeek],
-        includeLower: include,
-        upper: [],
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date_dayOfWeek_hour',
+        value: [date, null],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekLessThanAnyHour(
+      dateEqualToDayOfWeekIsNotNullAnyHour(String? date) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, null],
+        includeLower: false,
+        upper: [
+          date,
+        ],
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
+      dateDayOfWeekEqualToAnyHour(String? date, int? dayOfWeek) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'date_dayOfWeek_hour',
+        value: [date, dayOfWeek],
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
+      dateEqualToDayOfWeekNotEqualToAnyHour(String? date, int? dayOfWeek) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date],
+              upper: [date, dayOfWeek],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek],
+              includeLower: false,
+              upper: [date],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek],
+              includeLower: false,
+              upper: [date],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date],
+              upper: [date, dayOfWeek],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
+      dateEqualToDayOfWeekGreaterThanAnyHour(
+    String? date,
     int? dayOfWeek, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [],
-        upper: [dayOfWeek],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, dayOfWeek],
+        includeLower: include,
+        upper: [date],
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
+      dateEqualToDayOfWeekLessThanAnyHour(
+    String? date,
+    int? dayOfWeek, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date],
+        upper: [date, dayOfWeek],
         includeUpper: include,
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekBetweenAnyHour(
+      dateEqualToDayOfWeekBetweenAnyHour(
+    String? date,
     int? lowerDayOfWeek,
     int? upperDayOfWeek, {
     bool includeLower = true,
@@ -488,78 +561,80 @@ extension VertretungQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [lowerDayOfWeek],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, lowerDayOfWeek],
         includeLower: includeLower,
-        upper: [upperDayOfWeek],
+        upper: [date, upperDayOfWeek],
         includeUpper: includeUpper,
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourIsNull(int? dayOfWeek) {
+      dateDayOfWeekEqualToHourIsNull(String? date, int? dayOfWeek) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'dayOfWeek_hour',
-        value: [dayOfWeek, null],
+        indexName: r'date_dayOfWeek_hour',
+        value: [date, dayOfWeek, null],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourIsNotNull(int? dayOfWeek) {
+      dateDayOfWeekEqualToHourIsNotNull(String? date, int? dayOfWeek) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [dayOfWeek, null],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, dayOfWeek, null],
         includeLower: false,
         upper: [
+          date,
           dayOfWeek,
         ],
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause> dayOfWeekHourEqualTo(
-      int? dayOfWeek, int? hour) {
+  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
+      dateDayOfWeekHourEqualTo(String? date, int? dayOfWeek, int? hour) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'dayOfWeek_hour',
-        value: [dayOfWeek, hour],
+        indexName: r'date_dayOfWeek_hour',
+        value: [date, dayOfWeek, hour],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourNotEqualTo(int? dayOfWeek, int? hour) {
+      dateDayOfWeekEqualToHourNotEqualTo(
+          String? date, int? dayOfWeek, int? hour) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek],
-              upper: [dayOfWeek, hour],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek],
+              upper: [date, dayOfWeek, hour],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek, hour],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek, hour],
               includeLower: false,
-              upper: [dayOfWeek],
+              upper: [date, dayOfWeek],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek, hour],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek, hour],
               includeLower: false,
-              upper: [dayOfWeek],
+              upper: [date, dayOfWeek],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'dayOfWeek_hour',
-              lower: [dayOfWeek],
-              upper: [dayOfWeek, hour],
+              indexName: r'date_dayOfWeek_hour',
+              lower: [date, dayOfWeek],
+              upper: [date, dayOfWeek, hour],
               includeUpper: false,
             ));
       }
@@ -567,39 +642,42 @@ extension VertretungQueryWhere
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourGreaterThan(
+      dateDayOfWeekEqualToHourGreaterThan(
+    String? date,
     int? dayOfWeek,
     int? hour, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [dayOfWeek, hour],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, dayOfWeek, hour],
         includeLower: include,
-        upper: [dayOfWeek],
+        upper: [date, dayOfWeek],
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourLessThan(
+      dateDayOfWeekEqualToHourLessThan(
+    String? date,
     int? dayOfWeek,
     int? hour, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [dayOfWeek],
-        upper: [dayOfWeek, hour],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, dayOfWeek],
+        upper: [date, dayOfWeek, hour],
         includeUpper: include,
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dayOfWeekEqualToHourBetween(
+      dateDayOfWeekEqualToHourBetween(
+    String? date,
     int? dayOfWeek,
     int? lowerHour,
     int? upperHour, {
@@ -608,10 +686,10 @@ extension VertretungQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'dayOfWeek_hour',
-        lower: [dayOfWeek, lowerHour],
+        indexName: r'date_dayOfWeek_hour',
+        lower: [date, dayOfWeek, lowerHour],
         includeLower: includeLower,
-        upper: [dayOfWeek, upperHour],
+        upper: [date, dayOfWeek, upperHour],
         includeUpper: includeUpper,
       ));
     });
