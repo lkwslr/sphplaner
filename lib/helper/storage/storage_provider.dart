@@ -79,7 +79,7 @@ class StorageProvider {
   static String get loggedIn {
     String userID = getSharedPrefs("loggedIn");
     user = isar.users.getByUsernameSync(userID); //TODO: web
-    return getSharedPrefs("loggedIn");
+    return userID;
   }
 
   static set loggedIn(String userID) {
@@ -101,7 +101,7 @@ class StorageProvider {
 
   static List<String> get timelist {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
-    return _prefs!.getStringList("timelist") ?? [];
+    return _prefs!.getStringList("timelist") ?? [" ", " ", " ", " ", " ", " "," ", " ", " ", " ", " ", " "];
   }
 
   static set timelist(List<String> value) {

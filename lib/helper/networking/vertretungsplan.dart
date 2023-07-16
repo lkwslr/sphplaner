@@ -31,7 +31,7 @@ class Vertretungsplan {
               page.getElementById("vtable${date.replaceAll('.', '_')}")!;
           if (!table.text.contains("Keine Einträge!")) {
             dom.Element head = table.getElementsByTagName("thead")[0];
-            Map availableColumns = {};
+            Map availableColumns = {} ;
             for (int index = 0;
                 index < head.getElementsByTagName("th").length;
                 index++) {

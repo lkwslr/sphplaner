@@ -38,7 +38,7 @@ class SPH {
   static Future<void> setCredetialsFor(String userID) async {
     _username = await StorageProvider.getUsername(userID);
     _password = await StorageProvider.getPassword(userID);
-    _school = (await StorageProvider.isar.users.getByUsername(userID))!.school;
+    _school = (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
   }
 
   static Future<String> getSID() async {

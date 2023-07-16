@@ -74,11 +74,11 @@ class SettingsProvider {
 
   set title(String value) => _setSharedPrefs("title", value);
 
-  String get viewMode => _getSharedPrefs("viewMode") ?? "";
+  String get viewMode => _getSharedPrefs("viewMode") ?? "stundenplan";
 
   set viewMode(String value) => _setSharedPrefs("viewMode", value);
 
-  bool get updateLock => _getSharedPrefs("updateLock") ?? "" != "";
+  bool get updateLock => (_getSharedPrefs("updateLock") ?? "") != "";
 
   set updateLockText(String value) => _setSharedPrefs("updateLock", value);
 
