@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
@@ -10,6 +9,7 @@ import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/school.dart';
 import 'package:sphplaner/helper/storage/user.dart';
 import 'package:sphplaner/main.dart';
+import 'package:sphplaner/routes/welcome/login_settings.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -294,7 +294,7 @@ class _LoginState extends State<Login> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                const SPHPlaner()));
+                                                const LoginSettings()));
                                   });
                                 }
                               } else {

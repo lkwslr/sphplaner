@@ -14,7 +14,6 @@ import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sphplaner/routes/fach_settings.dart';
 
-
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
 
@@ -60,10 +59,10 @@ class _Settings extends State<Settings> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     _userSettings(),
-                    _plan(),
+                    plan(notify!),
                     _theme(),
                     //_autoUpdate(),
-                    colors(context, buttonSizeFactorSmall),
+                    _colors(),
                     _imexport(),
                     _logout()
                   ],
@@ -120,98 +119,6 @@ class _Settings extends State<Settings> {
     );
   }*/
 
-  Widget _plan() {
-    return Column(
-      children: [
-        const Align(
-          alignment: Alignment.center,
-          child: Text("Stundenplan & Vertretungsplan",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-        Row(
-          children: [
-            const Expanded(
-              child: ListTile(
-                title: Text("Vertretung im Stundenplan"),
-                subtitle: Text(
-                  "Achtung, es kann bei manchen Schulen zu Fehlern kommen, wenn der Vertretungsplan in den Stundenplan integriert wird, da manchmal Vertretung für Fächer angezeigt wird, die nicht belegt sind.\n"
-                      "Bitte berücksichtige dies bei der Aktivierung!",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            Switch(
-              value: StorageProvider.settings.showVertretung,
-              onChanged: (changed) {
-                StorageProvider.settings.showVertretung = changed;
-                notify!.notifyAll(["stundenplan", "settings"]);
-              },
-            )
-          ],
-        ),
-        Row(
-          children: [
-            const Expanded(
-              child: ListTile(
-                title: Text("Gesamten Vertretungsplan laden"),
-                subtitle: Text(
-                  "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
-                      "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            Switch(
-              value: StorageProvider.settings.loadAllVertretung,
-              onChanged: (changed) {
-                StorageProvider.settings.loadAllVertretung = changed;
-                notify!.notifyAll(["stundenplan", "settings"]);
-              },
-            )
-          ],
-        ),
-        const Divider(height: 32, thickness: 3)
-      ],
-    );
-  }
-
-  Widget _theme() {
-    return Column(
-      children: [
-        const Align(
-          alignment: Alignment.center,
-          child: Text("Aussehen",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-        RadioListTile(
-            title: const Text('Systemstandard'),
-            value: "system",
-            groupValue: StorageProvider.settings.themeByString,
-            onChanged: (String? value) {
-              StorageProvider.settings.themeByString = "system";
-              notify!.notifyAll(["theme", "settings"]);
-            }),
-        RadioListTile(
-            title: const Text('Hell'),
-            value: "light",
-            groupValue: StorageProvider.settings.themeByString,
-            onChanged: (String? value) {
-              StorageProvider.settings.themeByString = "light";
-              notify!.notifyAll(["theme", "settings"]);
-            }),
-        RadioListTile(
-            title: const Text('Dunkel'),
-            value: "dark",
-            groupValue: StorageProvider.settings.themeByString,
-            onChanged: (String? value) {
-              StorageProvider.settings.themeByString = "dark";
-              notify!.notifyAll(["theme", "settings"]);
-            }),
-        const Divider(height: 32, thickness: 3)
-      ],
-    );
-  }
-
   /* Widget _autoUpdate() {
     return Column(
       children: [
@@ -246,7 +153,7 @@ class _Settings extends State<Settings> {
           child: Text("Profileinstellungen",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
         ),
-        _anzeigeName(),
+        anzeigeName(context, buttonSizeFactorXSmall),
         Divider(
             height: buttonSizeFactorSmall > 40 ? 8 : 0,
             color: Colors.transparent),
@@ -295,32 +202,6 @@ class _Settings extends State<Settings> {
             ),
           );
         });
-  }
-
-  Widget _anzeigeName() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size.fromHeight(buttonSizeFactorXSmall),
-      ),
-      onPressed: () async {
-        anzeigeNameDialog(context);
-      },
-      child: const SizedBox(
-        width: double.infinity,
-        height: 32,
-        child: Stack(
-          children: [
-            Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Anzeigenamen anpassen")),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(Icons.arrow_forward),
-            )
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _email() {
@@ -492,6 +373,178 @@ class _Settings extends State<Settings> {
       ],
     );
   }
+
+  Widget _colors() {
+    List<Widget> faecher = [
+      const Align(
+        alignment: Alignment.center,
+        child: Text("Einstellungen für deine Fächer",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+      )
+    ];
+    for (Subject subject
+        in StorageProvider.isar.subjects.where().findAllSync()) {
+      if (buttonSizeFactorSmall > 40) {
+        faecher.add(const SizedBox(height: 8));
+      }
+
+      faecher.add(ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => FachSettings(subject: subject)));
+          },
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Color(subject.color),
+              minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
+          child: SizedBox(
+            width: double.infinity,
+            height: 32,
+            child: Stack(
+              children: [
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text("${subject.subjectName} (${subject.subject})",
+                        style: const TextStyle(color: Colors.black))),
+                const Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(Icons.arrow_forward, color: Colors.black)),
+              ],
+            ),
+          )));
+    }
+    if (faecher.length == 1) {
+      faecher.add(const Align(
+        alignment: Alignment.center,
+        child: Text(
+            "Um die Farben für deine Fächer anpassen zu können, musst du diese zuerst in deinen Stundenplan eintragen.",
+            style: TextStyle(fontSize: 16)),
+      ));
+    }
+    faecher.add(const Divider(height: 32, thickness: 3));
+    return Column(
+      children: faecher,
+    );
+  }
+
+  Widget _theme() {
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.center,
+          child: Text("Aussehen",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        ),
+        RadioListTile(
+            title: const Text('Systemstandard'),
+            value: "system",
+            groupValue: StorageProvider.settings.themeByString,
+            onChanged: (String? value) {
+              StorageProvider.settings.themeByString = "system";
+              notify!.notifyAll(["theme", "settings"]);
+            }),
+        RadioListTile(
+            title: const Text('Hell'),
+            value: "light",
+            groupValue: StorageProvider.settings.themeByString,
+            onChanged: (String? value) {
+              StorageProvider.settings.themeByString = "light";
+              notify!.notifyAll(["theme", "settings"]);
+            }),
+        RadioListTile(
+            title: const Text('Dunkel'),
+            value: "dark",
+            groupValue: StorageProvider.settings.themeByString,
+            onChanged: (String? value) {
+              StorageProvider.settings.themeByString = "dark";
+              notify!.notifyAll(["theme", "settings"]);
+            }),
+        const Divider(height: 32, thickness: 3)
+      ],
+    );
+  }
+}
+
+Widget anzeigeName(BuildContext context, double buttonSizeFactorXSmall) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      minimumSize: Size.fromHeight(buttonSizeFactorXSmall),
+    ),
+    onPressed: () async {
+      anzeigeNameDialog(context);
+    },
+    child: const SizedBox(
+      width: double.infinity,
+      height: 32,
+      child: Stack(
+        children: [
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Text("Anzeigenamen anpassen")),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Icon(Icons.arrow_forward),
+          )
+        ],
+      ),
+    ),
+  );
+}
+
+Widget plan(StorageNotifier notify) {
+  return Column(
+    children: [
+      const Align(
+        alignment: Alignment.center,
+        child: Text("Stundenplan & Vertretungsplan",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+      ),
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
+              title: Text("Vertretung im Stundenplan"),
+              subtitle: Text(
+                "Achtung, es kann bei manchen Schulen zu Fehlern kommen, wenn der Vertretungsplan in den Stundenplan integriert wird, da manchmal Vertretung für Fächer angezeigt wird, die nicht belegt sind.\n"
+                "Bitte berücksichtige dies bei der Aktivierung!",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.settings.showVertretung,
+            onChanged: (changed) {
+              StorageProvider.settings.showVertretung = changed;
+              notify.notifyAll(["stundenplan", "settings"]);
+            },
+          )
+        ],
+      ),
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
+              title: Text("Gesamten Vertretungsplan laden"),
+              subtitle: Text(
+                "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
+                "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.settings.loadAllVertretung,
+            onChanged: (changed) {
+              StorageProvider.settings.loadAllVertretung = changed;
+              notify.notifyAll(["stundenplan", "settings"]);
+            },
+          )
+        ],
+      ),
+      const Divider(height: 32, thickness: 3)
+    ],
+  );
 }
 
 Future anzeigeNameDialog(BuildContext context) {
@@ -530,57 +583,4 @@ Future anzeigeNameDialog(BuildContext context) {
           ]),
         );
       });
-}
-
-Widget colors(BuildContext context, double buttonSizeFactorSmall) {
-  List<Widget> faecher = [
-    const Align(
-      alignment: Alignment.center,
-      child: Text("Einstellungen für deine Fächer",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-    )
-  ];
-  for (Subject subject in StorageProvider.isar.subjects.where().findAllSync()) {
-    if (buttonSizeFactorSmall > 40) {
-      faecher.add(const SizedBox(height: 8));
-    }
-
-    faecher.add(ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => FachSettings(subject: subject)));
-        },
-        style: ElevatedButton.styleFrom(
-            backgroundColor: Color(subject.color),
-            minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 32,
-          child: Stack(
-            children: [
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text("${subject.subjectName} (${subject.subject})",
-                      style: const TextStyle(color: Colors.black))),
-              const Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(Icons.arrow_forward, color: Colors.black)),
-            ],
-          ),
-        )));
-  }
-  if (faecher.length == 1) {
-    faecher.add(const Align(
-      alignment: Alignment.center,
-      child: Text(
-          "Um die Farben für deine Fächer anpassen zu können, musst du diese zuerst in deinen Stundenplan eintragen.",
-          style: TextStyle(fontSize: 16)),
-    ));
-  }
-  faecher.add(const Divider(height: 32, thickness: 3));
-  return Column(
-    children: faecher,
-  );
 }

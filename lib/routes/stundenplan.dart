@@ -52,7 +52,6 @@ class _StundenplanState extends State<Stundenplan> {
             List<Widget> row = [];
             for (int day = 0; day <= 5; day++) {
               if (day == 0) {
-                print(cellWidth);
                 row.add(Container(
                   width: cellWidth / 2,
                   height: cellHeight,

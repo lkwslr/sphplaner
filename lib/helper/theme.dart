@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-get sphBlue => const Color(0xff038dd4);
+Color get sphBlue => const Color(0xff038dd4);
 
 get defaultLightColorScheme => const ColorScheme(
     brightness: Brightness.light,

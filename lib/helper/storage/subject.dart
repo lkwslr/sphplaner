@@ -12,7 +12,7 @@ class Subject {
 
   String? subjectName;
 
-  int color = 4294967295;
+  int color = 4292600319;
 
   String? teacher;
 
