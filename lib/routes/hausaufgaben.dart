@@ -50,8 +50,9 @@ class _HomeWorkState extends State<HomeWork> {
                                         .writeTxn(() async {
                                       await StorageProvider.isar.homeworks
                                           .put(homework);
-                                      notify.notify("homework");
+
                                     });
+                                    notify.notify("homework");
                                   }),
                               content:
                                   Text('${homework.title} wurde entfernt.')));

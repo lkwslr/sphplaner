@@ -150,7 +150,7 @@ class _StundenplanState extends State<Stundenplan> {
                           .findFirstSync()
                           ?.subject
                           .value
-                          ?.color ?? Colors.white.value);
+                          ?.color ?? 4292600319);
                 } else {
                   subject = StorageProvider.isar.lessons
                           .where()

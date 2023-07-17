@@ -86,12 +86,11 @@ class SettingsProvider {
   String get updateLockText => _getSharedPrefs("updateLock") ?? "";
 
   bool get update {
-    int versionCode = int.tryParse(buildNumber) ?? 0;
-    return (_prefs?.getInt("version") ?? versionCode) < versionCode;
+    return (_prefs?.getInt("version") ?? -1) < (int.tryParse(buildNumber ?? "") ?? 0);
   }
 
   set update(bool value) {
-    _prefs?.setInt("version", int.tryParse(buildNumber) ?? 0);
+    _prefs?.setInt("version", int.tryParse(buildNumber ?? "") ?? 0);
   }
 
   bool get showVertretung => _prefs?.getBool("showVertretung") ?? false;

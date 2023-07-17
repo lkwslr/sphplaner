@@ -47,6 +47,7 @@ Future<void> main() async {
   initializeDateFormatting();
   Intl.defaultLocale = "de_DE";
   app_info.init();
+  StorageProvider.initializeStorage();
 
   runApp(PropertyChangeProvider<StorageNotifier, String>(
       value: StorageNotifier(), child: const SPHPlaner()));

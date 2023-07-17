@@ -18,12 +18,11 @@ class StorageProvider {
   static SharedPreferences? _prefs;
   static const FlutterSecureStorage _secure = FlutterSecureStorage();
   static SettingsProvider settings = SettingsProvider();
-  static User? user;
+  static User? _user;
 
   static Future<void> initializeStorage() async {
-    if (_isar == null) {
-      final dir = await getApplicationDocumentsDirectory();
-      _isar = await Isar.open([
+    final dir = await getApplicationDocumentsDirectory();
+    _isar ??= await Isar.open([
         UserSchema,
         SubjectSchema,
         TeacherSchema,
@@ -31,7 +30,6 @@ class StorageProvider {
         HomeworkSchema,
         VertretungSchema
       ], name: "sphplaner", directory: dir.path);
-    }
 
     _prefs ??= await SharedPreferences.getInstance();
     settings.initializeSettings(_isar!, _prefs!);
@@ -40,6 +38,11 @@ class StorageProvider {
   static Isar get isar {
     assert(_isar != null, 'Isar has not been initialized');
     return _isar!;
+  }
+
+  static User get user {
+    _user ??= isar.users.getByUsernameSync(getSharedPrefs("loggedIn"));
+    return _user ?? User();
   }
 
   static String saveCredentials(String username, String password) {
@@ -52,11 +55,9 @@ class StorageProvider {
   }
 
   static Future<void> saveUser() async {
-    if (user != null) {
-      await isar.writeTxn(() async {
-        await isar.users.put(user!);
-      });
-    }
+    await isar.writeTxn(() async {
+      await isar.users.put(user);
+    });
   }
 
   static Future<String> getUsername(String userID) async {
@@ -79,7 +80,7 @@ class StorageProvider {
 
   static String get loggedIn {
     String userID = getSharedPrefs("loggedIn");
-    user = isar.users.getByUsernameSync(userID); //TODO: web
+    _user = isar.users.getByUsernameSync(userID); //TODO: web
     return userID;
   }
 
@@ -125,14 +126,17 @@ class StorageProvider {
     await isar.writeTxn(() async {
       await isar.clear();
     });
-    await isar.close();
+    if (isar.isOpen) {
+      await isar.close();
+    }
+
     await _prefs!.clear();
     await _secure.deleteAll();
 
     _isar = null;
     _prefs = null;
     settings = SettingsProvider();
-    user = null;
+    _user = null;
     SPH.clear();
     return;
   }

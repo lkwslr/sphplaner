@@ -554,7 +554,7 @@ Future anzeigeNameDialog(BuildContext context) {
       .value;
 
   TextEditingController controller =
-      TextEditingController(text: "${StorageProvider.user!.displayName}");
+      TextEditingController(text: "${StorageProvider.user.displayName}");
   //TODO: In zukünftiger Version: Benutzername nach Leerzeichen gesplittet und auswählbar machen, daran Custom Text anpassen
   return showDialog(
       context: context,
@@ -572,7 +572,7 @@ Future anzeigeNameDialog(BuildContext context) {
                 minimumSize: const Size.fromHeight(40),
               ),
               onPressed: () async {
-                StorageProvider.user!.displayName = controller.text;
+                StorageProvider.user.displayName = controller.text;
                 await StorageProvider.saveUser().then((value) {
                   notify.notify("main");
                   Navigator.of(context).pop();

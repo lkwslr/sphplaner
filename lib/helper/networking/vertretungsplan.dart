@@ -103,7 +103,7 @@ class Vertretungsplan {
           for (Vertretung vertretung in vertretungs) {
             if ((vertretung.classes?.trim() ?? "").isEmpty || StorageProvider.settings.loadAllVertretung ||
                 (vertretung.classes?.trim().toLowerCase() ?? "").contains(
-                    StorageProvider.user?.course?.toLowerCase() ?? "")) {
+                    StorageProvider.user.course?.toLowerCase() ?? "")) {
               Vertretung? test = await isar.vertretungs
                   .where()
                   .dateDayOfWeekHourEqualTo(
