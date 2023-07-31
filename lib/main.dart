@@ -60,6 +60,18 @@ class SPHPlaner extends StatefulWidget {
   State<SPHPlaner> createState() => _SPHPlaner();
 }
 
+updateHandler(String action) {
+  switch (action) {
+    case "reset": {
+      return StorageProvider.deleteAll().then((value) {
+        StorageProvider.initializeStorage().then((value) => StorageProvider.settings.update = true);
+      });
+    }
+    case "ignore": return;
+    default: return;
+  }
+}
+
 class _SPHPlaner extends State<SPHPlaner> {
   bool loaded = false;
   ValueNotifier<bool> loading = ValueNotifier(false);
@@ -70,9 +82,7 @@ class _SPHPlaner extends State<SPHPlaner> {
     super.initState();
     StorageProvider.initializeStorage().then((value) {
       if (StorageProvider.settings.update) {
-        StorageProvider.deleteAll().then((value) {
-          StorageProvider.initializeStorage().then((value) => StorageProvider.settings.update = true);
-        });
+        updateHandler("ignore");
       }
       if (StorageProvider.settings.loggedIn) {
         SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {

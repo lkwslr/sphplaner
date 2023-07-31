@@ -286,7 +286,12 @@ class _LoginState extends State<Login> {
                               if (!sid.startsWith("ERROR")) {
                                 StorageProvider.saveCredentials(
                                     username, password);
-                                String userID = await SPH.updateUser();
+                                String userID = "";
+                                try {
+                                  userID = await SPH.updateUser();
+                                } catch (_) {
+                                  errormessage = "Es ist ein unerwarteter Fehler aufgetreten";
+                                }
                                 if (userID != "") {
                                   StorageProvider.loggedIn = userID;
                                   await SPH.update(notify).then((value) {

@@ -25,6 +25,9 @@ class SettingsProvider {
   }
 
   get loggedIn {
+    if (_isar == null) {
+      return false;
+    }
     return _isar?.users.get(1) != null;
   }
 

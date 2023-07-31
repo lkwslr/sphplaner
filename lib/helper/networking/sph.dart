@@ -47,26 +47,31 @@ class SPH {
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
-    if (_lastSid + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch || _sid.isEmpty) {
+    if (_lastSid + 15 * 60 * 1000 < DateTime
+        .now()
+        .millisecondsSinceEpoch || _sid.isEmpty) {
       CookieStore.clearCookies();
-      http.Response loginResponse =
-          await post("https://login.schulportal.hessen.de", {
-        "value":
-            "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+      http.Response loginResponse = await post(
+          "https://login.schulportal.hessen.de", {
+        "value": "user=$_school.$_username&password=${Uri.encodeComponent(
+            "$_password").replaceAll("!", "%21")
+            .replaceAll(")", "%29")
+            .replaceAll("(", "%28")}"
       });
 
       if (loginResponse.statusCode == 200) {
-        loginResponse =
-        await post("https://login.schulportal.hessen.de", {
-          "value":
-          "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+        loginResponse = await post("https://login.schulportal.hessen.de", {
+          "value": "user=$_school.$_username&password=${Uri.encodeComponent(
+              "$_password").replaceAll("!", "%21")
+              .replaceAll(")", "%29")
+              .replaceAll("(", "%28")}"
         });
       }
 
       if (loginResponse.statusCode == 302 &&
           loginResponse.headers['location'] != null) {
-        http.Response sidResponse =
-            await get(loginResponse.headers['location']!);
+        http.Response sidResponse = await get(
+            loginResponse.headers['location']!);
         if (sidResponse.statusCode == 444) {
           _sid = "";
           return _sid;
@@ -74,7 +79,9 @@ class SPH {
 
         if (sidResponse.body.contains("SPH-Login")) {
           _sid = CookieStore.getSID();
-          _lastSid = DateTime.now().millisecondsSinceEpoch;
+          _lastSid = DateTime
+              .now()
+              .millisecondsSinceEpoch;
         }
       } else {
         _sid = "";
@@ -100,8 +107,8 @@ class SPH {
         response = await post("/ajax.php?f=rsaHandshake&s=$s", data);
 
         if (response.statusCode == 200 && response.body.contains("challenge")) {
-          String decryptChallenge =
-              aes.decrypt(jsonDecode(response.body)['challenge'], _sessionKey);
+          String decryptChallenge = aes.decrypt(
+              jsonDecode(response.body)['challenge'], _sessionKey);
           if (_sessionKey != decryptChallenge) {
             _sessionKey = "";
           }
@@ -113,9 +120,9 @@ class SPH {
 
   static Future<List<School>> downloadSchoolInfo() async {
     try {
-      http.Response response = await http
-          .get(Uri.parse("https://start.schulportal.hessen.de"))
-          .timeout(const Duration(seconds: 3), onTimeout: () {
+      http.Response response = await http.get(
+          Uri.parse("https://start.schulportal.hessen.de")).timeout(
+          const Duration(seconds: 3), onTimeout: () {
         throw TimeoutException;
       });
 
@@ -123,10 +130,9 @@ class SPH {
 
       dom.Element schoolList = startpage.getElementById("accordion")!;
 
-      for (dom.Element school
-          in schoolList.getElementsByClassName("list-group-item")) {
-        String schoolInfo = school.innerHtml
-            .replaceAll(" <small>", ";(")
+      for (dom.Element school in schoolList.getElementsByClassName(
+          "list-group-item")) {
+        String schoolInfo = school.innerHtml.replaceAll(" <small>", ";(")
             .replaceAll("</small>", ")");
         String schoolName = schoolInfo.split(";")[0];
         String schoolCity = schoolInfo.split(";")[1];
@@ -155,50 +161,48 @@ class SPH {
       String grade = "";
       String course = "";
 
-      http.Response benutzerInfo =
-          await get("/benutzerverwaltung.php?a=userData");
+      http.Response benutzerInfo = await get(
+          "/benutzerverwaltung.php?a=userData");
       if (benutzerInfo.statusCode == 200) {
         dom.Document page = parse(benutzerInfo.body);
 
         schoolName = page
-                .getElementById("institutionsid")
-                ?.attributes['data-bezeichnung'] ??
-            "";
-        schoolID = page.getElementById("institutionsid")?.text ?? "";
+            .getElementById("institutionsid")
+            ?.attributes['data-bezeichnung'] ?? "";
+        schoolID = page
+            .getElementById("institutionsid")
+            ?.text ?? "";
 
-        firstName = page
-            .getElementsByTagName('table')[0]
-            .getElementsByTagName('td')[5]
-            .text;
-        lastName = page
-            .getElementsByTagName('table')[0]
-            .getElementsByTagName('td')[3]
-            .text;
-        birthDate = page
-            .getElementsByTagName('table')[0]
-            .getElementsByTagName('td')[7]
-            .text;
-        course = page
-            .getElementsByTagName('table')[0]
-            .getElementsByTagName('td')[11]
-            .text;
-        grade = page
-            .getElementsByTagName('table')[0]
-            .getElementsByTagName('td')[9]
-            .text;
+        firstName =
+            page.getElementsByTagName('table')[0].getElementsByTagName('td')[5]
+                .text;
+        lastName =
+            page.getElementsByTagName('table')[0].getElementsByTagName('td')[3]
+                .text;
+        birthDate =
+            page.getElementsByTagName('table')[0].getElementsByTagName('td')[7]
+                .text;
+        course =
+            page.getElementsByTagName('table')[0].getElementsByTagName('td')[11]
+                .text;
+        grade =
+            page.getElementsByTagName('table')[0].getElementsByTagName('td')[9]
+                .text;
       }
 
-      http.Response benutzerMail =
-          await get("/benutzerverwaltung.php?a=userMail");
+      http.Response benutzerMail = await get(
+          "/benutzerverwaltung.php?a=userMail");
 
       if (benutzerMail.statusCode == 200) {
         dom.Document mailPage = parse(benutzerMail.body);
 
-        email = mailPage.getElementById('mail')?.attributes['value'] ?? "";
+        email = mailPage
+            .getElementById('mail')
+            ?.attributes['value'] ?? "";
       }
 
-      http.Response userImage =
-          await get("/benutzerverwaltung.php?a=userFoto&b=show");
+      http.Response userImage = await get(
+          "/benutzerverwaltung.php?a=userFoto&b=show");
 
       if (userImage.statusCode == 200) {
         image = base64Encode(userImage.bodyBytes);
@@ -263,12 +267,11 @@ class SPH {
 
     http.Response response;
     try {
-      response = await http
-          .get(Uri.parse(url),
-              headers: CookieStore.getCookies().toString().isNotEmpty
-                  ? {'Cookie': CookieStore.getCookies()}
-                  : {})
-          .timeout(const Duration(seconds: _timeout), onTimeout: () {
+      response = await http.get(Uri.parse(url), headers: CookieStore
+          .getCookies()
+          .toString()
+          .isNotEmpty ? {'Cookie': CookieStore.getCookies()} : {}).timeout(
+          const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
     } catch (_) {
@@ -295,8 +298,10 @@ class SPH {
     http.Response response;
     try {
       response = await http.post(Uri.parse(url), body: finalData, headers: {
-        if (CookieStore.getCookies().toString().isNotEmpty)
-          'Cookie': CookieStore.getCookies(),
+        if (CookieStore
+            .getCookies()
+            .toString()
+            .isNotEmpty)'Cookie': CookieStore.getCookies(),
         'Content-Type': "application/x-www-form-urlencoded"
       }).timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
@@ -323,21 +328,47 @@ class SPH {
     return uuid;
   }
 
-  static Future<void> update(StorageNotifier notify) async { //TODO TIMEOUTS
-    StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
-    notify.notify("main");
-    await TimeTable.downloadTimetable();
-    notify.notifyAll(["stundenplan"]);
-    StorageProvider.settings.updateLockText = "Aktualisiere Vertretungsplan...";
-    notify.notify("main");
-    await Vertretungsplan.download();
-    notify.notifyAll(["stundenplan", "vertretung"]);
-    StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
-    notify.notify("main");
-    await updateUser();
+  static Future<void> update(StorageNotifier notify) async {
+    //TODO TIMEOUTS
+    List errors = [];
+    try {
+      StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
+      notify.notify("main");
+      await TimeTable.downloadTimetable();
+      notify.notifyAll(["stundenplan"]);
+    } catch (e) {
+      errors.add({
+        "type": "Der Stundenplan konnte nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+    try {
+      StorageProvider.settings.updateLockText =
+      "Aktualisiere Vertretungsplan...";
+      notify.notify("main");
+      await Vertretungsplan.download();
+      notify.notifyAll(["stundenplan", "vertretung"]);
+    } catch (e) {
+      errors.add({
+        "type": "Der Vertretungsplan konnte nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
+    try {
+      StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
+      notify.notify("main");
+      await updateUser();
+    } catch (e) {
+      errors.add({
+        "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
     StorageProvider.settings.updateLockText = "";
     StorageProvider.settings.status =
-        "Letztes Update: ${DateFormat('dd.MM.y HH:mm').format(DateTime.now())}";
+    "Letztes Update: ${DateFormat('dd.MM.y HH:mm').format(DateTime.now())}";
     notify.notify("main");
   }
 

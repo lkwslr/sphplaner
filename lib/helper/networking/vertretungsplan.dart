@@ -16,98 +16,102 @@ class Vertretungsplan {
     http.Response response = await SPH.get("/vertretungsplan.php");
     if (response.statusCode == 200) {
       dom.Document page = parse(response.body);
-      if (page.getElementById("content") != null &&
-          page.getElementById("menue_tag") != null) {
-        dom.Element tableHead = page.getElementById("menue_tag")!;
-        List<String> dates = tableHead
-            .getElementsByClassName("btn")
-            .map((e) => e.attributes['data-tag']!.replaceAll("_", "."))
-            .toList();
 
+      dom.Element? content = page.getElementById("content");
+
+      if (content != null) {
+        List<dom.Element> panels = content.getElementsByClassName("panel");
+        List<String> dates = [];
         List<Vertretung> vertretungs = [];
 
-        for (String date in dates) {
-          int weekday = DateFormat("dd.MM.yyyy").parse(date).weekday;
-          dom.Element table =
-              page.getElementById("vtable${date.replaceAll('.', '_')}")!;
-          if (!table.text.contains("Keine Einträge!")) {
-            dom.Element head = table.getElementsByTagName("thead")[0];
-            Map availableColumns = {};
-            for (int index = 0;
-                index < head.getElementsByTagName("th").length;
-                index++) {
-              if (head
+        for (dom.Element panel in panels) {
+          if (panel.id.startsWith("tag")) {
+            String date = panel.id.substring(3).replaceAll("_", ("."));
+            dates.add(date);
+            int weekday = DateFormat("dd.MM.yyyy").parse(date).weekday;
+
+            dom.Element? table =
+                page.getElementById(panel.id.replaceAll("tag", "vtable"));
+
+            if (table != null && !table.text.contains("Keine Einträge!")) {
+              dom.Element head = table.getElementsByTagName("thead")[0];
+              Map availableColumns = {};
+              for (int index = 0;
+                  index < head.getElementsByTagName("th").length;
+                  index++) {
+                if (head
+                        .getElementsByTagName("th")[index]
+                        .attributes['data-field'] !=
+                    null) {
+                  availableColumns[head
                       .getElementsByTagName("th")[index]
-                      .attributes['data-field'] !=
-                  null) {
-                availableColumns[head
-                    .getElementsByTagName("th")[index]
-                    .attributes['data-field']!] = index;
+                      .attributes['data-field']!] = index;
+                }
               }
-            }
-            dom.Element body = table.getElementsByTagName("tbody")[0];
-            Map content = {
-              "Fach": "",
-              "Stunde": "",
-              "Raum": "",
-              "Art": "",
-              "Hinweis": "",
-              "Vertreter": "",
-              "Klasse": ""
-            };
-            for (dom.Element row in body.getElementsByTagName("tr")) {
-              for (MapEntry entry in availableColumns.entries) {
-                content[entry.key] =
-                    row.getElementsByTagName("td")[entry.value].text.trim();
-              }
-              List<int> hours = content['Stunde']
-                  .toString()
-                  .split('-')
-                  .map((e) => int.parse(e.trim()))
-                  .toList();
+              dom.Element body = table.getElementsByTagName("tbody")[0];
+              Map content = {
+                "Fach": "",
+                "Stunde": "",
+                "Raum": "",
+                "Art": "",
+                "Hinweis": "",
+                "Vertreter": "",
+                "Klasse": ""
+              };
+              for (dom.Element row in body.getElementsByTagName("tr")) {
+                for (MapEntry entry in availableColumns.entries) {
+                  content[entry.key] =
+                      row.getElementsByTagName("td")[entry.value].text.trim();
+                }
+                List<int> hours = content['Stunde']
+                    .toString()
+                    .split('-')
+                    .map((e) => int.parse(e.trim()))
+                    .toList();
 
-              for (int hour in hours) {
-                Subject? subject = StorageProvider.isar.subjects
-                    .getBySubjectSync(content['Fach'].toString().trim());
+                for (int hour in hours) {
+                  Subject? subject = StorageProvider.isar.subjects
+                      .getBySubjectSync(content['Fach'].toString().trim());
 
-                if (subject == null) {
-                  vertretungs.add(Vertretung()
-                    ..vertrSubject = content['Fach'].toString().trim()
-                    ..room = content['Raum'].toString().trim()
-                    ..teacher = content['Vertreter'].toString().trim()
-                    ..hour = hour
-                    ..dayOfWeek = weekday
-                    ..date = date
-                    ..classes = content["Klasse"].toString().trim()
-                    ..note = content['Hinweis'].toString().trim()
-                    ..type = content['Art'].toString().trim());
-                } else {
-                  vertretungs.add(Vertretung()
-                    ..subject.value = subject
-                    ..room = content['Raum'].toString().trim()
-                    ..teacher = content['Vertreter'].toString().trim()
-                    ..hour = hour
-                    ..dayOfWeek = weekday
-                    ..date = date
-                    ..classes = content["Klasse"].toString().trim()
-                    ..note = content['Hinweis'].toString().trim()
-                    ..type = content['Art'].toString().trim());
+                  if (subject == null) {
+                    vertretungs.add(Vertretung()
+                      ..vertrSubject = content['Fach'].toString().trim()
+                      ..room = content['Raum'].toString().trim()
+                      ..teacher = content['Vertreter'].toString().trim()
+                      ..hour = hour
+                      ..dayOfWeek = weekday
+                      ..date = date
+                      ..classes = content["Klasse"].toString().trim()
+                      ..note = content['Hinweis'].toString().trim()
+                      ..type = content['Art'].toString().trim());
+                  } else {
+                    vertretungs.add(Vertretung()
+                      ..subject.value = subject
+                      ..room = content['Raum'].toString().trim()
+                      ..teacher = content['Vertreter'].toString().trim()
+                      ..hour = hour
+                      ..dayOfWeek = weekday
+                      ..date = date
+                      ..classes = content["Klasse"].toString().trim()
+                      ..note = content['Hinweis'].toString().trim()
+                      ..type = content['Art'].toString().trim());
+                  }
                 }
               }
             }
           }
         }
-
         StorageProvider.vertretungsDate = dates;
         if (vertretungs.isNotEmpty) {
           for (Vertretung vertretung in vertretungs) {
-            if ((vertretung.classes?.trim() ?? "").isEmpty || StorageProvider.settings.loadAllVertretung ||
+            if ((vertretung.classes?.trim() ?? "").isEmpty ||
+                StorageProvider.settings.loadAllVertretung ||
                 (vertretung.classes?.trim().toLowerCase() ?? "").contains(
                     StorageProvider.user.course?.toLowerCase() ?? "")) {
               Vertretung? test = await isar.vertretungs
                   .where()
                   .dateDayOfWeekHourEqualTo(
-                  vertretung.date, vertretung.dayOfWeek, vertretung.hour)
+                      vertretung.date, vertretung.dayOfWeek, vertretung.hour)
                   .findFirst();
               if (test == null || test.subject.value != null) {
                 await isar.writeTxn(() async {
@@ -117,7 +121,6 @@ class Vertretungsplan {
               }
             }
           }
-
         }
       }
     }

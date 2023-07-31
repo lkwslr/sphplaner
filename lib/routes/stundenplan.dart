@@ -273,7 +273,7 @@ class _StundenplanState extends State<Stundenplan> {
             color: Theme.of(context).colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(5),
           ),
-          child: (shortToday == e || shortTomorrow == e)
+          child: (StorageProvider.settings.showVertretung && (shortToday == e || shortTomorrow == e))
               ? Column(
                   children: [
                     SizedBox(

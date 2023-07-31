@@ -114,7 +114,11 @@ class StorageProvider {
 
   static List<String> get vertretungsDate {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
-    return _prefs!.getStringList("vertretungsDate") ?? [" ", " "];
+    List<String> dates = _prefs!.getStringList("vertretungsDate") ?? [];
+    for (int i = dates.length;i<2;i++) {
+      dates.add(" ");
+    }
+    return dates;
   }
 
   static set vertretungsDate(List<String> value) {
