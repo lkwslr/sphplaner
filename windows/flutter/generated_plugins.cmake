@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_windows
   flutter_secure_storage_windows
   isar_flutter_libs
+  share_plus
   url_launcher_windows
 )
 

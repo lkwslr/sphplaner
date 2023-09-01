@@ -329,7 +329,6 @@ class SPH {
   }
 
   static Future<void> update(StorageNotifier notify) async {
-    //TODO TIMEOUTS
     List errors = [];
     try {
       StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";

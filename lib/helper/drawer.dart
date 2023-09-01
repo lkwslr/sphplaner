@@ -7,16 +7,20 @@ import 'package:sphplaner/helper/app_info.dart' as app_info;
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
+import 'package:sphplaner/routes/suppport.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../routes/easteregg.dart';
 import '../routes/settings.dart';
 
+const IconData handHoldingHeart =
+    IconData(0xf4be, fontFamily: "sphplaner", fontPackage: null);
+
 Widget getDrawer() {
   return PropertyChangeConsumer<StorageNotifier, String>(
     properties: const ['main'],
     builder: (context, notify, child) {
-      String username = "${StorageProvider.user!.displayName}";
+      String username = "${StorageProvider.user.displayName}";
       String hey;
       if (username.trim().isEmpty) {
         hey = "Hey";
@@ -69,25 +73,25 @@ Widget getDrawer() {
                                           ListTile(
                                             title: const Text("Name"),
                                             subtitle: Text(
-                                                "${StorageProvider.user!.firstName} ${StorageProvider.user!.lastName}"),
+                                                "${StorageProvider.user.firstName} ${StorageProvider.user.lastName}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("E-Mail"),
                                             subtitle: Text(
-                                                "${StorageProvider.user!.email}"),
+                                                "${StorageProvider.user.email}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Geburtsdatum"),
                                             subtitle: Text(
-                                                "${StorageProvider.user!.birthDate}"),
+                                                "${StorageProvider.user.birthDate}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Klasse"),
                                             subtitle: Text(
-                                                "${StorageProvider.user!.course}"),
+                                                "${StorageProvider.user.course}"),
                                           ),
                                           const Divider(),
                                           ListTile(
@@ -103,8 +107,7 @@ Widget getDrawer() {
                                                 child: Image(
                                                   image: MemoryImage(
                                                       base64Decode(
-                                                          StorageProvider.user!
-                                                              .profileImage!)),
+                                                          StorageProvider.user.profileImage!)),
                                                 ),
                                               )),
                                         ],
@@ -127,7 +130,7 @@ Widget getDrawer() {
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
                                     image: MemoryImage(base64Decode(
-                                        StorageProvider.user!.profileImage!))),
+                                        StorageProvider.user.profileImage!))),
                               ),
                             ),
                           ),
@@ -168,7 +171,7 @@ Widget getDrawer() {
               selected: StorageProvider.settings.viewMode == "stundenplan",
               title: const Text('Stundenplan'),
               leading: const Icon(
-                Icons.calendar_month_outlined,
+                Icons.calendar_month,
               ),
               onTap: () {
                 StorageProvider.settings.viewMode = "stundenplan";
@@ -180,7 +183,7 @@ Widget getDrawer() {
               selected: StorageProvider.settings.viewMode == "hausaufgaben",
               title: const Text('Hausaufgaben'),
               leading: const Icon(
-                Icons.book_outlined,
+                Icons.book,
               ),
               onTap: () {
                 StorageProvider.settings.viewMode = "hausaufgaben";
@@ -194,15 +197,28 @@ Widget getDrawer() {
                 'Einstellungen',
               ),
               leading: const Icon(
-                Icons.settings_outlined,
+                Icons.settings,
               ),
               onTap: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Settings()));
               },
             ),
+            ListTile(
+              selected: StorageProvider.settings.viewMode == "support",
+              title: const Text(
+                'Unterstütze diese App',
+              ),
+              leading: const Icon(
+                handHoldingHeart,
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Support()));
+              },
+            ),
             AboutListTile(
-              icon: const Icon(Icons.info_outline),
+              icon: const Icon(Icons.info),
               applicationName: "SPH Planer",
               applicationVersion: "v${app_info.version}",
               applicationIcon: Image.asset(
@@ -210,7 +226,21 @@ Widget getDrawer() {
                 width: 64,
               ),
               aboutBoxChildren: [
-                _feedback(context),
+                ListTile(
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+                  title: const Text(
+                    'Unterstütze diese App',
+                  ),
+                  leading: const Icon(
+                    handHoldingHeart,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Support()));
+                  },
+                ),
                 const SizedBox(
                   height: 16,
                 ),
@@ -222,42 +252,6 @@ Widget getDrawer() {
         ),
       );
     },
-  );
-}
-
-Widget _feedback(BuildContext ctx) {
-  return Column(
-    children: [
-      const Align(
-        alignment: Alignment.center,
-        child: Text("Feedback",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-      ),
-      Align(
-          alignment: Alignment.center,
-          child: RichText(
-            text: TextSpan(
-              children: <TextSpan>[
-                const TextSpan(
-                    text:
-                        "Falls dir diese App gefällt oder du weitere Vorschläge zur Verbesserung hast, klicke ",
-                    style: TextStyle(fontSize: 16)),
-                TextSpan(
-                    text: 'hier',
-                    style: TextStyle(
-                        color: Theme.of(ctx).colorScheme.primary,
-                        fontSize: 16,
-                        fontStyle: FontStyle.italic),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(Uri.parse('https://www.lkwslr.de/sphplaner'),
-                            mode: LaunchMode.externalApplication);
-                      }),
-                const TextSpan(text: ".")
-              ],
-            ),
-          )),
-    ],
   );
 }
 
