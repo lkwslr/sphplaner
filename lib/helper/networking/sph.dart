@@ -85,7 +85,7 @@ class SPH {
         }
       } else {
         _sid = "";
-        return "ERROR=Der Benutzername oder das Passwort sind falsch.";
+        throw Exception("SIDERROR=Der Benutzername oder das Passwort sind falsch.");
       }
     }
     return _sid;
@@ -315,6 +315,10 @@ class SPH {
     return response;
   }
 
+  static String encrypt(String plaintext) {
+    return aes.encrypt(plaintext, _sessionKey);
+  }
+
   static String _generateUUID() {
     const pattern = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx-xxxxxx3xx';
     var uuid = '';
@@ -363,6 +367,10 @@ class SPH {
         "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
         "error": e
       });
+    }
+
+    if (errors.where((element) => element["error"].toString().contains("SID")).isNotEmpty) {
+      StorageProvider.wrongPassword = true;
     }
 
     StorageProvider.settings.updateLockText = "";

@@ -62,13 +62,17 @@ class SPHPlaner extends StatefulWidget {
 
 updateHandler(String action) {
   switch (action) {
-    case "reset": {
-      return StorageProvider.deleteAll().then((value) {
-        StorageProvider.initializeStorage().then((value) => StorageProvider.settings.update = true);
-      });
-    }
-    case "ignore": return;
-    default: return;
+    case "reset":
+      {
+        return StorageProvider.deleteAll().then((value) {
+          StorageProvider.initializeStorage()
+              .then((value) => StorageProvider.settings.update = true);
+        });
+      }
+    case "ignore":
+      return;
+    default:
+      return;
   }
 }
 
@@ -191,6 +195,77 @@ class _SPHPlaner extends State<SPHPlaner> {
                   properties: const ['main'],
                   builder: (context, notify, child) {
                     if (StorageProvider.loggedIn.isNotEmpty) {
+                      if (StorageProvider.wrongPassword && !StorageProvider.dialog) {
+                        StorageProvider.dialog = true;
+                        Future.delayed(Duration.zero, () => showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              ValueNotifier<bool> obscure = ValueNotifier<bool>(true);
+
+                              TextEditingController input =
+                              TextEditingController();
+
+                              return AlertDialog(
+                                scrollable: true,
+                                title: const Text("Passwort"),
+                                content: Column(
+                                  children: [
+                                    const Text(
+                                        "Anscheinend hast du dein Passwort außerhalb der App geändert. Damit die App weiterhin funktioniert, gib bitte das neue Passwort ein!"),
+                                    const SizedBox(height: 8,),
+                                    ValueListenableBuilder(
+                                      valueListenable: obscure,
+                                      builder: (context, bool value, _) {
+                                        return TextField(
+                                          controller: input,
+                                          obscureText: value,
+                                          decoration: InputDecoration(
+                                              border: const OutlineInputBorder(),
+                                              labelText: 'Aktuelles Passwort',
+                                              suffixIcon: GestureDetector(
+                                                onTap: () {
+                                                  obscure.value = !value;
+                                                },
+                                                child: Icon(Icons.remove_red_eye,
+                                                    color: value
+                                                        ? null
+                                                        : Theme.of(context).colorScheme.primary),
+                                              )),
+                                        );
+                                      },
+                                    )
+
+                                  ],
+                                ),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        StorageProvider.dialog = false;
+                                        StorageProvider.wrongPassword = false;
+                                        StorageProvider.deleteAll().then((value) {
+                                          Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(builder: (_) => const SPHPlaner()),
+                                              ModalRoute.withName('/'));
+                                        });
+                                      },
+                                      child: const Text("Abmelden")),
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        StorageProvider.savePassword(
+                                            StorageProvider.loggedIn,
+                                            input.text);
+                                        StorageProvider.wrongPassword = false;
+                                        StorageProvider.dialog = false;
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Speichern")),
+                                ],
+                              );
+                            }));
+                        ;
+                      }
                       return Scaffold(
                         appBar: AppBar(
                           title: Text(StorageProvider.settings.title),

@@ -54,6 +54,11 @@ class StorageProvider {
     return userID;
   }
 
+  static savePassword(String userID, String password) {
+    _secure.write(key: "${userID}_password", value: password);
+    SPH.setCredetialsFor(userID);
+  }
+
   static Future<void> saveUser() async {
     await isar.writeTxn(() async {
       await isar.users.put(user);
@@ -87,6 +92,9 @@ class StorageProvider {
   static set loggedIn(String userID) {
     setSharedPrefs("loggedIn", userID);
   }
+
+  static bool wrongPassword = false;
+  static bool dialog = false;
 
   static String get status {
     return getSharedPrefs("status");

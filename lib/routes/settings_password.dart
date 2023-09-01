@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sphplaner/helper/networking/sph_settings.dart';
+
+import '../helper/storage/storage_provider.dart';
 
 class Password extends StatefulWidget {
   const Password({Key? key}) : super(key: key);
@@ -124,9 +127,9 @@ class _PasswordState extends State<Password> {
             autocorrect: false,
             onChanged: (value) async {
               if (currentPW == "") {
-                //currentPW = await backend.password;
+                currentPW =
+                    await StorageProvider.getPassword(StorageProvider.loggedIn);
               }
-
               setState(() {
                 current = value == currentPW;
               });
@@ -229,8 +232,8 @@ class _PasswordState extends State<Password> {
                   });
                 } else if (passwordRepeat == password) {
                   try {
-                    //bool result = await backend.changePassword(password);
-                    bool result = true;
+                    bool result =
+                        await SPHSettings.changePassword(currentPW, password);
                     if (result) {
                       changedText = "Das Passwort wurde geändert.";
                     } else {

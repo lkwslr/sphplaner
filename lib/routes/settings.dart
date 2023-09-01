@@ -13,6 +13,7 @@ import 'package:sphplaner/routes/settings_profilbild.dart';*/
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sphplaner/routes/fach_settings.dart';
+import 'package:sphplaner/routes/settings_password.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -239,10 +240,8 @@ class _Settings extends State<Settings> {
         minimumSize: Size.fromHeight(buttonSizeFactorXSmall),
       ),
       onPressed: () {
-        Fluttertoast.showToast(
-            msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
-        /*Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const Password()));*/
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const Password()));
       },
       child: const SizedBox(
         width: double.infinity,
