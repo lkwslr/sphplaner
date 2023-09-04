@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sphplaner/helper/networking/sph_settings.dart';
+import 'package:sphplaner/helper/storage/storage_provider.dart';
+import 'package:sphplaner/helper/storage/user.dart';
 
 class Email extends StatefulWidget {
   const Email({Key? key}) : super(key: key);
@@ -10,7 +13,7 @@ class Email extends StatefulWidget {
 class _EmailState extends State<Email> {
   bool _loading = false;
 
-  //bool _loadingPending = false;
+  bool _loadingPending = false;
   bool loadedPending = false;
   bool result = false;
   String pendingText = "";
@@ -26,11 +29,21 @@ class _EmailState extends State<Email> {
   final _formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
-    if (current == "") {
-      //current = backend.email;
-    }
+  void initState() {
+    super.initState();
+    StorageProvider.isar.users
+        .getByUsername(StorageProvider.loggedIn)
+        .then((value) {
+      if (value != null) {
+        setState(() {
+          current = value.email ?? "Keine E-Mail-Adresse angegeben!";
+        });
+      }
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('E-Mail-Adresse ändern')),
         body: Stack(
@@ -41,9 +54,9 @@ class _EmailState extends State<Email> {
                 children: [
                   _info(),
                   const Divider(height: 32, thickness: 3),
-                  //TODO: if (backend.emailChange) _changePending(),
-                  //if (backend.emailChange)
-                  const Divider(height: 32, thickness: 3),
+                  if (StorageProvider.emailChange.isNotEmpty) _changePending(),
+                  if (StorageProvider.emailChange.isNotEmpty)
+                    const Divider(height: 32, thickness: 3),
                   if (current.contains("@")) _delete(),
                   if (current.contains("@"))
                     const Divider(height: 32, thickness: 3),
@@ -66,7 +79,7 @@ class _EmailState extends State<Email> {
         Text(
             'Die hier hinterlegte E-Mail-Adresse wird für die "Passwort vergessen"-Funktion genutzt.\n'
             'Die Schule hat keinen Zugriff auf diese E-Mail-Adresse.\n'
-            'Aktuelle E-Mail-Adresse: $current$warning'),
+            'Aktuelle E-Mail-Adresse: $current\n$warning'),
       ],
     );
   }
@@ -97,13 +110,13 @@ class _EmailState extends State<Email> {
                           child: const Text("Nein")),
                       TextButton(
                           onPressed: () async {
-                            /*await backend.deleteEMail().then((value) {
+                            await SPHSettings.deleteEMail().then((value) {
                               if (value) {
                                 Navigator.of(context).pop("1");
                               } else {
                                 Navigator.of(context).pop("0");
                               }
-                            });*/
+                            });
                           },
                           child: const Text("Ja")),
                     ],
@@ -146,7 +159,7 @@ class _EmailState extends State<Email> {
               child: TextFormField(
                 autofillHints: const [AutofillHints.email],
                 decoration:
-                    const InputDecoration(labelText: 'neue E-Mail-Adresse'),
+                    const InputDecoration(labelText: 'Neue E-Mail-Adresse'),
                 readOnly: _loading,
                 validator: (value) {
                   if (!mailRegex.hasMatch(value!)) {
@@ -198,7 +211,8 @@ class _EmailState extends State<Email> {
                       ? null
                       : () async {
                           if (currentPW == "") {
-                            //currentPW = await backend.password;
+                            currentPW = await StorageProvider.getPassword(
+                                StorageProvider.loggedIn);
                           }
                           if (_formKey.currentState!.validate()) {
                             setState(() {
@@ -206,26 +220,26 @@ class _EmailState extends State<Email> {
                             });
                             _formKey.currentState!.save();
 
-                            /*try {
-                              bool result = await backend.changeEMail(email);
+                            try {
+                              bool result =
+                                  await SPHSettings.changeEMail(email);
+                              change = result;
                               if (result) {
-                                current = backend.email;
                                 changedText =
-                                "Es wurde ein Bestätigungslink an ${backend.email} gesendet.\n"
+                                    "Es wurde ein Bestätigungslink an $email gesendet.\n"
                                     "Bitte rufe Deine E-Mails ab und schaue auch ggf. im Spam-Ordner nach. "
                                     "In der zugesandten E-Mail findest Du einen Link, den Du zur Bestätigung der E-Mail-Adresse aufrufen musst. "
                                     "Dieser ist nur für die nächsten zwei Stunden gültig.\n"
                                     "Nach Bestätigung wird die neue E-Mail-Adresse übernommen.";
-                                change = result;
                               } else {
                                 changedText =
-                                "Die E-Mail-Adresse konnte nicht geändert werden.\n"
+                                    "Die E-Mail-Adresse konnte nicht geändert werden.\n"
                                     "Bitte überprüfe die eingegebene Adresse.";
                               }
                             } catch (_) {
-
-                              changedText = "\n\nE-Mail-Adresse konnte nicht geändert werden.";
-                            }*/
+                              changedText =
+                                  "\n\nE-Mail-Adresse konnte nicht geändert werden.";
+                            }
                           }
                           warning = "";
                           setState(() {
@@ -234,6 +248,9 @@ class _EmailState extends State<Email> {
                         },
                   child: const Text("Speichern")),
             ),
+            /*TODO:
+            * changeEmail in SPHSettings, beide request sind Fehler vom Schulportal
+            * */
             if (change != null)
               Text(changedText,
                   style: TextStyle(color: change! ? Colors.green : Colors.red)),
@@ -241,7 +258,7 @@ class _EmailState extends State<Email> {
         ));
   }
 
-/*Widget _changePending() {
+  Widget _changePending() {
     if (pendingText == "") {
       _loadPending();
     }
@@ -279,7 +296,7 @@ class _EmailState extends State<Email> {
                             _loadingPending = true;
                           });
 
-                          //TODO: await backend.requestEMailLink();
+                          await SPHSettings.requestEMailLink();
 
                           setState(() {
                             pendingText = "";
@@ -307,10 +324,10 @@ class _EmailState extends State<Email> {
               )
       ],
     );
-  }*/
+  }
 
-/*Future<void> _loadPending() async {
-    //pendingText = await backend.checkEMail();
+  Future<void> _loadPending() async {
+    pendingText = await SPHSettings.checkEMail();
     if (pendingText == "") {
       pendingText = "E-Mail-Adresse wurde erfolgreich verifiziert";
       result = true;
@@ -327,5 +344,5 @@ class _EmailState extends State<Email> {
     setState(() {
       loadedPending = true;
     });
-  }*/
+  }
 }

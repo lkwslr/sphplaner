@@ -10,6 +10,9 @@ import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/vertretung.dart';
 
+import '../helper/storage/subject.dart';
+import 'fach_settings.dart';
+
 class Stundenplan extends StatefulWidget {
   const Stundenplan({super.key});
 
@@ -64,7 +67,9 @@ class _StundenplanState extends State<Stundenplan> {
                   child: Column(
                     children: [
                       SizedBox(
-                          height: (cellWidth > 128) ? (cellHeight - 4) / 2 : cellHeight - 4,
+                          height: (cellWidth > 128)
+                              ? (cellHeight - 4) / 2
+                              : cellHeight - 4,
                           child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(hour.toString(),
@@ -98,16 +103,18 @@ class _StundenplanState extends State<Stundenplan> {
                 String date = " ";
                 try {
                   date = dates.firstWhere(
-                          (element) =>
-                      DateFormat("dd.MM.yyyy").parse(element).weekday == day,
+                      (element) =>
+                          DateFormat("dd.MM.yyyy").parse(element).weekday ==
+                          day,
                       orElse: () => "01.01.1970");
                 } on FormatException catch (_) {}
 
-                if (StorageProvider.settings.showVertretung && StorageProvider.isar.vertretungs
-                        .where()
-                        .dateDayOfWeekHourEqualTo(date, day, hour)
-                        .findFirstSync() !=
-                    null) {
+                if (StorageProvider.settings.showVertretung &&
+                    StorageProvider.isar.vertretungs
+                            .where()
+                            .dateDayOfWeekHourEqualTo(date, day, hour)
+                            .findFirstSync() !=
+                        null) {
                   textcolor = Colors.red;
                   subject = StorageProvider.isar.vertretungs
                           .where()
@@ -120,7 +127,8 @@ class _StundenplanState extends State<Stundenplan> {
                           .where()
                           .dateDayOfWeekHourEqualTo(date, day, hour)
                           .findFirstSync()
-                          ?.vertrSubject ?? "???";
+                          ?.vertrSubject ??
+                      "???";
                   room = StorageProvider.isar.vertretungs
                           .where()
                           .dateDayOfWeekHourEqualTo(date, day, hour)
@@ -150,7 +158,8 @@ class _StundenplanState extends State<Stundenplan> {
                           .findFirstSync()
                           ?.subject
                           .value
-                          ?.color ?? 4292600319);
+                          ?.color ??
+                      4292600319);
                 } else {
                   subject = StorageProvider.isar.lessons
                           .where()
@@ -176,35 +185,215 @@ class _StundenplanState extends State<Stundenplan> {
                       Theme.of(context).colorScheme.secondaryContainer.value);
                 }
 
-                row.add(Container(
-                    width: cellWidth,
-                    height: cellHeight,
-                    margin: const EdgeInsets.all(4),
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: (cellHeight - 4) / 2,
-                          padding: const EdgeInsets.all(2),
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Text(subject,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: textcolor)),
+                row.add(GestureDetector(
+                  onLongPress: () async {
+                    await StorageProvider.isar.subjects
+                        .where()
+                        .findAll()
+                        .then((value) {
+                      Lesson lesson = Lesson();
+
+                      List<Widget> subjects = value.map<Widget>((e) {
+                        return Container(
+                          padding: const EdgeInsets.all(4),
+                          width: double.infinity,
+                          height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(e.color),
+                                minimumSize: const Size.fromHeight(40)),
+                            onPressed: () {
+                              Navigator.of(context).pop(e);
+                            },
+                            child: Text(
+                              e.subjectName ?? "???",
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        );
+                      }).toList();
+
+                      subjects.add(Container(
+                        padding: const EdgeInsets.all(4),
+                        width: double.infinity,
+                        height: 40,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              minimumSize: const Size.fromHeight(40)),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        FachSettings(subject: Subject()))).then(
+                                (value) => Navigator.of(context).pop(value));
+                          },
+                          child: const Text(
+                            "Fach hinzufügen",
+                            style: TextStyle(color: Colors.black),
                           ),
                         ),
-                        Container(
-                          height: (cellHeight - 4) / 2,
-                          padding: const EdgeInsets.all(2),
-                          child: Text(room, style: TextStyle(color: textcolor, fontStyle: FontStyle.italic)),
-                        ),
-                      ],
-                    )));
+                      ));
+
+                      if (room != " ") {
+                        subjects.add(Container(
+                          padding: const EdgeInsets.all(4),
+                          width: double.infinity,
+                          height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                minimumSize: const Size.fromHeight(40)),
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pop(Subject()..subject = "remove");
+                            },
+                            child: const Text(
+                              "Stunde löschen",
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ));
+                      }
+
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                                contentPadding: const EdgeInsets.all(8),
+                                scrollable: true,
+                                title: const Text("Fach hinzufügen"),
+                                content: Column(
+                                  children: subjects,
+                                ));
+                          }).then((value) async {
+                        if (value != null) {
+                          lesson.subject.value = value;
+
+                          if (lesson.subject.value?.subject == "remove") {
+                            await StorageProvider.isar.writeTxn(() async {
+                              await StorageProvider.isar.lessons
+                                  .deleteByDayOfWeekHour(day, hour);
+                            }).then((value) => notify
+                                ?.notifyAll(["stundenplan", "vertretung"]));
+                          } else {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  TextEditingController roomController =
+                                      TextEditingController();
+                                  return AlertDialog(
+                                    contentPadding: const EdgeInsets.all(8),
+                                    scrollable: true,
+                                    title: const Text("Fach hinzufügen"),
+                                    content: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("Fach: "),
+                                            Expanded(
+                                                child: ElevatedButton(
+                                                    onPressed: null,
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      disabledBackgroundColor:
+                                                          Color(lesson
+                                                                  .subject
+                                                                  .value
+                                                                  ?.color ??
+                                                              Colors
+                                                                  .white.value),
+                                                      disabledForegroundColor:
+                                                          Colors.black,
+                                                      minimumSize:
+                                                          const Size.fromHeight(
+                                                              32),
+                                                    ),
+                                                    child: Text(lesson
+                                                            .subject
+                                                            .value
+                                                            ?.subjectName ??
+                                                        lesson.subject.value
+                                                            ?.subject ??
+                                                        "")))
+                                          ],
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(4),
+                                          child: TextField(
+                                            controller: roomController,
+                                            decoration: const InputDecoration(
+                                                labelText: 'Raum'),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop("");
+                                          },
+                                          child: const Text("Abbrechen")),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(roomController.text);
+                                          },
+                                          child: const Text("Speichern"))
+                                    ],
+                                  );
+                                }).then((value) async {
+                              if (value != "") {
+                                lesson.hour = hour;
+                                lesson.dayOfWeek = day;
+                                lesson.room = value;
+                                await StorageProvider.isar.writeTxn(() async {
+                                  await StorageProvider.isar.lessons
+                                      .put(lesson);
+                                  await lesson.subject.save();
+                                }).then((value) => notify
+                                    ?.notifyAll(["stundenplan", "vertretung"]));
+                              }
+                            });
+                          }
+                        }
+                      });
+                    });
+                  },
+                  child: Container(
+                      width: cellWidth,
+                      height: cellHeight,
+                      margin: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: (cellHeight - 4) / 2,
+                            padding: const EdgeInsets.all(2),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Text(subject,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: textcolor)),
+                            ),
+                          ),
+                          Container(
+                            height: (cellHeight - 4) / 2,
+                            padding: const EdgeInsets.all(2),
+                            child: Text(room,
+                                style: TextStyle(
+                                    color: textcolor,
+                                    fontStyle: FontStyle.italic)),
+                          ),
+                        ],
+                      )),
+                ));
               }
             }
             columns.add(Row(children: row));
@@ -250,20 +439,19 @@ class _StundenplanState extends State<Stundenplan> {
               borderRadius: BorderRadius.circular(5),
             ),
             child: RotatedBox(
-              quarterTurns: cellWidth < 128 ? 3 : 0,
-              child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(e,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 23,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer)))
-            ),
+                quarterTurns: cellWidth < 128 ? 3 : 0,
+                child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(e,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 23,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer)))),
           );
         }
-        
+
         return Container(
           width: cellWidth,
           height: cellHeight,
@@ -273,7 +461,8 @@ class _StundenplanState extends State<Stundenplan> {
             color: Theme.of(context).colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(5),
           ),
-          child: (StorageProvider.settings.showVertretung && (shortToday == e || shortTomorrow == e))
+          child: (StorageProvider.settings.showVertretung &&
+                  (shortToday == e || shortTomorrow == e))
               ? Column(
                   children: [
                     SizedBox(

@@ -59,7 +59,8 @@ class _LoginSettings extends State<LoginSettings> {
                               "Bitte achte darauf, dass es vereinzelt zu Problemen kommen kann, "
                               "die dafür sorgen, dass der Vertretungs- oder Stundenplan nicht richtig angezeigt wird. \n"
                               "Einige Einstellungen sind deshalb deaktiviert, lassen sich jedoch auch aktivieren. Tue dies nur auf eigene Gefahr.\n"
-                              "Aktuell wird in Stunden, bei denen zwei Fächer zur Auswahl stehen, das erste genommen.\n\n"
+                              "Aktuell wird in Stunden, bei denen zwei Fächer zur Auswahl stehen, das erste genommen.\nDu kannst alle Fächer jedoch bearbeiten, löschen oder auch neue hinzufügen.\n"
+                              "Damit deine Fächer auch im Stundenplan richtig angezeigt werden, müsst du einfach lange auf die entsprechende Stunde klicken.\n\n"
                               "Du kannst jetzt direkt einige Einstellungen anpassen: "),
                         ),
                         const Divider(height: 32, color: Colors.transparent),
@@ -70,7 +71,7 @@ class _LoginSettings extends State<LoginSettings> {
                     plan(notify!),
                     //theme(notify),
                     //_autoUpdate(),
-                    //colors(context, buttonSizeFactorSmall),
+                    colors(context, buttonSizeFactorSmall),
                     ElevatedButton(
                         onPressed: () => Navigator.pushReplacement(
                             context,

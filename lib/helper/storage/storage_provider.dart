@@ -23,13 +23,13 @@ class StorageProvider {
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _isar ??= await Isar.open([
-        UserSchema,
-        SubjectSchema,
-        TeacherSchema,
-        LessonSchema,
-        HomeworkSchema,
-        VertretungSchema
-      ], name: "sphplaner", directory: dir.path);
+      UserSchema,
+      SubjectSchema,
+      TeacherSchema,
+      LessonSchema,
+      HomeworkSchema,
+      VertretungSchema
+    ], name: "sphplaner", directory: dir.path);
 
     _prefs ??= await SharedPreferences.getInstance();
     settings.initializeSettings(_isar!, _prefs!);
@@ -95,6 +95,7 @@ class StorageProvider {
 
   static bool wrongPassword = false;
   static bool dialog = false;
+  static String emailCheck = "";
 
   static String get status {
     return getSharedPrefs("status");
@@ -123,7 +124,7 @@ class StorageProvider {
   static List<String> get vertretungsDate {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
     List<String> dates = _prefs!.getStringList("vertretungsDate") ?? [];
-    for (int i = dates.length;i<2;i++) {
+    for (int i = dates.length; i < 2; i++) {
       dates.add(" ");
     }
     return dates;
@@ -132,6 +133,16 @@ class StorageProvider {
   static set vertretungsDate(List<String> value) {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
     _prefs!.setStringList("vertretungsDate", value);
+  }
+
+  static String get emailChange {
+    assert(_prefs != null, 'SharedPreferences have not been initialized');
+    return _prefs!.getString("emailChange") ?? "";
+  }
+
+  static set emailChange(String value) {
+    assert(_prefs != null, 'SharedPreferences have not been initialized');
+    _prefs!.setString("emailChange", value);
   }
 
   static Future<void> deleteAll() async {

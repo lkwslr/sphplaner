@@ -1,9 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sphplaner/helper/networking/sph_settings.dart';
+import 'package:sphplaner/helper/storage/storage_notifier.dart';
+
+import '../helper/storage/storage_provider.dart';
 
 class Profilbild extends StatefulWidget {
-  const Profilbild({Key? key}) : super(key: key);
+  const Profilbild({Key? key, required this.notify}) : super(key: key);
+
+  final StorageNotifier notify;
 
   @override
   State<Profilbild> createState() => _ProfilbildState();
@@ -93,21 +102,22 @@ class _ProfilbildState extends State<Profilbild> {
                   setState(() {
                     _loading = true;
                   });
-                  /*backend.changeImage(path).then((value) {
-              if (value) {
-                setState(() {
-                  _loading = false;
-                  success = true;
-                  status = "Profilbild wurde erfolgreich geändert!";
-                });
-              } else {
-                setState(() {
-                  _loading = false;
-                  success = false;
-                  status = "Profilbild konnte nicht geändert werden!";
-                });
-              }
-            });*/
+                  SPHSettings.changeImage(path).then((value) {
+                    if (value) {
+                      widget.notify.notifyAll(["main", "settings"]);
+                      setState(() {
+                        _loading = false;
+                        success = true;
+                        status = "Profilbild wurde erfolgreich geändert!";
+                      });
+                    } else {
+                      setState(() {
+                        _loading = false;
+                        success = false;
+                        status = "Profilbild konnte nicht geändert werden!";
+                      });
+                    }
+                  });
                 }
               }
             },
@@ -175,9 +185,12 @@ class _ProfilbildState extends State<Profilbild> {
         const SizedBox(
           height: 16,
         ),
-        //path != ""
-        //    ? Image.file(File(path))
-        //    : Image.file(File("${backend.userDir}/image.png")),
+        path != ""
+            ? Image.file(File(path))
+            : Image(
+                image: MemoryImage(
+                    base64Decode(StorageProvider.user.profileImage!)),
+              ),
         const SizedBox(
           height: 16,
         ),
@@ -190,8 +203,9 @@ class _ProfilbildState extends State<Profilbild> {
               setState(() {
                 _loadingDelete = true;
               });
-              /*backend.deleteImage().then((value) {
+              SPHSettings.deleteImage().then((value) {
                 if (value) {
+                  widget.notify.notifyAll(["main", "settings"]);
                   setState(() {
                     _loadingDelete = false;
                     success = true;
@@ -204,7 +218,7 @@ class _ProfilbildState extends State<Profilbild> {
                     status = "Profilbild konnte nicht gelöscht werden!";
                   });
                 }
-              });*/
+              });
             }
           },
           child: SizedBox(

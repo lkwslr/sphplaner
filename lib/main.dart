@@ -1,8 +1,4 @@
-//TODO: Funktionen für passwort change etc müssen check haben, dass SID da ist und ggf sessionKey. Siehe bei updateUser
-
 //TODO: Login flow, bei dem Stundenplan geladen wird. Danach hat man die Option Fächer und Kurse auszuwählen, wenn es mehr als eine Option gibt.
-
-//TODO: während/nach fach auswahl option, um die Farben der einzelnen Fächer anzupassen
 
 //TODO: wenn stundenplan geupdatet wird überprüfen, ob die fächer immer noch die gleichen sind, wenn sich fächer im Stundenplan geändert haben erneut Bildschim vom Login-Flow anzeigen
 
@@ -195,76 +191,124 @@ class _SPHPlaner extends State<SPHPlaner> {
                   properties: const ['main'],
                   builder: (context, notify, child) {
                     if (StorageProvider.loggedIn.isNotEmpty) {
-                      if (StorageProvider.wrongPassword && !StorageProvider.dialog) {
+                      if (StorageProvider.emailCheck.isNotEmpty &&
+                          !StorageProvider.dialog) {
                         StorageProvider.dialog = true;
-                        Future.delayed(Duration.zero, () => showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              ValueNotifier<bool> obscure = ValueNotifier<bool>(true);
+                        Future.delayed(
+                            Duration.zero,
+                            () => showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    scrollable: true,
+                                    title: const Text("E-Mail ändern"),
+                                    content: Text(StorageProvider.emailCheck),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            StorageProvider.dialog = false;
+                                            StorageProvider.wrongPassword =
+                                                false;
+                                            StorageProvider.deleteAll()
+                                                .then((value) {
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          const SPHPlaner()),
+                                                  ModalRoute.withName('/'));
+                                            });
+                                          },
+                                          child: const Text("OK")),
+                                    ],
+                                  );
+                                }));
+                      }
+                      if (StorageProvider.wrongPassword &&
+                          !StorageProvider.dialog) {
+                        StorageProvider.dialog = true;
+                        Future.delayed(
+                            Duration.zero,
+                            () => showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  ValueNotifier<bool> obscure =
+                                      ValueNotifier<bool>(true);
 
-                              TextEditingController input =
-                              TextEditingController();
+                                  TextEditingController input =
+                                      TextEditingController();
 
-                              return AlertDialog(
-                                scrollable: true,
-                                title: const Text("Passwort"),
-                                content: Column(
-                                  children: [
-                                    const Text(
-                                        "Anscheinend hast du dein Passwort außerhalb der App geändert. Damit die App weiterhin funktioniert, gib bitte das neue Passwort ein!"),
-                                    const SizedBox(height: 8,),
-                                    ValueListenableBuilder(
-                                      valueListenable: obscure,
-                                      builder: (context, bool value, _) {
-                                        return TextField(
-                                          controller: input,
-                                          obscureText: value,
-                                          decoration: InputDecoration(
-                                              border: const OutlineInputBorder(),
-                                              labelText: 'Aktuelles Passwort',
-                                              suffixIcon: GestureDetector(
-                                                onTap: () {
-                                                  obscure.value = !value;
-                                                },
-                                                child: Icon(Icons.remove_red_eye,
-                                                    color: value
-                                                        ? null
-                                                        : Theme.of(context).colorScheme.primary),
-                                              )),
-                                        );
-                                      },
-                                    )
-
-                                  ],
-                                ),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () {
-                                        StorageProvider.dialog = false;
-                                        StorageProvider.wrongPassword = false;
-                                        StorageProvider.deleteAll().then((value) {
-                                          Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(builder: (_) => const SPHPlaner()),
-                                              ModalRoute.withName('/'));
-                                        });
-                                      },
-                                      child: const Text("Abmelden")),
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        StorageProvider.savePassword(
-                                            StorageProvider.loggedIn,
-                                            input.text);
-                                        StorageProvider.wrongPassword = false;
-                                        StorageProvider.dialog = false;
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text("Speichern")),
-                                ],
-                              );
-                            }));
-                        ;
+                                  return AlertDialog(
+                                    scrollable: true,
+                                    title: const Text("Passwort"),
+                                    content: Column(
+                                      children: [
+                                        const Text(
+                                            "Anscheinend hast du dein Passwort außerhalb der App geändert. Damit die App weiterhin funktioniert, gib bitte das neue Passwort ein!"),
+                                        const SizedBox(
+                                          height: 8,
+                                        ),
+                                        ValueListenableBuilder(
+                                          valueListenable: obscure,
+                                          builder: (context, bool value, _) {
+                                            return TextField(
+                                              controller: input,
+                                              obscureText: value,
+                                              decoration: InputDecoration(
+                                                  border:
+                                                      const OutlineInputBorder(),
+                                                  labelText:
+                                                      'Aktuelles Passwort',
+                                                  suffixIcon: GestureDetector(
+                                                    onTap: () {
+                                                      obscure.value = !value;
+                                                    },
+                                                    child: Icon(
+                                                        Icons.remove_red_eye,
+                                                        color: value
+                                                            ? null
+                                                            : Theme.of(context)
+                                                                .colorScheme
+                                                                .primary),
+                                                  )),
+                                            );
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                          onPressed: () {
+                                            StorageProvider.dialog = false;
+                                            StorageProvider.wrongPassword =
+                                                false;
+                                            StorageProvider.deleteAll()
+                                                .then((value) {
+                                              Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          const SPHPlaner()),
+                                                  ModalRoute.withName('/'));
+                                            });
+                                          },
+                                          child: const Text("Abmelden")),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            StorageProvider.savePassword(
+                                                StorageProvider.loggedIn,
+                                                input.text);
+                                            StorageProvider.wrongPassword =
+                                                false;
+                                            StorageProvider.dialog = false;
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text("Speichern")),
+                                    ],
+                                  );
+                                }));
                       }
                       return Scaffold(
                         appBar: AppBar(

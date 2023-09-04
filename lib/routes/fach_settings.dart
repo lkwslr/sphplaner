@@ -23,6 +23,7 @@ class _FachSettings extends State<FachSettings> {
   double buttonSizeFactor = 40;
 
   TextEditingController? subjectNameController;
+  TextEditingController? subjectController;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +39,9 @@ class _FachSettings extends State<FachSettings> {
             ? widget.subject.subjectName
             : null);
 
+    subjectController ??=
+        TextEditingController(text: widget.subject.subject ?? "");
+
     logicalScreenSize =
         View.of(context).physicalSize / View.of(context).devicePixelRatio;
     if (logicalScreenSize.height < logicalScreenSize.width) {
@@ -47,16 +51,38 @@ class _FachSettings extends State<FachSettings> {
     }
 
     List<Widget> listitems = [
-      const Align(
-        alignment: Alignment.center,
-        child: Text(
-          "Alle Einstellungen werden automatisch gespeichert!",
-          style: TextStyle(
-              fontStyle: FontStyle.italic, fontSize: 16, color: Colors.red),
-        ),
-      ),
       const SizedBox(
         height: 32,
+      ),
+      const Align(
+        alignment: Alignment.center,
+        child: Text("Fach ID",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+      ),
+      TextField(
+        controller: subjectController,
+        decoration: InputDecoration(
+          hintText: subject.subject,
+          labelText: "Fach ID",
+          helperText:
+              "Diese ID wird zur internen Identifikation verwendet und kann nur einmal vergeben werden.\nEr dient zu dem dazu Vertretungen richtig anzuzeigen!\n"
+              "\nÄndere diese nur, wenn du weißt, was du tust!",
+          helperMaxLines: 10,
+        ),
+        onChanged: (value) {
+          if (value != "") {
+            setState(() {
+              subject.subject = value;
+            });
+          } else {
+            setState(() {
+              subject.subject = null;
+            });
+          }
+        },
+      ),
+      const SizedBox(
+        height: 16,
       ),
       const Align(
         alignment: Alignment.center,
@@ -73,19 +99,12 @@ class _FachSettings extends State<FachSettings> {
               "\nBeispiel: WP1_SPO_Hj1 kann als Sport angezeigt werden.",
           helperMaxLines: 10,
         ),
-        onChanged: (value) async {
+        onChanged: (value) {
           if (value.isEmpty) {
-            value = subject.subject!;
+            value = subject.subject ?? "Kein Name angegeben!";
           }
           setState(() {
             subject.subjectName = value;
-          });
-        },
-        onTapOutside: (event) async {
-          await StorageProvider.isar.writeTxn(() async {
-            await StorageProvider.isar.subjects.putBySubject(subject);
-          }).then((value) {
-            notify.notifyAll(["stundenplan", "settings"]);
           });
         },
       ),
@@ -124,12 +143,9 @@ class _FachSettings extends State<FachSettings> {
           children: [
             Expanded(
                 child: ElevatedButton(
-              onPressed: () async {
-                subject.color = color["normal"];
-                await StorageProvider.isar.writeTxn(() async {
-                  await StorageProvider.isar.subjects.putBySubject(subject);
-                }).then((value) {
-                  notify.notifyAll(["stundenplan", "settings"]);
+              onPressed: () {
+                setState(() {
+                  subject.color = color["normal"];
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -150,12 +166,9 @@ class _FachSettings extends State<FachSettings> {
             const SizedBox(width: 8),
             Expanded(
                 child: ElevatedButton(
-              onPressed: () async {
-                subject.color = color["akzent"];
-                await StorageProvider.isar.writeTxn(() async {
-                  await StorageProvider.isar.subjects.putBySubject(subject);
-                }).then((value) {
-                  notify.notifyAll(["stundenplan", "settings"]);
+              onPressed: () {
+                setState(() {
+                  subject.color = color["akzent"];
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -175,9 +188,76 @@ class _FachSettings extends State<FachSettings> {
         const SizedBox(height: 16)
       ]);
     }
+    listitems.addAll([
+      const SizedBox(
+        height: 32,
+      ),
+      const Align(
+        alignment: Alignment.center,
+        child: Text("Gefahrenzone",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+      ),
+      ElevatedButton(
+          onPressed: () async {
+            showDialog(
+                context: context,
+                builder: (builder) {
+                  return AlertDialog(
+                    title: const Text("Fach löschen?"),
+                    content: Text(
+                        "Möchtest du das Fach (${subject.subject}) wirklich löschen?\nDies kann nicht rückgängig gemacht werden!"),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop("0");
+                          },
+                          child: const Text("Nein")),
+                      TextButton(
+                          onPressed: () async {
+                            await StorageProvider.isar.writeTxn(() async {
+                              await StorageProvider.isar.subjects
+                                  .delete(subject.id);
+                            }).then((value) {
+                              notify.notifyAll(["stundenplan", "settings"]);
+                              Navigator.of(context).pop("1");
+                            });
+                          },
+                          child: const Text("Ja")),
+                    ],
+                  );
+                }).then((value) {
+              if (value == "1") {
+                Navigator.of(context).pop();
+              }
+            });
+          },
+          style: ElevatedButton.styleFrom(
+              minimumSize: Size.fromHeight(buttonSizeFactor)),
+          child: const Text("Fach löschen",
+              style: TextStyle(color: Colors.white))),
+      const SizedBox(
+        height: 32,
+      ),
+      ElevatedButton(
+          onPressed: () async {
+            await StorageProvider.isar.writeTxn(() async {
+              await StorageProvider.isar.subjects.putBySubject(subject);
+            }).then((value) {
+              notify.notifyAll(["stundenplan", "settings"]);
+              Navigator.of(context).pop(subject);
+            });
+          },
+          style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              minimumSize: Size.fromHeight(buttonSizeFactor)),
+          child: const Text("Änderungen speichern",
+              style: TextStyle(color: Colors.white)))
+    ]);
 
     return Scaffold(
-        appBar: AppBar(title: Text('Einstellungen für ${subject.subjectName}')),
+        appBar: AppBar(
+            title: Text(
+                'Einstellungen für ${subject.subjectName ?? subject.subject}')),
         body: Container(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: ListView(

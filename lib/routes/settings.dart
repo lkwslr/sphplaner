@@ -13,7 +13,6 @@ import 'package:sphplaner/routes/settings_profilbild.dart';*/
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sphplaner/routes/fach_settings.dart';
-import 'package:sphplaner/routes/settings_password.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -63,7 +62,7 @@ class _Settings extends State<Settings> {
                     plan(notify!),
                     _theme(),
                     //_autoUpdate(),
-                    _colors(),
+                    colors(context, buttonSizeFactorSmall),
                     _imexport(),
                     _logout()
                   ],
@@ -240,8 +239,10 @@ class _Settings extends State<Settings> {
         minimumSize: Size.fromHeight(buttonSizeFactorXSmall),
       ),
       onPressed: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => const Password()));
+        Fluttertoast.showToast(
+            msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
+        /*Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const Password()));*/
       },
       child: const SizedBox(
         width: double.infinity,
@@ -270,7 +271,7 @@ class _Settings extends State<Settings> {
         Fluttertoast.showToast(
             msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
         /*Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const Profilbild()));*/
+            MaterialPageRoute(builder: (context) => Profilbild(notify: notify!)));*/
       },
       child: const SizedBox(
         width: double.infinity,
@@ -370,60 +371,6 @@ class _Settings extends State<Settings> {
         ),
         const Divider(height: 32, thickness: 3)
       ],
-    );
-  }
-
-  Widget _colors() {
-    List<Widget> faecher = [
-      const Align(
-        alignment: Alignment.center,
-        child: Text("Einstellungen für deine Fächer",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-      )
-    ];
-    for (Subject subject
-        in StorageProvider.isar.subjects.where().findAllSync()) {
-      if (buttonSizeFactorSmall > 40) {
-        faecher.add(const SizedBox(height: 8));
-      }
-
-      faecher.add(ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FachSettings(subject: subject)));
-          },
-          style: ElevatedButton.styleFrom(
-              backgroundColor: Color(subject.color),
-              minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
-          child: SizedBox(
-            width: double.infinity,
-            height: 32,
-            child: Stack(
-              children: [
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("${subject.subjectName} (${subject.subject})",
-                        style: const TextStyle(color: Colors.black))),
-                const Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(Icons.arrow_forward, color: Colors.black)),
-              ],
-            ),
-          )));
-    }
-    if (faecher.length == 1) {
-      faecher.add(const Align(
-        alignment: Alignment.center,
-        child: Text(
-            "Um die Farben für deine Fächer anpassen zu können, musst du diese zuerst in deinen Stundenplan eintragen.",
-            style: TextStyle(fontSize: 16)),
-      ));
-    }
-    faecher.add(const Divider(height: 32, thickness: 3));
-    return Column(
-      children: faecher,
     );
   }
 
@@ -543,6 +490,77 @@ Widget plan(StorageNotifier notify) {
       ),
       const Divider(height: 32, thickness: 3)
     ],
+  );
+}
+
+Widget colors(BuildContext context, double buttonSizeFactorSmall) {
+  List<Widget> faecher = [
+    const Align(
+      alignment: Alignment.center,
+      child: Text("Einstellungen für deine Fächer",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+    )
+  ];
+  for (Subject subject in StorageProvider.isar.subjects.where().findAllSync()) {
+    if (buttonSizeFactorSmall > 40) {
+      faecher.add(const SizedBox(height: 8));
+    }
+
+    faecher.add(ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => FachSettings(subject: subject)));
+        },
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Color(subject.color),
+            minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
+        child: SizedBox(
+          width: double.infinity,
+          height: 32,
+          child: Stack(
+            children: [
+              Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("${subject.subjectName} (${subject.subject})",
+                      style: const TextStyle(color: Colors.black))),
+              const Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(Icons.arrow_forward, color: Colors.black)),
+            ],
+          ),
+        )));
+  }
+
+  faecher.add(ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => FachSettings(subject: Subject())));
+      },
+      style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
+      child: const SizedBox(
+        width: double.infinity,
+        height: 32,
+        child: Stack(
+          children: [
+            Align(
+                alignment: Alignment.centerLeft,
+                child: Text("neues Fach hinzufügen",
+                    style: TextStyle(color: Colors.black))),
+            Align(
+                alignment: Alignment.centerRight,
+                child: Icon(Icons.arrow_forward, color: Colors.black)),
+          ],
+        ),
+      )));
+  faecher.add(const Divider(height: 32, thickness: 3));
+  return Column(
+    children: faecher,
   );
 }
 
