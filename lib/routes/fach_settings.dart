@@ -56,17 +56,17 @@ class _FachSettings extends State<FachSettings> {
       ),
       const Align(
         alignment: Alignment.center,
-        child: Text("Fach ID",
+        child: Text("Fachbezeichnung",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
       ),
       TextField(
         controller: subjectController,
         decoration: InputDecoration(
           hintText: subject.subject,
-          labelText: "Fach ID",
+          labelText: "Fachbezeichnung",
           helperText:
-              "Diese ID wird zur internen Identifikation verwendet und kann nur einmal vergeben werden.\nEr dient zu dem dazu Vertretungen richtig anzuzeigen!\n"
-              "\nÄndere diese nur, wenn du weißt, was du tust!",
+              "Diese Bezeichnung wird zur internen Identifikation verwendet und kann nur einmal vergeben werden.\nSie dient dazu Vertretungen richtig anzuzeigen!\n"
+              "\nBeispiel: WP1_SPO_Hj1\n\nÄndere diese nur, wenn du weißt, was du tust!",
           helperMaxLines: 10,
         ),
         onChanged: (value) {
