@@ -1,84 +1,106 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
-String getDefaultColors() {
-  return jsonEncode({
-    "REV": Colors.grey.shade500.value,
-    "RKA": Colors.grey.shade500.value,
-    "ETHI": Colors.grey.shade500.value,
-    "POWI": Colors.pink.shade100.value,
-    "INFO": Colors.teal.shade100.value,
-    "BIO": Colors.greenAccent.shade100.value,
-    "SPA": Colors.orange.shade100.value,
-    "SPO": Colors.grey.shade300.value,
-    "EK": Colors.green.shade100.value,
-    "MU": Colors.yellowAccent.shade100.value,
-    "KU": Colors.cyan.shade100.value,
-    "CH": Colors.limeAccent.shade100.value,
-    "PH": Colors.deepPurple.shade100.value,
-    "M": Colors.blue.shade100.value,
-    "D": Colors.red.shade100.value,
-    "E": Colors.yellow.shade100.value,
-    "F": Colors.deepOrangeAccent.shade100.value,
-    "G": Colors.brown.shade100.value,
-    "L": Colors.lime.shade100.value,
-    "ITA": Colors.purple.shade100.value,
-    "DSP": Colors.indigo.shade100.value,
-  });
-}
-
 int getDefaultColor(String fach) {
-  //TODO: regex for fächer
-  return 4294967295;
+  fach = fach.toUpperCase();
+  if (fach.contains("REV") ||
+      fach.contains("RKA") ||
+      fach.contains("RJÜD")) {
+    return Colors.grey.shade300.value;
+  } else if (fach.contains("ETH")) {
+    return Colors.grey.shade300.value;
+  }
+  else if (fach.contains("POWI") || fach.contains("PW")) {
+    return Colors.pink.shade100.value;
+  } else if (fach.contains("INF")) {
+    return Colors.teal.shade100.value;
+  } else if (fach.contains("BIO")) {
+    return Colors.lightGreen.shade100.value;
+  } else if (fach.contains("DSP")) {
+    return Colors.cyan.shade100.value;
+  } else if (fach.contains("SPO")) {
+    return Colors.blueGrey.shade200.value;
+  } else if (fach.contains("EK")) {
+    return Colors.green.shade100.value;
+  } else if (fach.contains("GEO")) {
+    return Colors.green.shade100.value;
+  }else if (fach.contains("MU")) {
+    return Colors.yellow.shade100.value;
+  } else if (fach.contains("KU")) {
+    return Colors.purple.shade100.value;
+  } else if (fach.contains("PH")) {
+    return Colors.deepPurple.shade100.value;
+  } else if (fach.contains("CH")) {
+    return Colors.lime.shade100.value;
+  }else if (fach.contains("M")) {
+    return Colors.lightBlue.shade100.value;
+  } else if (fach.contains("F")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("SPA")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("IT")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("E")) {
+    return Colors.amber.shade100.value;
+  } else if (fach.contains("D")) {
+    return Colors.red.shade100.value;
+  } else if (fach.contains("G")) {
+    return Colors.brown.shade100.value;
+  } else if (fach.contains("L")) {
+    return Colors.indigo.shade100.value;
+  } else {
+    return 4294967295;
+  }
 }
 
-String getFach(String fach) {
-  switch (fach) {
-    case "REV":
-    case "RKA":
-      return "Religion";
-    case "ETHI":
-      return "Ethik";
-    case "POWI":
-      return "Politik und Wirtschaft";
-    case "INFO":
-      return "Informatik";
-    case "BIO":
-      return "Biologie";
-    case "SPA":
-      return "Spanisch";
-    case "SPO":
-      return "Sport";
-    case "EK":
-      return "Erdkunde";
-    case "MU":
-      return "Musik";
-    case "KU":
-      return "Kunst";
-    case "CH":
-      return "Chemie";
-    case "PH":
-      return "Physik";
-    case "M":
-      return "Mathematik";
-    case "D":
-      return "Deutsch";
-    case "E":
-      return "Englisch";
-    case "F":
-      return "Französisch";
-    case "ITA":
-      return "Italienisch";
-    case "G":
-      return "Geschichte";
-    case "L":
-      return "Latein";
-    case "DSP":
-      return "Darstellendes Spiel";
-    default:
-      return fach;
+String? getDefaultName(String fach) {
+  fach = fach.toUpperCase();
+  if (fach.contains("REV") ||
+      fach.contains("RKA") ||
+      fach.contains("RJÜD")) {
+    return "Religion";
+  } else if (fach.contains("ETH")) {
+    return "Ethik";
   }
+  else if (fach.contains("POWI") || fach.contains("PW")) {
+    return "Politik und Wirtschaft";
+  } else if (fach.contains("INF")) {
+    return "Informatik";
+  } else if (fach.contains("BIO")) {
+    return "Biologie";
+  } else if (fach.contains("DSP")) {
+    return "Darstellendes Spiel";
+  } else if (fach.contains("SPO")) {
+    return "Sport";
+  } else if (fach.contains("EK")) {
+    return "Erdkunde";
+  } else if (fach.contains("GEO")) {
+    return "Geologie";
+  }else if (fach.contains("MU")) {
+    return "Musik";
+  } else if (fach.contains("KU")) {
+    return "Kunst";
+  } else if (fach.contains("PH")) {
+    return "Physik";
+  } else if (fach.contains("CH")) {
+    return "Chemie";
+  } else if (fach.contains("M")) {
+    return "Mathematik";
+  } else if (fach.contains("F")) {
+    return "Französisch";
+  } else if (fach.contains("SPA")) {
+    return "Spanisch";
+  } else if (fach.contains("IT")) {
+    return "Italienisch";
+  } else if (fach.contains("E")) {
+    return "Englisch";
+  } else if (fach.contains("D")) {
+    return "Deutsch";
+  } else if (fach.contains("G")) {
+    return "Geschichte";
+  } else if (fach.contains("L")) {
+    return "Latein";
+  }
+  return null;
 }
 
 List getColors() {

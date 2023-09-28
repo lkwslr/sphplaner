@@ -104,22 +104,37 @@ class Vertretungsplan {
         StorageProvider.vertretungsDate = dates;
         if (vertretungs.isNotEmpty) {
           for (Vertretung vertretung in vertretungs) {
-            if ((vertretung.classes?.trim() ?? "").isEmpty ||
-                StorageProvider.settings.loadAllVertretung ||
+            if ((vertretung.classes?.trim() ?? "").isEmpty || // prüft, ob eine Klasse angegeben ist
+                StorageProvider.settings.loadAllVertretung || // prüft ob alle Vertretungen geladen werden sollen
                 (vertretung.classes?.trim().toLowerCase() ?? "").contains(
-                    StorageProvider.user.course?.toLowerCase() ?? "")) {
+                    StorageProvider.user.course?.toLowerCase() ?? "") || // prüft, ob die Klasse des benutzers angegeben ist
+                (StorageProvider.user.school == 5135 &&
+                    int.tryParse(StorageProvider.user.grade ?? "0")! >= 11 &&
+                    vertretung.subject.value != null) || vertretung.placeholder) { //letztes testet, ob man bei der krs in der oberstufe bei der vertretung das fach hat, ggf logic gate prüfen
               Vertretung? test = await isar.vertretungs
                   .where()
                   .dateDayOfWeekHourEqualTo(
                       vertretung.date, vertretung.dayOfWeek, vertretung.hour)
-                  .findFirst();
+                  .findFirst(); //testet, ob schon vertretung zu dem zeitpunkt vorhanden
               if (test == null || test.subject.value != null) {
+                dates.remove(vertretung.date);
                 await isar.writeTxn(() async {
                   await isar.vertretungs.put(vertretung);
                   await vertretung.subject.save();
                 });
               }
             }
+          }
+        }
+        if (dates.isNotEmpty) {
+          for (String date in dates) {
+            await isar.writeTxn(() async {
+              await isar.vertretungs.put(Vertretung()
+                ..hour = 0
+                ..dayOfWeek = 0
+                ..date = date
+                ..placeholder = true);
+            });
           }
         }
       }

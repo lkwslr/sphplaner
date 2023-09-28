@@ -24,5 +24,7 @@ class Vertretung {
   String? type;
   String? note;
 
+  bool placeholder = false;
+
   final user = IsarLink<User>();
 }

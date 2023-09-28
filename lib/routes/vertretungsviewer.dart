@@ -53,7 +53,14 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
   }
 
   _buildTab(String date, StorageNotifier notify) {
-    if (date == "Keine Vertretung vorhanden") {
+    List<Vertretung> vertretungs = StorageProvider.isar.vertretungs
+        .where()
+        .dateEqualToAnyDayOfWeekHour(date)
+        .filter()
+        .placeholderEqualTo(false)
+        .findAllSync();
+
+    if (vertretungs.isEmpty) {
       return LayoutBuilder(
           builder: (context, constraints) => RefreshIndicator(
               child: SingleChildScrollView(
@@ -62,7 +69,7 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                     padding: const EdgeInsets.all(16),
                     width: double.infinity,
                     child: const Text(
-                      "Es konnte keine Vertretung geladen werden!",
+                      "Es ist keine Vertretung vorhanden!",
                       textAlign: TextAlign.center,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -72,10 +79,6 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                 await SPH.update(notify);
               }));
     }
-    List<Vertretung> vertretungs = StorageProvider.isar.vertretungs
-        .where()
-        .dateEqualToAnyDayOfWeekHour(date)
-        .findAllSync();
 
     return RefreshIndicator(
         child: ListView.builder(
@@ -109,8 +112,8 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                                     .value
                                     ?.subjectName
                                     .toString() ??
-                                vertretungs[index]
-                                    .vertrSubject ?? "?",
+                                vertretungs[index].vertrSubject ??
+                                "?",
                             overflow: TextOverflow.fade,
                             maxLines: 1,
                             style: const TextStyle(
@@ -174,8 +177,10 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold))),
                               Expanded(
-                                  child: Text("${vertretungs[index].classes}",
-                                    textAlign: TextAlign.left,)),
+                                  child: Text(
+                                "${vertretungs[index].classes}",
+                                textAlign: TextAlign.left,
+                              )),
                             ],
                           ),
                       ],

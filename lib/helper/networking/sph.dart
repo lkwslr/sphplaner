@@ -52,13 +52,13 @@ class SPH {
         _sid.isEmpty) {
       CookieStore.clearCookies();
       http.Response loginResponse =
-          await post("https://login.schulportal.hessen.de", {
+          await post("https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school", {
         "value":
             "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
       });
 
-      if (loginResponse.statusCode == 200) {
-        loginResponse = await post("https://login.schulportal.hessen.de", {
+      if (loginResponse.statusCode != 302) {
+        loginResponse = await post("https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school", {
           "value":
               "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
         });
@@ -337,7 +337,8 @@ class SPH {
       notify.notify("main");
       await TimeTable.downloadTimetable();
       notify.notifyAll(["stundenplan"]);
-    } catch (e) {
+    } catch (e, s) {
+      print(s);
       errors.add({
         "type": "Der Stundenplan konnte nicht aktualisiert werden.",
         "error": e

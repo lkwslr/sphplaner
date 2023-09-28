@@ -59,9 +59,10 @@ class _LoginSettings extends State<LoginSettings> {
                               "Bitte achte darauf, dass es vereinzelt zu Problemen kommen kann, "
                               "die dafür sorgen, dass der Vertretungs- oder Stundenplan nicht richtig angezeigt wird. \n"
                               "Einige Einstellungen sind deshalb deaktiviert, lassen sich jedoch auch aktivieren. Tue dies nur auf eigene Gefahr.\n"
-                              "Aktuell wird in Stunden, bei denen zwei Fächer zur Auswahl stehen, das erste genommen.\nDu kannst alle Fächer jedoch bearbeiten, löschen oder auch neue hinzufügen.\n"
+                              "Aktuell wird in Stunden, bei denen zwei Fächer zur Auswahl stehen, das erste genommen. (Bei Schüler*innen der KRS werden die Fächer verwendet, die unter Videokonferenzen zu finden sind!)\nDu kannst alle Fächer jedoch bearbeiten, löschen oder auch neue hinzufügen.\n"
                               "Damit deine Fächer auch im Stundenplan richtig angezeigt werden, müsst du einfach lange auf die entsprechende Stunde klicken.\n\n"
-                              "Du kannst jetzt direkt einige Einstellungen anpassen: "),
+                              "Die Namen und Farben werden automatisch zugeteilt, weshalb es zu Fehlern kommen kann. Die Namen und Farben können jederzeit angepasst werden!"
+                                  "\nDu kannst jetzt direkt einige Einstellungen anpassen: "),
                         ),
                         const Divider(height: 32, color: Colors.transparent),
                         anzeigeName(context, buttonSizeFactorXSmall),

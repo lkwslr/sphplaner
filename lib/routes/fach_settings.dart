@@ -1,9 +1,10 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/defaults.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
+import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
@@ -18,7 +19,6 @@ class FachSettings extends StatefulWidget {
 
 class _FachSettings extends State<FachSettings> {
   late Subject subject;
-  Map colors = jsonDecode(getDefaultColors());
   late Size logicalScreenSize;
   double buttonSizeFactor = 40;
 
@@ -28,6 +28,7 @@ class _FachSettings extends State<FachSettings> {
   @override
   Widget build(BuildContext context) {
     subject = widget.subject;
+    bool isNew = subject.subject == null;
     StorageNotifier notify = PropertyChangeProvider.of<StorageNotifier, String>(
             context,
             listen: true,
@@ -35,12 +36,11 @@ class _FachSettings extends State<FachSettings> {
         .value;
 
     subjectNameController ??= TextEditingController(
-        text: widget.subject.subjectName != widget.subject.subject
-            ? widget.subject.subjectName
+        text: subject.subjectName != subject.subject
+            ? subject.subjectName
             : null);
 
-    subjectController ??=
-        TextEditingController(text: widget.subject.subject ?? "");
+    subjectController ??= TextEditingController(text: subject.subject ?? "");
 
     logicalScreenSize =
         View.of(context).physicalSize / View.of(context).devicePixelRatio;
@@ -217,6 +217,10 @@ class _FachSettings extends State<FachSettings> {
                             await StorageProvider.isar.writeTxn(() async {
                               await StorageProvider.isar.subjects
                                   .delete(subject.id);
+                              await StorageProvider.isar.lessons
+                                  .filter()
+                                  .subject((q) => q.idEqualTo(subject.id))
+                                  .deleteAll(); //TODO: test
                             }).then((value) {
                               notify.notifyAll(["stundenplan", "settings"]);
                               Navigator.of(context).pop("1");
@@ -241,7 +245,11 @@ class _FachSettings extends State<FachSettings> {
       ElevatedButton(
           onPressed: () async {
             await StorageProvider.isar.writeTxn(() async {
-              await StorageProvider.isar.subjects.putBySubject(subject);
+              if (isNew) {
+                await StorageProvider.isar.subjects.putBySubject(subject);
+              } else {
+                await StorageProvider.isar.subjects.put(subject); //TODO: Test
+              }
             }).then((value) {
               notify.notifyAll(["stundenplan", "settings"]);
               Navigator.of(context).pop(subject);

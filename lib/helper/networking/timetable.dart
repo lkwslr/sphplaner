@@ -1,3 +1,4 @@
+import 'package:sphplaner/helper/defaults.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
@@ -22,6 +23,24 @@ class TimeTable {
 
     http.Response response = await SPH.get("/stundenplan.php");
     if (response.statusCode == 200) {
+      List<Map<String, String>> vidcourses = [];
+      if (StorageProvider.user.school == 5135) {
+        http.Response vidresponse = await SPH.get("/videokonferenz.php");
+        if (vidresponse.statusCode == 200) {
+          dom.Document vidkonferenz = parse(vidresponse.body);
+          dom.Element? vidtable = vidkonferenz
+              .getElementById("lgroomtab")
+              ?.getElementsByTagName("tbody")[0];
+          if (vidtable != null) {
+            for (dom.Element vidlistitem
+                in vidtable.getElementsByTagName("tr")) {
+              String name = vidlistitem.getElementsByTagName("td")[0].text;
+              String teacher = vidlistitem.getElementsByTagName("td")[1].text;
+              vidcourses.add({"name": name, "teacher": teacher});
+            }
+          }
+        }
+      }
       dom.Document page = parse(response.body);
       if (page.getElementById("own") != null) {
         dom.Element timetableContainer = page.getElementById("own")!;
@@ -53,58 +72,80 @@ class TimeTable {
                 dom.Element current =
                     tr.getElementsByTagName("td")[currentDay - skippedHours];
                 if (current.attributes['rowspan'] != null) {
-                  dom.Element course = current.querySelector(
-                      "div.stunde")!; //TODO: auswahl ermöglichen, wenn mehrere Fächer möglich
-                  String subjectName =
-                      course.getElementsByTagName("b")[0].text.trim();
-                  String teacher =
-                      course.getElementsByTagName("small")[0].text.trim();
-                  String room = course.text
-                      .trim()
-                      .replaceAll(RegExp(r'\s+'), " ")
-                      .replaceAll(subjectName, "")
-                      .replaceAll(teacher, "")
-                      .trim();
+                  List<dom.Element> allLessons =
+                      current.querySelectorAll("div.stunde");
+                  for (int i = 0; i < allLessons.length; i++) {
+                    dom.Element course = allLessons[i];
+                    String subjectName =
+                        course.getElementsByTagName("b")[0].text.trim();
+                    String teacher =
+                        course.getElementsByTagName("small")[0].text.trim();
+                    if (_checkLesson(subjectName, teacher, vidcourses) ||
+                        (StorageProvider.user.school != 5135)) {
+                      String room = course.text
+                          .trim()
+                          .replaceAll(RegExp(r'\s+'), " ")
+                          .replaceAll(subjectName, "")
+                          .replaceAll(teacher, "")
+                          .trim();
 
-                  Subject? subject = await StorageProvider.isar.subjects
+                      Subject? subject = await StorageProvider.isar.subjects
                           .getBySubject(subjectName);
 
-                  if (subject == null) {
-                    subject = Subject()
-                      ..subject = subjectName
-                      ..subjectName = subjectName
-                      ..teacher = teacher;
+                      if (subject == null) {
+                        subject = Subject()
+                          ..subject = subjectName
+                          ..subjectName = getDefaultName(subjectName)
+                          ..teacher = teacher
+                          ..color = getDefaultColor(subjectName);
 
-                    await isar.writeTxn(() async {
-                      await isar.subjects.putBySubject(subject!);
-                    });
-                  }
+                        await isar.writeTxn(() async {
+                          await isar.subjects.putBySubject(subject!);
+                        });
+                      }
+                      List<Lesson> lessons = [];
+                      Lesson? lesson = await StorageProvider.isar.lessons
+                          .getByDayOfWeekHour(currentDay, currentHour + 1);
 
-                  List<Lesson> lessons = [
-                    Lesson()
-                      ..subject.value = subject
-                      ..dayOfWeek = currentDay
-                      ..hour = currentHour + 1
-                      ..room = room
-                  ];
+                      if (lesson == null) {
+                        lessons.add(Lesson()
+                          ..subject.value = subject
+                          ..dayOfWeek = currentDay
+                          ..hour = currentHour + 1
+                          ..room = room);
+                      } else {
+                        lessons.add(lesson..subject.value = subject
+                          ..room = room);
+                      }
 
-                  if (current.attributes['rowspan'] == "2" &&
-                      currentHour < availableLesson.length - 1) {
-                    availableLesson[currentHour + 1][currentDay - 1] = false;
-                    lessons.add(Lesson()
-                      ..subject.value = subject
-                      ..dayOfWeek = currentDay
-                      ..hour = currentHour + 2
-                      ..room = room);
-                  } else if (currentHour < availableLesson.length - 1) {
-                    availableLesson[currentHour + 1][currentDay - 1] = true;
-                  }
-                  await isar.writeTxn(() async {
-                    await isar.lessons.putAll(lessons);
-                    for (Lesson lesson in lessons) {
-                      await lesson.subject.save();
+                      if (current.attributes['rowspan'] == "2" &&
+                          currentHour < availableLesson.length - 1) {
+                        availableLesson[currentHour + 1][currentDay - 1] =
+                            false;
+                        Lesson? lesson = await StorageProvider.isar.lessons
+                            .getByDayOfWeekHour(currentDay, currentHour + 1);
+
+                        if (lesson == null) {
+                          lessons.add(Lesson()
+                            ..subject.value = subject
+                            ..dayOfWeek = currentDay
+                            ..hour = currentHour + 2
+                            ..room = room);
+                        } else {
+                          lessons.add(lesson..subject.value = subject
+                            ..room = room);
+                        }
+                      } else if (currentHour < availableLesson.length - 1) {
+                        availableLesson[currentHour + 1][currentDay - 1] = true;
+                      }
+                      await isar.writeTxn(() async {
+                        await isar.lessons.putAll(lessons);
+                        for (Lesson lesson in lessons) {
+                          await lesson.subject.save();
+                        }
+                      });
                     }
-                  });
+                  }
                 }
               }
             } else {
@@ -116,5 +157,29 @@ class TimeTable {
         }
       }
     }
+  }
+
+  static _checkLesson(
+      String courseName, String teacher, List<Map<String, String>> vidcourses) {
+    if (courseName.startsWith("Q")) {
+      String courseType =
+          "${courseName.split("_")[1].substring(0, 1).toLowerCase()}k";
+      String lessonName = courseName.split("_")[0].substring(2).toLowerCase();
+
+      for (Map<String, String> course in vidcourses) {
+        if (course['teacher']?.contains(teacher) ?? false) {
+          if (course['name']?.toLowerCase().contains(courseType) ?? false) {
+            if (course['name']
+                    ?.toLowerCase()
+                    .contains(getDefaultName(lessonName)?.toLowerCase() ?? "?????") ??
+                false) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+    return true;
   }
 }

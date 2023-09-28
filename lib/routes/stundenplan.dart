@@ -109,83 +109,101 @@ class _StundenplanState extends State<Stundenplan> {
                       orElse: () => "01.01.1970");
                 } on FormatException catch (_) {}
 
+                Vertretung? vertretung = StorageProvider.isar.vertretungs
+                    .where()
+                    .dateDayOfWeekHourEqualTo(date, day, hour)
+                    .findFirstSync();
+
+                Lesson? lesson = StorageProvider.isar.lessons
+                    .where()
+                    .dayOfWeekHourEqualTo(day, hour)
+                    .findFirstSync();
+
                 if (StorageProvider.settings.showVertretung &&
-                    StorageProvider.isar.vertretungs
-                            .where()
-                            .dateDayOfWeekHourEqualTo(date, day, hour)
-                            .findFirstSync() !=
-                        null) {
+                    vertretung != null) {
                   textcolor = Colors.red;
-                  subject = StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.subject
-                          .value
-                          ?.subjectName ??
-                      StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.vertrSubject ??
-                      "???";
-                  room = StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.room ??
-                      " ";
-                  type = StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.type ??
-                      " ";
-                  note = StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.note ??
-                      " ";
+                  subject = vertretung.subject.value?.subjectName ??
+                      vertretung.vertrSubject ??
+                      "";
+                  if (subject.trim() == "") {
+                    subject = vertretung.subject.value?.subject ?? "???";
+                  }
+                  room = vertretung.room ?? " ";
+                  type = vertretung.type ?? " ";
+                  note = vertretung.note ?? " ";
                   if (["Entfall", "Freisetzung"].contains(type) ||
                       ["fällt aus"].contains(note)) {
                     subject = "---";
                     room = "---";
                   }
-                  color = Color(StorageProvider.isar.vertretungs
-                          .where()
-                          .dateDayOfWeekHourEqualTo(date, day, hour)
-                          .findFirstSync()
-                          ?.subject
-                          .value
-                          ?.color ??
-                      4292600319);
+                  color = Color(vertretung.subject.value?.color ?? 4292600319);
                 } else {
-                  subject = StorageProvider.isar.lessons
-                          .where()
-                          .dayOfWeekHourEqualTo(day, hour)
-                          .findFirstSync()
-                          ?.subject
-                          .value
-                          ?.subjectName ??
-                      " ";
-                  room = StorageProvider.isar.lessons
-                          .where()
-                          .dayOfWeekHourEqualTo(day, hour)
-                          .findFirstSync()
-                          ?.room ??
-                      " ";
-                  color = Color(StorageProvider.isar.lessons
-                          .where()
-                          .dayOfWeekHourEqualTo(day, hour)
-                          .findFirstSync()
-                          ?.subject
-                          .value
-                          ?.color ??
+                  subject = lesson?.subject.value?.subjectName ?? "";
+                  if (subject.trim() == "") {
+                    subject = lesson?.subject.value?.subject ?? " ";
+                  }
+                  room = lesson?.room ?? " ";
+                  color = Color(lesson?.subject.value?.color ??
                       Theme.of(context).colorScheme.secondaryContainer.value);
                 }
 
                 row.add(GestureDetector(
+                  onTap: () async {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                              contentPadding: const EdgeInsets.all(8),
+                              scrollable: true,
+                              title: Text(
+                                  "Informationen zu ${lesson?.subject.value?.subjectName ?? lesson?.subject.value?.subject}"),
+                              content: Container(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                                child: Column(
+                                  children: [
+                                    const Text(
+                                        "Diese Informationen zeigen keine Vertretung an!"),
+                                    const SizedBox(
+                                      height: 16,
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Expanded(
+                                            child: Text("Fachname: ")),
+                                        Expanded(
+                                            child: Text(
+                                                "${lesson?.subject.value?.subjectName}"))
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Expanded(
+                                            child: Text("Fachbezeichnung: ")),
+                                        Expanded(
+                                            child: Text(
+                                                "${lesson?.subject.value?.subject}"))
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Expanded(child: Text("Raum: ")),
+                                        Expanded(child: Text("${lesson?.room}"))
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        const Expanded(child: Text("Lehrer: ")),
+                                        Expanded(
+                                            child: Text(
+                                                "${lesson?.subject.value?.teacher}"))
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ));
+                        });
+                  },
                   onLongPress: () async {
                     await StorageProvider.isar.subjects
                         .where()

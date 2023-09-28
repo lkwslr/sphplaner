@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/homework.dart';
 import 'package:sphplaner/helper/storage/lesson.dart';
+import 'package:sphplaner/helper/storage/log.dart';
 import 'package:sphplaner/helper/storage/settings_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 import 'package:sphplaner/helper/storage/teacher.dart';
@@ -28,7 +29,8 @@ class StorageProvider {
       TeacherSchema,
       LessonSchema,
       HomeworkSchema,
-      VertretungSchema
+      VertretungSchema,
+      LogSchema
     ], name: "sphplaner", directory: dir.path);
 
     _prefs ??= await SharedPreferences.getInstance();

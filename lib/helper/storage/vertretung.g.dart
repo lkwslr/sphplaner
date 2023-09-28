@@ -42,23 +42,28 @@ const VertretungSchema = CollectionSchema(
       name: r'note',
       type: IsarType.string,
     ),
-    r'room': PropertySchema(
+    r'placeholder': PropertySchema(
       id: 5,
+      name: r'placeholder',
+      type: IsarType.bool,
+    ),
+    r'room': PropertySchema(
+      id: 6,
       name: r'room',
       type: IsarType.string,
     ),
     r'teacher': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'teacher',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'type',
       type: IsarType.string,
     ),
     r'vertrSubject': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'vertrSubject',
       type: IsarType.string,
     )
@@ -176,10 +181,11 @@ void _vertretungSerialize(
   writer.writeLong(offsets[2], object.dayOfWeek);
   writer.writeLong(offsets[3], object.hour);
   writer.writeString(offsets[4], object.note);
-  writer.writeString(offsets[5], object.room);
-  writer.writeString(offsets[6], object.teacher);
-  writer.writeString(offsets[7], object.type);
-  writer.writeString(offsets[8], object.vertrSubject);
+  writer.writeBool(offsets[5], object.placeholder);
+  writer.writeString(offsets[6], object.room);
+  writer.writeString(offsets[7], object.teacher);
+  writer.writeString(offsets[8], object.type);
+  writer.writeString(offsets[9], object.vertrSubject);
 }
 
 Vertretung _vertretungDeserialize(
@@ -195,10 +201,11 @@ Vertretung _vertretungDeserialize(
   object.hour = reader.readLongOrNull(offsets[3]);
   object.id = id;
   object.note = reader.readStringOrNull(offsets[4]);
-  object.room = reader.readStringOrNull(offsets[5]);
-  object.teacher = reader.readStringOrNull(offsets[6]);
-  object.type = reader.readStringOrNull(offsets[7]);
-  object.vertrSubject = reader.readStringOrNull(offsets[8]);
+  object.placeholder = reader.readBool(offsets[5]);
+  object.room = reader.readStringOrNull(offsets[6]);
+  object.teacher = reader.readStringOrNull(offsets[7]);
+  object.type = reader.readStringOrNull(offsets[8]);
+  object.vertrSubject = reader.readStringOrNull(offsets[9]);
   return object;
 }
 
@@ -220,12 +227,14 @@ P _vertretungDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
       return (reader.readStringOrNull(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1363,6 +1372,16 @@ extension VertretungQueryFilter
     });
   }
 
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      placeholderEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'placeholder',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2053,6 +2072,18 @@ extension VertretungQuerySortBy
     });
   }
 
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByPlaceholder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'placeholder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByPlaceholderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'placeholder', Sort.desc);
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByRoom() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'room', Sort.asc);
@@ -2176,6 +2207,18 @@ extension VertretungQuerySortThenBy
     });
   }
 
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByPlaceholder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'placeholder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByPlaceholderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'placeholder', Sort.desc);
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByRoom() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'room', Sort.asc);
@@ -2260,6 +2303,12 @@ extension VertretungQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByPlaceholder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'placeholder');
+    });
+  }
+
   QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByRoom(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2324,6 +2373,12 @@ extension VertretungQueryProperty
   QueryBuilder<Vertretung, String?, QQueryOperations> noteProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'note');
+    });
+  }
+
+  QueryBuilder<Vertretung, bool, QQueryOperations> placeholderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'placeholder');
     });
   }
 

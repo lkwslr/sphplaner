@@ -33,6 +33,7 @@ class CookieStore {
         cookies += "${cookie.key}=${cookie.value}; ";
       }
     }
+
     return cookies;
   }
 

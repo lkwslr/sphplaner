@@ -89,18 +89,24 @@ class SettingsProvider {
   String get updateLockText => _getSharedPrefs("updateLock") ?? "";
 
   bool get update {
-    return (_prefs?.getInt("version") ?? -1) < (int.tryParse(buildNumber ?? "") ?? 0);
+    return (_prefs?.getInt("version") ?? -1) <
+        (int.tryParse(buildNumber ?? "") ?? 0);
   }
 
   set update(bool value) {
     _prefs?.setInt("version", int.tryParse(buildNumber ?? "") ?? 0);
   }
 
-  bool get showVertretung => _prefs?.getBool("showVertretung") ?? false;
+  bool get showVertretung => _prefs?.getBool("showVertretung") ?? true;
 
   set showVertretung(bool value) => _prefs?.setBool("showVertretung", value);
 
   bool get loadAllVertretung => _prefs?.getBool("loadAllVertretung") ?? false;
 
-  set loadAllVertretung(bool value) => _prefs?.setBool("loadAllVertretung", value);
+  set loadAllVertretung(bool value) =>
+      _prefs?.setBool("loadAllVertretung", value);
+
+  bool get logging => _prefs?.getBool("logging") ?? true;
+
+  set logging(bool value) => _prefs?.setBool("logging", value);
 }

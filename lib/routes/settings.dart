@@ -506,6 +506,11 @@ Widget colors(BuildContext context, double buttonSizeFactorSmall) {
       faecher.add(const SizedBox(height: 8));
     }
 
+    String subjectName = subject.subjectName ?? "";
+    if (subjectName.trim() == "") {
+      subjectName = subject.subject ?? "???";
+    }
+
     faecher.add(ElevatedButton(
         onPressed: () {
           Navigator.push(
@@ -523,7 +528,8 @@ Widget colors(BuildContext context, double buttonSizeFactorSmall) {
             children: [
               Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("${subject.subjectName} (${subject.subject})",
+                  child: Text(
+                      "$subjectName ${subjectName == subject.subject ? "" : "(${subject.subject})"}",
                       style: const TextStyle(color: Colors.black))),
               const Align(
                   alignment: Alignment.centerRight,

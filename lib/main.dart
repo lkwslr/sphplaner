@@ -21,9 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
 import 'package:sphplaner/helper/networking/sph.dart';
+import 'package:sphplaner/helper/storage/log.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/drawer.dart';
@@ -44,6 +46,22 @@ Future<void> main() async {
   Intl.defaultLocale = "de_DE";
   app_info.init();
   StorageProvider.initializeStorage();
+
+/*Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((event) {print("event");});
+    Logger.root.onRecord.listen((record) async {
+      print(
+          '${record.loggerName} - ${record.level.name}: ${record.time}: ${record.message}');
+      await StorageProvider.isar.writeTxn(() async {
+        await StorageProvider.isar.logs.put(
+            Log()
+              ..name = record.loggerName
+              ..level = record.level.name
+              ..time = record.time.millisecondsSinceEpoch
+              ..message = record.message
+        );
+      });
+    });*/
 
   runApp(PropertyChangeProvider<StorageNotifier, String>(
       value: StorageNotifier(), child: const SPHPlaner()));
@@ -76,6 +94,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   bool loaded = false;
   ValueNotifier<bool> loading = ValueNotifier(false);
   String result = "Klicken, um in den Online-Modus zu wechseln";
+  final log = Logger('SPHPlaner');
 
   @override
   void initState() {
@@ -90,6 +109,7 @@ class _SPHPlaner extends State<SPHPlaner> {
           FlutterNativeSplash.remove();
         });
       }
+
       setState(() {
         loaded = true;
       });
