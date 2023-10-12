@@ -43,9 +43,9 @@ int getDefaultColor(String fach) {
     return Colors.amber.shade100.value;
   } else if (fach.contains("D")) {
     return Colors.red.shade100.value;
-  } else if (fach.contains("G")) {
+  } else if (fach.contains("G") && !fach.contains("_G")) {
     return Colors.brown.shade100.value;
-  } else if (fach.contains("L")) {
+  } else if (fach.contains("L") && !fach.contains("_L")) {
     return Colors.indigo.shade100.value;
   } else {
     return 4294967295;
@@ -95,9 +95,9 @@ String? getDefaultName(String fach) {
     return "Englisch";
   } else if (fach.contains("D")) {
     return "Deutsch";
-  } else if (fach.contains("G")) {
+  } else if (fach.contains("G") && !fach.contains("_G")) {
     return "Geschichte";
-  } else if (fach.contains("L")) {
+  } else if (fach.contains("L") && !fach.contains("_L")) {
     return "Latein";
   }
   return null;

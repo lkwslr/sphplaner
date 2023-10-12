@@ -473,6 +473,7 @@ Widget plan(StorageNotifier notify) {
             child: ListTile(
               title: Text("Gesamten Vertretungsplan laden"),
               subtitle: Text(
+                "ACHTUNG: NUR AKTIVIEREN, WENN KEINE VERTRETUNG ANGEZEIGT WIRD!!!"
                 "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
                 "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
                 style: TextStyle(fontStyle: FontStyle.italic),

@@ -248,7 +248,7 @@ class _FachSettings extends State<FachSettings> {
               if (isNew) {
                 await StorageProvider.isar.subjects.putBySubject(subject);
               } else {
-                await StorageProvider.isar.subjects.put(subject); //TODO: Test
+                await StorageProvider.isar.subjects.put(subject);
               }
             }).then((value) {
               notify.notifyAll(["stundenplan", "settings"]);
