@@ -1,0 +1,8 @@
+flutter_launcher_icons: # dart run flutter_launcher_icons
+  image_path: "assets/splash_full_bg.png"
+  image_path_ios: "assets/splash_full_bg.png"
+  android: true
+  remove_alpha_ios: true
+  ios: true
+  adaptive_icon_foreground: "assets/splash_white.png"
+  adaptive_icon_background: "assets/adaptive_background.png"
