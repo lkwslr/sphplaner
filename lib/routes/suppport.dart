@@ -8,6 +8,9 @@ class Support extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(Theme.of(context).colorScheme.background.value == 4294835455);
+    //dark: 4279639076
+    //light: 4294835455
     return Scaffold(
       appBar: AppBar(
         title: const Text("Unterstütze diese App"),
@@ -15,7 +18,7 @@ class Support extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          const Image(image: AssetImage("assets/sph_white_wide.png")),
+          Image(image: Theme.of(context).colorScheme.background.value == 4294835455 ? const AssetImage("assets/sph_black_wide.png") : const AssetImage("assets/sph_white_wide.png")),
           ListTile(
             title: const Text("Teile die App!"),
             subtitle: const Text(

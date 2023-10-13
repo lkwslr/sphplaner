@@ -35,6 +35,7 @@ class StorageProvider {
 
     _prefs ??= await SharedPreferences.getInstance();
     settings.initializeSettings(_isar!, _prefs!);
+    settings.updateLockText = "";
   }
 
   static Isar get isar {

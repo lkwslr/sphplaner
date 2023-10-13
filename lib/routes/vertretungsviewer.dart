@@ -20,13 +20,20 @@ class _VertretungsViewerState extends State<VertretungsViewer> {
     return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ['vertretung'],
         builder: (context, notify, child) {
+
           List<String> dates = StorageProvider.isar.vertretungs
               .where()
-              .sortByDate()
               .distinctByDate()
               .findAllSync()
               .map((e) => e.date ?? "01.01.1970")
               .toList();
+          dates.sort((a, b) => Comparable.compare(
+              DateTime.parse(
+                  "${a.split(".")[2]}-${a.split(".")[1]}-${a.split(".")[0]}")
+                  .millisecondsSinceEpoch,
+              DateTime.parse(
+                  "${b.split(".")[2]}-${b.split(".")[1]}-${b.split(".")[0]}")
+                  .millisecondsSinceEpoch));
           if (dates.isEmpty) {
             dates = ['Keine Vertretung vorhanden'];
           }
