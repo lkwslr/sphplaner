@@ -16,6 +16,11 @@ class Homework {
 
   bool finished = false;
 
+  bool online = false;
+
+  @Index(unique: true, replace: true)
+  String? onlineIdentifier;
+
   @Backlink(to: 'homeworks')
   final user = IsarLink<User>();
 

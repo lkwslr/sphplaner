@@ -343,7 +343,8 @@ class _CreateHAState extends State<CreateHA> {
                     ..subject.value = subject
                     ..title = titel.text
                     ..description = beschreibung.text
-                    ..due = date.millisecondsSinceEpoch;
+                    ..due = date.millisecondsSinceEpoch
+                  ..onlineIdentifier = "OFFLINEID=${DateTime.now().microsecondsSinceEpoch}";
 
                   await StorageProvider.isar.writeTxn(() async {
                     await StorageProvider.isar.homeworks.put(homework);

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/crypto.dart';
 import 'package:sphplaner/helper/networking/cookie.dart';
+import 'package:sphplaner/helper/networking/homework.dart';
 import 'package:sphplaner/helper/networking/sph_settings.dart';
 import 'package:sphplaner/helper/networking/timetable.dart';
 import 'package:sphplaner/helper/networking/vertretungsplan.dart';
@@ -337,8 +338,7 @@ class SPH {
       notify.notify("main");
       await TimeTable.downloadTimetable();
       notify.notifyAll(["stundenplan"]);
-    } catch (e, s) {
-      print(s);
+    } catch (e) {
       errors.add({
         "type": "Der Stundenplan konnte nicht aktualisiert werden.",
         "error": e
@@ -364,6 +364,18 @@ class SPH {
     } catch (e) {
       errors.add({
         "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
+    try {
+      StorageProvider.settings.updateLockText = "Aktualisiere Hausaufgaben...";
+      notify.notify("main");
+      await HomeWork.downloadHomework();
+      notify.notifyAll(["homework"]);
+    } catch (e) {
+      errors.add({
+        "type": "Die Hausaufgaben konnte nicht aktualisiert werden.",
         "error": e
       });
     }

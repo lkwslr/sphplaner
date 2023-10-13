@@ -32,8 +32,18 @@ const HomeworkSchema = CollectionSchema(
       name: r'finished',
       type: IsarType.bool,
     ),
-    r'title': PropertySchema(
+    r'online': PropertySchema(
       id: 3,
+      name: r'online',
+      type: IsarType.bool,
+    ),
+    r'onlineIdentifier': PropertySchema(
+      id: 4,
+      name: r'onlineIdentifier',
+      type: IsarType.string,
+    ),
+    r'title': PropertySchema(
+      id: 5,
       name: r'title',
       type: IsarType.string,
     )
@@ -43,7 +53,21 @@ const HomeworkSchema = CollectionSchema(
   deserialize: _homeworkDeserialize,
   deserializeProp: _homeworkDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'onlineIdentifier': IndexSchema(
+      id: -5919514136883663529,
+      name: r'onlineIdentifier',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'onlineIdentifier',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    )
+  },
   links: {
     r'user': LinkSchema(
       id: 2460500947705068757,
@@ -79,6 +103,12 @@ int _homeworkEstimateSize(
     }
   }
   {
+    final value = object.onlineIdentifier;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.title;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -96,7 +126,9 @@ void _homeworkSerialize(
   writer.writeString(offsets[0], object.description);
   writer.writeLong(offsets[1], object.due);
   writer.writeBool(offsets[2], object.finished);
-  writer.writeString(offsets[3], object.title);
+  writer.writeBool(offsets[3], object.online);
+  writer.writeString(offsets[4], object.onlineIdentifier);
+  writer.writeString(offsets[5], object.title);
 }
 
 Homework _homeworkDeserialize(
@@ -110,7 +142,9 @@ Homework _homeworkDeserialize(
   object.due = reader.readLongOrNull(offsets[1]);
   object.finished = reader.readBool(offsets[2]);
   object.id = id;
-  object.title = reader.readStringOrNull(offsets[3]);
+  object.online = reader.readBool(offsets[3]);
+  object.onlineIdentifier = reader.readStringOrNull(offsets[4]);
+  object.title = reader.readStringOrNull(offsets[5]);
   return object;
 }
 
@@ -128,6 +162,10 @@ P _homeworkDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -146,6 +184,65 @@ void _homeworkAttach(IsarCollection<dynamic> col, Id id, Homework object) {
   object.id = id;
   object.user.attach(col, col.isar.collection<User>(), r'user', id);
   object.subject.attach(col, col.isar.collection<Subject>(), r'subject', id);
+}
+
+extension HomeworkByIndex on IsarCollection<Homework> {
+  Future<Homework?> getByOnlineIdentifier(String? onlineIdentifier) {
+    return getByIndex(r'onlineIdentifier', [onlineIdentifier]);
+  }
+
+  Homework? getByOnlineIdentifierSync(String? onlineIdentifier) {
+    return getByIndexSync(r'onlineIdentifier', [onlineIdentifier]);
+  }
+
+  Future<bool> deleteByOnlineIdentifier(String? onlineIdentifier) {
+    return deleteByIndex(r'onlineIdentifier', [onlineIdentifier]);
+  }
+
+  bool deleteByOnlineIdentifierSync(String? onlineIdentifier) {
+    return deleteByIndexSync(r'onlineIdentifier', [onlineIdentifier]);
+  }
+
+  Future<List<Homework?>> getAllByOnlineIdentifier(
+      List<String?> onlineIdentifierValues) {
+    final values = onlineIdentifierValues.map((e) => [e]).toList();
+    return getAllByIndex(r'onlineIdentifier', values);
+  }
+
+  List<Homework?> getAllByOnlineIdentifierSync(
+      List<String?> onlineIdentifierValues) {
+    final values = onlineIdentifierValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'onlineIdentifier', values);
+  }
+
+  Future<int> deleteAllByOnlineIdentifier(
+      List<String?> onlineIdentifierValues) {
+    final values = onlineIdentifierValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'onlineIdentifier', values);
+  }
+
+  int deleteAllByOnlineIdentifierSync(List<String?> onlineIdentifierValues) {
+    final values = onlineIdentifierValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'onlineIdentifier', values);
+  }
+
+  Future<Id> putByOnlineIdentifier(Homework object) {
+    return putByIndex(r'onlineIdentifier', object);
+  }
+
+  Id putByOnlineIdentifierSync(Homework object, {bool saveLinks = true}) {
+    return putByIndexSync(r'onlineIdentifier', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByOnlineIdentifier(List<Homework> objects) {
+    return putAllByIndex(r'onlineIdentifier', objects);
+  }
+
+  List<Id> putAllByOnlineIdentifierSync(List<Homework> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'onlineIdentifier', objects,
+        saveLinks: saveLinks);
+  }
 }
 
 extension HomeworkQueryWhereSort on QueryBuilder<Homework, Homework, QWhere> {
@@ -219,6 +316,72 @@ extension HomeworkQueryWhere on QueryBuilder<Homework, Homework, QWhereClause> {
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterWhereClause> onlineIdentifierIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'onlineIdentifier',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterWhereClause>
+      onlineIdentifierIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'onlineIdentifier',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterWhereClause> onlineIdentifierEqualTo(
+      String? onlineIdentifier) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'onlineIdentifier',
+        value: [onlineIdentifier],
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterWhereClause>
+      onlineIdentifierNotEqualTo(String? onlineIdentifier) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'onlineIdentifier',
+              lower: [],
+              upper: [onlineIdentifier],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'onlineIdentifier',
+              lower: [onlineIdentifier],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'onlineIdentifier',
+              lower: [onlineIdentifier],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'onlineIdentifier',
+              lower: [],
+              upper: [onlineIdentifier],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -505,6 +668,170 @@ extension HomeworkQueryFilter
     });
   }
 
+  QueryBuilder<Homework, Homework, QAfterFilterCondition> onlineEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'online',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'onlineIdentifier',
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'onlineIdentifier',
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'onlineIdentifier',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'onlineIdentifier',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'onlineIdentifier',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'onlineIdentifier',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterFilterCondition>
+      onlineIdentifierIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'onlineIdentifier',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Homework, Homework, QAfterFilterCondition> titleIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -721,6 +1048,30 @@ extension HomeworkQuerySortBy on QueryBuilder<Homework, Homework, QSortBy> {
     });
   }
 
+  QueryBuilder<Homework, Homework, QAfterSortBy> sortByOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'online', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> sortByOnlineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'online', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> sortByOnlineIdentifier() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'onlineIdentifier', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> sortByOnlineIdentifierDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'onlineIdentifier', Sort.desc);
+    });
+  }
+
   QueryBuilder<Homework, Homework, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -784,6 +1135,30 @@ extension HomeworkQuerySortThenBy
     });
   }
 
+  QueryBuilder<Homework, Homework, QAfterSortBy> thenByOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'online', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> thenByOnlineDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'online', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> thenByOnlineIdentifier() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'onlineIdentifier', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QAfterSortBy> thenByOnlineIdentifierDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'onlineIdentifier', Sort.desc);
+    });
+  }
+
   QueryBuilder<Homework, Homework, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -818,6 +1193,20 @@ extension HomeworkQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Homework, Homework, QDistinct> distinctByOnline() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'online');
+    });
+  }
+
+  QueryBuilder<Homework, Homework, QDistinct> distinctByOnlineIdentifier(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'onlineIdentifier',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Homework, Homework, QDistinct> distinctByTitle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -849,6 +1238,18 @@ extension HomeworkQueryProperty
   QueryBuilder<Homework, bool, QQueryOperations> finishedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'finished');
+    });
+  }
+
+  QueryBuilder<Homework, bool, QQueryOperations> onlineProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'online');
+    });
+  }
+
+  QueryBuilder<Homework, String?, QQueryOperations> onlineIdentifierProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'onlineIdentifier');
     });
   }
 

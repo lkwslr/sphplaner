@@ -79,8 +79,8 @@ updateHandler(String action) {
     case "reset":
       {
         return StorageProvider.deleteAll().then((value) {
-          StorageProvider.initializeStorage()
-              .then((value) => StorageProvider.settings.update = true);
+          StorageProvider.initializeStorage().then((value) =>
+          StorageProvider.settings.update = true);
         });
       }
     case "ignore":
@@ -120,237 +120,181 @@ class _SPHPlaner extends State<SPHPlaner> {
   @override
   Widget build(BuildContext context) {
     if (!loaded) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator(),);
     }
 
     return OrientationBuilder(builder: (context, _) {
       return PropertyChangeConsumer<StorageNotifier, String>(
-        properties: const ['theme'],
-        builder: (context, notify, child) {
-          /*bool autoUpdate = StorageProvider.user?.autoUpdate ?? true;
+        properties: const ['theme'], builder: (context, notify, child) {
+        /*bool autoUpdate = StorageProvider.user?.autoUpdate ?? true;
         if (autoUpdate) {
           SPH.update(notify!);
         }*/
 
-          return DynamicColorBuilder(
-              builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            ColorScheme lightColorScheme;
-            ColorScheme darkColorScheme;
+        return DynamicColorBuilder(
+            builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+              ColorScheme lightColorScheme;
+              ColorScheme darkColorScheme;
 
-            if (lightDynamic != null && darkDynamic != null) {
-              lightColorScheme = lightDynamic.harmonized();
+              if (lightDynamic != null && darkDynamic != null) {
+                lightColorScheme = lightDynamic.harmonized();
 
-              darkColorScheme = darkDynamic.harmonized();
-              lightColorScheme = lightColorScheme.copyWith(
-                primary: sphBlue,
-                onPrimary: const Color(0xffdde3ee),
-                primaryContainer: sphBlue,
-              );
-              darkColorScheme = darkColorScheme.copyWith(
-                primary: sphBlue,
-                onPrimary: const Color(0xffdde3ee),
-                primaryContainer: sphBlue,
-              );
-            } else {
-              lightColorScheme = defaultLightColorScheme;
-              darkColorScheme = defaultDarkColorScheme;
-            }
+                darkColorScheme = darkDynamic.harmonized();
+                lightColorScheme = lightColorScheme.copyWith(primary: sphBlue,
+                  onPrimary: const Color(0xffdde3ee),
+                  primaryContainer: sphBlue,);
+                darkColorScheme = darkColorScheme.copyWith(primary: sphBlue,
+                  onPrimary: const Color(0xffdde3ee),
+                  primaryContainer: sphBlue,);
+              } else {
+                lightColorScheme = defaultLightColorScheme;
+                darkColorScheme = defaultDarkColorScheme;
+              }
 
-            InputDecorationTheme customLightInputTheme = InputDecorationTheme(
-                enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 1, color: lightColorScheme.outline),
-                    borderRadius: BorderRadius.circular(4)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 2, color: lightColorScheme.primary),
-                    borderRadius: BorderRadius.circular(4)),
-                errorBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 1, color: lightColorScheme.error),
-                    borderRadius: BorderRadius.circular(4)),
-                focusedErrorBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 2, color: lightColorScheme.error),
-                    borderRadius: BorderRadius.circular(4)));
+              InputDecorationTheme customLightInputTheme = InputDecorationTheme(
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 1, color: lightColorScheme.outline),
+                      borderRadius: BorderRadius.circular(4)),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 2, color: lightColorScheme.primary),
+                      borderRadius: BorderRadius.circular(4)),
+                  errorBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 1, color: lightColorScheme.error),
+                      borderRadius: BorderRadius.circular(4)),
+                  focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 2, color: lightColorScheme.error),
+                      borderRadius: BorderRadius.circular(4)));
 
-            InputDecorationTheme customDarkInputTheme = InputDecorationTheme(
-                enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 1, color: darkColorScheme.outline),
-                    borderRadius: BorderRadius.circular(4)),
-                focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 2, color: darkColorScheme.primary),
-                    borderRadius: BorderRadius.circular(4)),
-                errorBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 1, color: darkColorScheme.error),
-                    borderRadius: BorderRadius.circular(4)),
-                focusedErrorBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(width: 2, color: darkColorScheme.error),
-                    borderRadius: BorderRadius.circular(4)));
+              InputDecorationTheme customDarkInputTheme = InputDecorationTheme(
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 1, color: darkColorScheme.outline),
+                      borderRadius: BorderRadius.circular(4)),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 2, color: darkColorScheme.primary),
+                      borderRadius: BorderRadius.circular(4)),
+                  errorBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 1, color: darkColorScheme.error),
+                      borderRadius: BorderRadius.circular(4)),
+                  focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(
+                      width: 2, color: darkColorScheme.error),
+                      borderRadius: BorderRadius.circular(4)));
 
-            return MaterialApp(
-              title: 'SPH Planer',
-              theme: ThemeData(
-                colorScheme: lightColorScheme,
-                useMaterial3: true,
-                inputDecorationTheme: customLightInputTheme,
-              ),
-              darkTheme: ThemeData(
-                colorScheme: darkColorScheme,
-                useMaterial3: true,
-                inputDecorationTheme: customDarkInputTheme,
-              ),
-              themeMode: StorageProvider.settings.theme,
-              home: PropertyChangeConsumer<StorageNotifier, String>(
-                  properties: const ['main'],
-                  builder: (context, notify, child) {
-                    if (StorageProvider.loggedIn.isNotEmpty) {
-                      if (StorageProvider.emailCheck.isNotEmpty &&
-                          !StorageProvider.dialog) {
-                        StorageProvider.dialog = true;
-                        Future.delayed(
-                            Duration.zero,
-                            () => showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    scrollable: true,
-                                    title: const Text("E-Mail ändern"),
-                                    content: Text(StorageProvider.emailCheck),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            StorageProvider.dialog = false;
-                                            StorageProvider.wrongPassword =
-                                                false;
-                                            StorageProvider.deleteAll()
-                                                .then((value) {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          const SPHPlaner()),
-                                                  ModalRoute.withName('/'));
-                                            });
-                                          },
-                                          child: const Text("OK")),
-                                    ],
-                                  );
-                                }));
-                      }
-                      if (StorageProvider.wrongPassword &&
-                          !StorageProvider.dialog) {
-                        StorageProvider.dialog = true;
-                        Future.delayed(
-                            Duration.zero,
-                            () => showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (BuildContext context) {
-                                  ValueNotifier<bool> obscure =
-                                      ValueNotifier<bool>(true);
+              return MaterialApp(
+                title: 'SPH Planer',
+                theme: ThemeData(colorScheme: lightColorScheme,
+                  useMaterial3: true,
+                  inputDecorationTheme: customLightInputTheme,),
+                darkTheme: ThemeData(colorScheme: darkColorScheme,
+                  useMaterial3: true,
+                  inputDecorationTheme: customDarkInputTheme,),
+                themeMode: StorageProvider.settings.theme,
+                home: PropertyChangeConsumer<StorageNotifier, String>(
+                    properties: const ['main'],
+                    builder: (context, notify, child) {
+                      if (StorageProvider.loggedIn.isNotEmpty) {
+                        if (StorageProvider.emailCheck.isNotEmpty &&
+                            !StorageProvider.dialog) {
+                          StorageProvider.dialog = true;
+                          Future.delayed(Duration.zero, () =>
+                              showDialog(context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(scrollable: true,
+                                      title: const Text("E-Mail ändern"),
+                                      content: Text(StorageProvider.emailCheck),
+                                      actions: [TextButton(onPressed: () {
+                                        StorageProvider.dialog = false;
+                                        StorageProvider.wrongPassword = false;
+                                        StorageProvider.deleteAll().then((
+                                            value) {
+                                          Navigator.pushAndRemoveUntil(context,
+                                              MaterialPageRoute(builder: (
+                                                  _) => const SPHPlaner()),
+                                              ModalRoute.withName('/'));
+                                        });
+                                      }, child: const Text("OK")),
+                                      ],);
+                                  }));
+                        }
+                        if (StorageProvider.wrongPassword &&
+                            !StorageProvider.dialog) {
+                          StorageProvider.dialog = true;
+                          Future.delayed(Duration.zero, () =>
+                              showDialog(context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    ValueNotifier<bool> obscure = ValueNotifier<
+                                        bool>(true);
 
-                                  TextEditingController input =
-                                      TextEditingController();
+                                    TextEditingController input = TextEditingController();
 
-                                  return AlertDialog(
-                                    scrollable: true,
-                                    title: const Text("Passwort"),
-                                    content: Column(
-                                      children: [
+                                    return AlertDialog(scrollable: true,
+                                      title: const Text("Passwort"),
+                                      content: Column(children: [
                                         const Text(
                                             "Anscheinend hast du dein Passwort außerhalb der App geändert. Damit die App weiterhin funktioniert, gib bitte das neue Passwort ein!"),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
+                                        const SizedBox(height: 8,),
                                         ValueListenableBuilder(
                                           valueListenable: obscure,
                                           builder: (context, bool value, _) {
-                                            return TextField(
-                                              controller: input,
+                                            return TextField(controller: input,
                                               obscureText: value,
                                               decoration: InputDecoration(
-                                                  border:
-                                                      const OutlineInputBorder(),
-                                                  labelText:
-                                                      'Aktuelles Passwort',
+                                                  border: const OutlineInputBorder(),
+                                                  labelText: 'Aktuelles Passwort',
                                                   suffixIcon: GestureDetector(
                                                     onTap: () {
                                                       obscure.value = !value;
-                                                    },
-                                                    child: Icon(
-                                                        Icons.remove_red_eye,
-                                                        color: value
-                                                            ? null
-                                                            : Theme.of(context)
-                                                                .colorScheme
-                                                                .primary),
-                                                  )),
-                                            );
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            StorageProvider.dialog = false;
-                                            StorageProvider.wrongPassword =
-                                                false;
-                                            StorageProvider.deleteAll()
-                                                .then((value) {
-                                              Navigator.pushAndRemoveUntil(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          const SPHPlaner()),
-                                                  ModalRoute.withName('/'));
-                                            });
-                                          },
-                                          child: const Text("Abmelden")),
-                                      ElevatedButton(
-                                          onPressed: () {
-                                            StorageProvider.savePassword(
-                                                StorageProvider.loggedIn,
-                                                input.text);
-                                            StorageProvider.wrongPassword =
-                                                false;
-                                            StorageProvider.dialog = false;
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text("Speichern")),
-                                    ],
-                                  );
-                                }));
-                      }
-                      return Scaffold(
-                        appBar: AppBar(
+                                                    }, child: Icon(Icons
+                                                      .remove_red_eye,
+                                                      color: value
+                                                          ? null
+                                                          : Theme
+                                                          .of(context)
+                                                          .colorScheme
+                                                          .primary),)),);
+                                          },)
+                                      ],),
+                                      actions: [
+                                        TextButton(onPressed: () {
+                                          StorageProvider.dialog = false;
+                                          StorageProvider.wrongPassword = false;
+                                          StorageProvider.deleteAll().then((
+                                              value) {
+                                            Navigator.pushAndRemoveUntil(
+                                                context, MaterialPageRoute(
+                                                builder: (
+                                                    _) => const SPHPlaner()),
+                                                ModalRoute.withName('/'));
+                                          });
+                                        }, child: const Text("Abmelden")),
+                                        ElevatedButton(onPressed: () {
+                                          StorageProvider.savePassword(
+                                              StorageProvider.loggedIn,
+                                              input.text);
+                                          StorageProvider.wrongPassword = false;
+                                          StorageProvider.dialog = false;
+                                          Navigator.of(context).pop();
+                                        }, child: const Text("Speichern")),
+                                      ],);
+                                  }));
+                        }
+                        return Scaffold(appBar: AppBar(
                           title: Text(StorageProvider.settings.title),
-                          bottom: !StorageProvider.settings.viewMode
-                                  .contains(RegExp(r"hausaufgaben"))
+                          bottom: !StorageProvider.settings.viewMode.contains(
+                              RegExp(r"hausaufgaben"))
                               ? bottomAppBar(context)
                               : null,
                           actions: buildActions(
-                              StorageProvider.settings.viewMode, context),
-                        ),
-                        drawer: getDrawer(),
-                        body: buildApp(StorageProvider.settings.viewMode),
-                      );
-                    } else {
-                      return const WelcomeScreen();
-                    }
-                  }),
-            );
-          });
-        },
-      );
+                              StorageProvider.settings.viewMode, context),),
+                          drawer: getDrawer(),
+                          body: buildApp(StorageProvider.settings.viewMode),);
+                      } else {
+                        return const WelcomeScreen();
+                      }
+                    }),);
+            });
+      },);
     });
   }
 
@@ -366,60 +310,42 @@ class _SPHPlaner extends State<SPHPlaner> {
   }
 
   PreferredSize? bottomAppBar(BuildContext context) {
-    return PreferredSize(
-        preferredSize: const Size.fromHeight(16),
-        child: Container(
-          height: 20,
+    return PreferredSize(preferredSize: const Size.fromHeight(16),
+        child: Container(height: 20,
           width: double.infinity,
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-          child: Center(
-              child: Text(StorageProvider.settings.updateLock
-                  ? StorageProvider.settings.updateLockText
-                  : StorageProvider.settings.status)),
-        ));
+          child: Center(child: Text(
+              StorageProvider.settings.updateLock ? StorageProvider.settings
+                  .updateLockText : StorageProvider.settings.status)),));
   }
 
   List<Widget>? buildActions(String view, BuildContext context) {
-    List<Widget> actions = [];
-
-    if (view == "stundenplan" || view == "vertretung") {
-      actions.add(Padding(
-          padding: const EdgeInsets.only(right: 10, left: 10),
+    List<Widget> actions = [
+      Padding(padding: const EdgeInsets.only(right: 10, left: 10),
           child: PropertyChangeConsumer<StorageNotifier, String>(
             properties: const ['updateLock'],
             builder: (context, notify, child) {
-              return GestureDetector(
-                onTap: () async {
-                  if (!StorageProvider.settings.updateLock) {
-                    await SPH.update(notify!);
-                  }
-                },
-                child: StorageProvider.settings.updateLock
-                    ? Center(
-                        child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ))
-                    : const Icon(
-                        Icons.refresh,
-                      ),
-              );
-            },
-          )));
-    }
-
-    actions.add(Padding(
-        padding: const EdgeInsets.only(right: 10, left: 10),
-        child: GestureDetector(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const Settings()));
-            },
-            child: const Icon(Icons.settings))));
+              return GestureDetector(onTap: () async {
+                if (!StorageProvider.settings.updateLock) {
+                  await SPH.update(notify!);
+                }
+              },
+                child: StorageProvider.settings.updateLock ? Center(
+                    child: SizedBox(width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3, color: Theme
+                          .of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.color,),)) : const Icon(Icons.refresh,),);
+            },)),
+      Padding(padding: const EdgeInsets.only(right: 10, left: 10),
+          child: GestureDetector(onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Settings()));
+          }, child: const Icon(Icons.settings)))
+    ];
 
     return actions;
   }
