@@ -43,10 +43,18 @@ int getDefaultColor(String fach) {
     return Colors.amber.shade100.value;
   } else if (fach.contains("D")) {
     return Colors.red.shade100.value;
-  } else if (fach.contains("G") && !fach.contains("_G")) {
-    return Colors.brown.shade100.value;
-  } else if (fach.contains("L") && !fach.contains("_L")) {
-    return Colors.indigo.shade100.value;
+  } else if (fach.contains("G")) {
+    String gFach = fach.replaceAll("_G", "");
+    if (gFach.contains("G")) {
+      return Colors.brown.shade100.value;
+    }
+    return 4294967295;
+  } else if (fach.contains("L")) {
+    String lFach = fach.replaceAll("_L", "");
+    if (lFach.contains("L")) {
+      return Colors.indigo.shade100.value;
+    }
+    return 4294967295;
   } else {
     return 4294967295;
   }
@@ -95,10 +103,18 @@ String? getDefaultName(String fach) {
     return "Englisch";
   } else if (fach.contains("D")) {
     return "Deutsch";
-  } else if (fach.contains("G") && !fach.contains("_G")) {
-    return "Geschichte";
-  } else if (fach.contains("L") && !fach.contains("_L")) {
-    return "Latein";
+  } else if (fach.contains("G")) {
+    String gFach = fach.replaceAll("_G", "");
+    if (gFach.contains("G")) {
+      return "Geschichte";
+    }
+    return null;
+  } else if (fach.contains("L")) {
+    String lFach = fach.replaceAll("_L", "");
+    if (lFach.contains("L")) {
+      return "Latein";
+    }
+    return null;
   }
   return null;
 }
