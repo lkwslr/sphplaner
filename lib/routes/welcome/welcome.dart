@@ -129,7 +129,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             ),
             child: Text(
               buttonText,
-              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+              style: TextStyle(
+                  color: loading
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onPrimary),
             ))
       ],
     );
