@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
@@ -30,23 +28,18 @@ class _StundenplanState extends State<Stundenplan> {
     return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ['stundenplan'],
         builder: (context, notify, _) {
-          Size logicalScreenSize =
-              View.of(context).physicalSize / View.of(context).devicePixelRatio;
+          Size logicalScreenSize = MediaQuery.of(context).size;
+          cellWidth = (logicalScreenSize.width / 5.5) - 9;
+
           if (MediaQuery.of(context).orientation == Orientation.portrait) {
-            cellWidth = (logicalScreenSize.width / 5.5) - 9;
-            if (Platform.isAndroid) {
-              double appBarHeight =
-                  (Scaffold.of(context).appBarMaxHeight ?? 0) +
-                      kToolbarHeight +
-                      40;
-              cellHeight = (logicalScreenSize.height - appBarHeight) / 12;
-            } else if (Platform.isIOS) {
-              cellHeight = (logicalScreenSize.height) / 12.5 - 18;
-            }
+            cellHeight = (logicalScreenSize.height) * 0.06;
           } else {
-            cellWidth = (logicalScreenSize.width / 6) - 8;
-            // TODO: unterschied tablet handy
+            cellHeight = (logicalScreenSize.height) * 0.1;
           }
+          if (cellHeight < 45) {
+            cellHeight = 45;
+          }
+
 
           List<String> dates = StorageProvider.vertretungsDate;
           List<Widget> columns = [buildHeader(dates[0], dates[1])];
@@ -80,13 +73,13 @@ class _StundenplanState extends State<Stundenplan> {
                                           .colorScheme
                                           .onSecondaryContainer)))),
                       if (cellWidth > 128)
-                        SizedBox(
+                        Container(
+                          padding: const EdgeInsets.all(2),
                             height: (cellHeight - 4) / 2,
                             child: FittedBox(
                                 fit: BoxFit.fitWidth,
                                 child: Text(StorageProvider.timelist[hour - 1],
                                     style: TextStyle(
-                                        fontStyle: FontStyle.italic,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSecondaryContainer))))
@@ -404,10 +397,12 @@ class _StundenplanState extends State<Stundenplan> {
                           Container(
                             height: (cellHeight - 4) / 2,
                             padding: const EdgeInsets.all(2),
-                            child: Text(room,
-                                style: TextStyle(
-                                    color: textcolor,
-                                    fontStyle: FontStyle.italic)),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Text(room,
+                                  style: TextStyle(
+                                      color: textcolor)),
+                            )
                           ),
                         ],
                       )),
@@ -457,7 +452,7 @@ class _StundenplanState extends State<Stundenplan> {
               borderRadius: BorderRadius.circular(5),
             ),
             child: RotatedBox(
-                quarterTurns: cellWidth < 128 ? 3 : 0,
+                quarterTurns: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 0,
                 child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(e,
@@ -483,38 +478,39 @@ class _StundenplanState extends State<Stundenplan> {
                   (shortToday == e || shortTomorrow == e))
               ? Column(
                   children: [
-                    SizedBox(
+                    Container(
                         height: (cellHeight - 4) / 2,
+                        padding: const EdgeInsets.all(2),
                         child: FittedBox(
-                            fit: BoxFit.scaleDown,
+                            fit: BoxFit.fitWidth,
                             child: Text(e,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 23,
                                     color: Theme.of(context)
                                         .colorScheme
                                         .primary)))),
-                    SizedBox(
+                    Container(
                         height: (cellHeight - 4) / 2,
+                        padding: const EdgeInsets.all(4),
                         child: FittedBox(
                             fit: BoxFit.fitWidth,
                             child: Text(shortToday == e ? today : tomorrow,
                                 style: TextStyle(
-                                    fontStyle: FontStyle.italic,
                                     color: Theme.of(context)
                                         .colorScheme
                                         .primary))))
                   ],
-                )
-              : FittedBox(
-                  fit: BoxFit.scaleDown,
+                ) : Container(
+              height: (cellHeight - 4) / 2,
+              padding: EdgeInsets.all(cellHeight/4),
+              child: FittedBox(
+                  fit: BoxFit.fitHeight,
                   child: Text(e,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 23,
                           color: Theme.of(context)
                               .colorScheme
-                              .onSecondaryContainer))),
+                              .onSecondaryContainer)))),
         );
       }).toList(),
     );

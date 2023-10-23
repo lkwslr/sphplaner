@@ -181,6 +181,7 @@ class _SPHPlaner extends State<SPHPlaner> {
 
               return MaterialApp(
                 title: 'SPH Planer',
+                debugShowCheckedModeBanner: false,
                 theme: ThemeData(colorScheme: lightColorScheme,
                   useMaterial3: true,
                   inputDecorationTheme: customLightInputTheme,),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,9 +10,6 @@ class Support extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(Theme.of(context).colorScheme.background.value == 4294835455);
-    //dark: 4279639076
-    //light: 4294835455
     return Scaffold(
       appBar: AppBar(
         title: const Text("Unterstütze diese App"),
@@ -76,6 +75,7 @@ class Support extends StatelessWidget {
               }
             },
           ),
+          if (!Platform.isIOS)
           const ListTile(
             title: Text("Unterstütze durch Geld"),
             subtitle: Text(
@@ -83,6 +83,7 @@ class Support extends StatelessWidget {
                 "Geld spenden kannst du auf den folgenden Wegen:"),
             leading: Icon(Icons.attach_money),
           ),
+          if (!Platform.isIOS)
           ListTile(
             leading: Icon(
               Icons.attach_money,

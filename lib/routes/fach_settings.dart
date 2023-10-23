@@ -237,8 +237,7 @@ class _FachSettings extends State<FachSettings> {
           },
           style: ElevatedButton.styleFrom(
               minimumSize: Size.fromHeight(buttonSizeFactor)),
-          child: const Text("Fach löschen",
-              style: TextStyle(color: Colors.white))),
+          child: const Text("Fach löschen")),
       const SizedBox(
         height: 32,
       ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,6 +37,64 @@ class StorageProvider {
     _prefs ??= await SharedPreferences.getInstance();
     settings.initializeSettings(_isar!, _prefs!);
     settings.updateLockText = "";
+
+    if (kDebugMode) {
+      Subject? subject = StorageProvider.isar.subjects
+          .getBySubjectSync("Q3D_g03");
+      Subject? sport = StorageProvider.isar.subjects
+          .getBySubjectSync("Q3SPO_g05");
+
+
+      List<Vertretung> vertretungen = [
+        Vertretung()
+          ..subject.value = subject
+          ..room = "R1"
+          ..teacher = "KST"
+          ..hour = 3
+          ..dayOfWeek = 2
+          ..date = "31.10.2023"
+          ..classes = "Q3"
+          ..note = ""
+          ..type = "",
+        Vertretung()
+          ..subject.value = subject
+          ..room = "R1"
+          ..teacher = "KST"
+          ..hour = 4
+          ..dayOfWeek = 2
+          ..date = "31.10.2023"
+          ..classes = "Q3"
+          ..note = ""
+          ..type = "",
+        Vertretung()
+          ..subject.value = sport
+          ..room = ""
+          ..teacher = ""
+          ..hour = 8
+          ..dayOfWeek = 1
+          ..date = "30.10.2023"
+          ..classes = ""
+          ..note = "fällt aus"
+          ..type = "",
+        Vertretung()
+          ..subject.value = sport
+          ..room = ""
+          ..teacher = "KST"
+          ..hour = 9
+          ..dayOfWeek = 1
+          ..date = "30.10.2023"
+          ..classes = ""
+          ..note = "fällt aus"
+          ..type = "",
+      ];
+
+      for (Vertretung vertretung in vertretungen) {
+        await isar.writeTxn(() async {
+          await isar.vertretungs.put(vertretung);
+          await vertretung.subject.save();
+        });
+      }
+    }
   }
 
   static Isar get isar {
