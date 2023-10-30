@@ -8,6 +8,7 @@ import 'package:sphplaner/helper/storage/user.dart';
 class SettingsProvider {
   Isar? _isar;
   SharedPreferences? _prefs;
+  String viewMode = "stundenplan";
 
   initializeSettings(Isar isar, SharedPreferences prefs) {
     _isar ??= isar;
@@ -64,7 +65,7 @@ class SettingsProvider {
   }
 
   String get title {
-    switch (_getSharedPrefs("viewMode") ?? "") {
+    switch (viewMode) {
       case "vertretung":
         return "Vertretung";
       case "stundenplan":
@@ -77,10 +78,6 @@ class SettingsProvider {
   }
 
   set title(String value) => _setSharedPrefs("title", value);
-
-  String get viewMode => _getSharedPrefs("viewMode") ?? "stundenplan";
-
-  set viewMode(String value) => _setSharedPrefs("viewMode", value);
 
   bool get updateLock => (_getSharedPrefs("updateLock") ?? "") != "";
 

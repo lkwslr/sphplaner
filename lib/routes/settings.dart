@@ -302,6 +302,27 @@ class _Settings extends State<Settings> {
         ),
         Row(
           children: [
+            Expanded(
+              child: ListTile(
+                title: Text(
+                  "Bitte verwende folgende Einstellungen nur, wenn du dazu aufgefordert wirst oder dir der Funktionsweise im Klaren bist.",
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ),
+            Switch(
+              value: !StorageProvider.advancedDisabled,
+              activeColor: Theme.of(context).colorScheme.error,
+              activeTrackColor: Theme.of(context).colorScheme.errorContainer,
+              onChanged: (changed) {
+                StorageProvider.advancedDisabled = !changed;
+                notify?.notify("settings");
+              },
+            )
+          ],
+        ),
+        Row(
+          children: [
             const Expanded(
               child: ListTile(
                 title: Text("Debug Modus"),
@@ -316,10 +337,32 @@ class _Settings extends State<Settings> {
             ),
             Switch(
               value: StorageProvider.debugLog,
-              onChanged: (changed) {
+              onChanged: StorageProvider.advancedDisabled ? null : (changed) {
                 Logger.root.level = changed ? Level.ALL : Level.WARNING;
                 StorageProvider.debugLog = changed;
                 notify?.notify("settings");
+              },
+            )
+          ],
+        ),
+        Row(
+          children: [
+            const Expanded(
+              child: ListTile(
+                title: Text("Gesamten Vertretungsplan laden"),
+                subtitle: Text(
+                  "ACHTUNG: NUR AKTIVIEREN, WENN KEINE VERTRETUNG ANGEZEIGT WIRD!!!"
+                      "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
+                      "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            Switch(
+              value: StorageProvider.settings.loadAllVertretung,
+              onChanged: StorageProvider.advancedDisabled ? null : (changed) {
+                StorageProvider.settings.loadAllVertretung = changed;
+                notify?.notifyAll(["stundenplan", "settings"]);
               },
             )
           ],
@@ -487,28 +530,6 @@ Widget plan(StorageNotifier notify) {
             value: StorageProvider.settings.showVertretung,
             onChanged: (changed) {
               StorageProvider.settings.showVertretung = changed;
-              notify.notifyAll(["stundenplan", "settings"]);
-            },
-          )
-        ],
-      ),
-      Row(
-        children: [
-          const Expanded(
-            child: ListTile(
-              title: Text("Gesamten Vertretungsplan laden"),
-              subtitle: Text(
-                "ACHTUNG: NUR AKTIVIEREN, WENN KEINE VERTRETUNG ANGEZEIGT WIRD!!!"
-                "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
-                "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ),
-          ),
-          Switch(
-            value: StorageProvider.settings.loadAllVertretung,
-            onChanged: (changed) {
-              StorageProvider.settings.loadAllVertretung = changed;
               notify.notifyAll(["stundenplan", "settings"]);
             },
           )

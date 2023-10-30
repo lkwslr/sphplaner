@@ -23,6 +23,7 @@ class StorageProvider {
 
 
 
+
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _isar ??= await Isar.open([
@@ -152,6 +153,14 @@ class StorageProvider {
 
   static set debugLog(bool debugLog) {
     _prefs!.setBool("debugLog", debugLog);
+  }
+
+  static bool get advancedDisabled {
+    return _prefs?.getBool("advancedDisabled") ?? true;
+  }
+
+  static set advancedDisabled(bool advancedDisabled) {
+    _prefs!.setBool("advancedDisabled", advancedDisabled);
   }
 
   static String get loggedIn {

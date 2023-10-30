@@ -55,7 +55,6 @@ Future<void> main() async {
   Intl.defaultLocale = "de_DE";
   app_info.init();
   await StorageProvider.initializeStorage();
-  StorageProvider.debugLog = true;
   Logger.root.level = StorageProvider.debugLog ? Level.ALL : Level.WARNING;
 
   Logger.root.onLevelChanged.listen((event) {
@@ -114,6 +113,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   bool popUpBuilder = false;
   ValueNotifier<bool> loading = ValueNotifier(false);
   String result = "Klicken, um in den Online-Modus zu wechseln";
+  int selectedIndex = 1;
   final log = Logger('SPHPlaner');
 
   @override
@@ -239,14 +239,66 @@ class _SPHPlaner extends State<SPHPlaner> {
                       return Scaffold(
                         appBar: AppBar(
                           title: Text(StorageProvider.settings.title),
-                          bottom: !StorageProvider.settings.viewMode
-                                  .contains(RegExp(r"hausaufgaben"))
-                              ? bottomAppBar(context)
-                              : null,
+                          bottom: bottomAppBar(context),
                           actions: buildActions(
                               StorageProvider.settings.viewMode, context),
                         ),
                         drawer: getDrawer(),
+                        bottomNavigationBar: NavigationBar(
+                          onDestinationSelected: (int index) {
+                            selectedIndex = index;
+                            switch (index) {
+                              case 0:
+                                {
+                                  StorageProvider.settings.viewMode =
+                                      "vertretung";
+
+                                  break;
+                                }
+                              case 1:
+                                {
+                                  StorageProvider.settings.viewMode =
+                                      "stundenplan";
+                                  break;
+                                }
+                              case 2:
+                                {
+                                  StorageProvider.settings.viewMode =
+                                      "hausaufgaben";
+                                  break;
+                                }
+                            }
+                            notify!.notify("main");
+                          },
+                          indicatorColor: Theme.of(context).colorScheme.primary,
+                          selectedIndex: selectedIndex,
+                          destinations: <Widget>[
+                            NavigationDestination(
+                              selectedIcon: Icon(Icons.calendar_view_day,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary),
+                              icon:
+                                  const Icon(Icons.calendar_view_day_outlined),
+                              label: 'Vertretungsplan',
+                            ),
+                            NavigationDestination(
+                              selectedIcon: Icon(
+                                Icons.calendar_month,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              icon: const Icon(Icons.calendar_month_outlined),
+                              label: 'Stundenplan',
+                            ),
+                            NavigationDestination(
+                              selectedIcon: Icon(
+                                Icons.book,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              icon: const Icon(Icons.book_outlined),
+                              label: 'Hausaufgaben',
+                            ),
+                          ],
+                        ),
                         body: buildApp(StorageProvider.settings.viewMode),
                       );
                     } else {
@@ -321,7 +373,7 @@ class _SPHPlaner extends State<SPHPlaner> {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Settings()));
               },
-              child: const Icon(Icons.settings)))
+              child: const Icon(Icons.settings))),
     ];
 
     return actions;

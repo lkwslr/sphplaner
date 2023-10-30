@@ -62,7 +62,7 @@ int getDefaultColor(String fach) {
   }
 }
 
-String? getDefaultName(String fach) {
+String? getDefaultName(String fach, {bool check = false}) {
   fach = fach.toUpperCase();
   if (fach.contains("REV") ||
       fach.contains("RKA") ||
@@ -72,7 +72,10 @@ String? getDefaultName(String fach) {
     return "Ethik";
   }
   else if (fach.contains("POWI") || fach.contains("PW")) {
-    return "Politik und Wirtschaft";
+    if (check) {
+      return "Politik und Wirtschaft";
+    }
+    return "PoWi";
   } else if (fach.contains("INF")) {
     return "Informatik";
   } else if (fach.contains("BIO")) {

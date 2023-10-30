@@ -170,7 +170,7 @@ class TimeTable {
           if (course['name']?.toLowerCase().contains(courseType) ?? false) {
             if (course['name']
                     ?.toLowerCase()
-                    .contains(getDefaultName(lessonName)?.toLowerCase() ?? "?????") ??
+                    .contains(getDefaultName(lessonName, check: true)?.toLowerCase() ?? "?????") ??
                 false) {
               return true;
             }

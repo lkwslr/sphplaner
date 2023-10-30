@@ -32,9 +32,9 @@ class _StundenplanState extends State<Stundenplan> {
           cellWidth = (logicalScreenSize.width / 5.5) - 9;
 
           if (MediaQuery.of(context).orientation == Orientation.portrait) {
-            cellHeight = (logicalScreenSize.height) * 0.06;
+            cellHeight = (logicalScreenSize.height) * 0.0545;
           } else {
-            cellHeight = (logicalScreenSize.height) * 0.1;
+            cellHeight = (logicalScreenSize.height) * 0.125;
           }
           if (cellHeight < 45) {
             cellHeight = 45;
