@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +21,8 @@ class StorageProvider {
   static SettingsProvider settings = SettingsProvider();
   static User? _user;
 
+
+
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _isar ??= await Isar.open([
@@ -38,7 +39,7 @@ class StorageProvider {
     settings.initializeSettings(_isar!, _prefs!);
     settings.updateLockText = "";
 
-    if (kDebugMode) {
+    /*if (kDebugMode) {
       Subject? subject = StorageProvider.isar.subjects
           .getBySubjectSync("Q3D_g03");
       Subject? sport = StorageProvider.isar.subjects
@@ -94,7 +95,7 @@ class StorageProvider {
           await vertretung.subject.save();
         });
       }
-    }
+    }*/
   }
 
   static Isar get isar {
@@ -143,6 +144,14 @@ class StorageProvider {
   static setSharedPrefs(String key, String value) {
     assert(_prefs != null, 'SharedPreferences have not been initialized');
     _prefs!.setString(key, value);
+  }
+
+  static bool get debugLog {
+    return _prefs?.getBool("debugLog") ?? false;
+  }
+
+  static set debugLog(bool debugLog) {
+    _prefs!.setBool("debugLog", debugLog);
   }
 
   static String get loggedIn {

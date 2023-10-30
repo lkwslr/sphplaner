@@ -10,7 +10,6 @@ import 'package:sphplaner/helper/storage/subject.dart';
 
 class TimeTable {
   static downloadTimetable() async {
-    await SPH.getSID();
     Isar isar = StorageProvider.isar;
 
     // TODO: TEXT FÜR AUSWAHL SEITE

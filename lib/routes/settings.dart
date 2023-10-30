@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
+import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
@@ -192,7 +193,7 @@ class _Settings extends State<Settings> {
             onPressed: !localStatus.startsWith("Alle")
                 ? null
                 : () async {
-                    await SPH.update(notify!);
+                    await SPH.update(notify!, force: true);
                   },
             child: SizedBox(
               width: double.infinity,
@@ -296,10 +297,34 @@ class _Settings extends State<Settings> {
       children: [
         const Align(
           alignment: Alignment.center,
-          child: Text("Daten",
+          child: Text("Erweiterte Einstellungen",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
         ),
         Row(
+          children: [
+            const Expanded(
+              child: ListTile(
+                title: Text("Debug Modus"),
+                subtitle: Text(
+                  "Ermöglicht das Nachvollziehen von Fehlern.\n"
+                      "Dazu werden an unterschiedlichen Stellen der App Werte aufgezeichnet und gespeichert. Diese können manuell ausgelesen werden.\n"
+                      "Zur bestmöglichen Auswertung werden dabei Informationen gespeichert, wie zum Beispiel die Zeit oder die Ansicht, welche aufgerufen wurde."
+                      "Dabei sind weder das Passwort noch persönliche Daten wie der Benutzername enthalten.",
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ),
+            ),
+            Switch(
+              value: StorageProvider.debugLog,
+              onChanged: (changed) {
+                Logger.root.level = changed ? Level.ALL : Level.WARNING;
+                StorageProvider.debugLog = changed;
+                notify?.notify("settings");
+              },
+            )
+          ],
+        ),
+        /*Row(
           children: [
             Expanded(
               child: ElevatedButton(
@@ -368,7 +393,7 @@ class _Settings extends State<Settings> {
                   child: const Text("Import")),
             )
           ],
-        ),
+        ),*/
         const Divider(height: 32, thickness: 3)
       ],
     );

@@ -12,7 +12,7 @@ import 'package:sphplaner/helper/storage/user.dart';
 class SPHSettings {
   static Future<bool> changePassword(
       String oldPassword, String newPassword) async {
-    await SPH.getSID();
+    await SPH.getSID(false);
     Isar isar = StorageProvider.isar;
 
     http.Response response =
@@ -57,7 +57,7 @@ class SPHSettings {
   }
 
   static Future<bool> changeImage(String path) async {
-    await SPH.getSID();
+    await SPH.getSID(false);
     Uint8List bytes = await File(path).readAsBytes();
     String imageAsString = "data:image/png;base64,${base64.encode(bytes)}";
 
@@ -83,7 +83,7 @@ class SPHSettings {
   }
 
   static Future<bool> deleteImage() async {
-    await SPH.getSID();
+    await SPH.getSID(false);
     Map data = {
       "a": "userFoto",
       "b": "delete",
@@ -108,7 +108,7 @@ class SPHSettings {
   }
 
   static Future<bool> deleteEMail() async {
-    await SPH.getSID();
+    await SPH.getSID(false);
     http.Response response = await SPH.post("/benutzerverwaltung.php", {
       'a': "userMail",
       'pw': SPH
@@ -129,7 +129,7 @@ class SPHSettings {
   }
 
   static Future<bool> changeEMail(String email) async {
-    await SPH.getSID();
+    await SPH.getSID(false);
     http.Response response =
         await SPH.get("/benutzerverwaltung.php?a=userMail");
 
@@ -164,7 +164,7 @@ class SPHSettings {
 
   static requestEMailLink() async {
     if (StorageProvider.emailChange.isNotEmpty) {
-      await SPH.getSID();
+      await SPH.getSID(false);
       await SPH.post("/benutzerverwaltung.php", {
         'a': "userMail",
         'pw': SPH.encrypt(
@@ -177,7 +177,7 @@ class SPHSettings {
 
   static checkEMail() async {
     if (StorageProvider.emailChange.isNotEmpty) {
-      await SPH.getSID();
+      await SPH.getSID(false);
       http.Response response =
           await SPH.get("/benutzerverwaltung.php?a=userMail");
 

@@ -1,6 +1,4 @@
-import 'package:sphplaner/helper/defaults.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
-import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
@@ -10,10 +8,7 @@ import 'package:sphplaner/helper/storage/homework.dart';
 
 class HomeWork {
   static downloadHomework() async {
-    await SPH.getSID();
     Isar isar = StorageProvider.isar;
-
-    List<Homework> homework = [];
 
     http.Response response = await SPH.get("/meinunterricht.php");
     if (response.statusCode == 200 && !response.body.contains("Fehler")) {

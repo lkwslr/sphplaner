@@ -6,6 +6,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
+import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/crypto.dart';
 import 'package:sphplaner/helper/networking/cookie.dart';
 import 'package:sphplaner/helper/networking/homework.dart';
@@ -30,6 +31,7 @@ class SPH {
   static String _sessionKey = "";
   static final AESCrypto aes = AESCrypto();
   static RSACrypto? rsa;
+  static final logger = Logger("SPH Networking");
 
   static setCredetials(String username, String password, int school) {
     _username = username;
@@ -44,25 +46,28 @@ class SPH {
         (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
   }
 
-  static Future<String> getSID() async {
+  static Future<String> getSID(bool force) async {
     assert(_username != null, "Username not set");
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
-
-    if (_lastSid + 15 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch ||
-        _sid.isEmpty) {
+    //      Anzahl m  -> m   -> s
+    if (_lastSid + 1 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch ||
+        _sid.isEmpty || force) {
       CookieStore.clearCookies();
-      http.Response loginResponse =
-          await post("https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school", {
-        "value":
-            "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
-      });
+      http.Response loginResponse = await post(
+          "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
+          {
+            "value":
+                "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+          });
 
       if (loginResponse.statusCode != 302) {
-        loginResponse = await post("https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school", {
-          "value":
-              "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
-        });
+        loginResponse = await post(
+            "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
+            {
+              "value":
+                  "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+            });
       }
 
       if (loginResponse.statusCode == 302 &&
@@ -141,8 +146,6 @@ class SPH {
   }
 
   static Future<String> updateUser() async {
-    await getSID();
-
     String userID = "";
 
     if (_sid != "") {
@@ -274,7 +277,28 @@ class SPH {
           .timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
-    } catch (_) {
+      if (response.body.contains("Wartungsarbeiten")) {
+        logger.shout(
+            "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
+        return http.Response.bytes([], 567);
+      } else if (response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.")) {
+        logger.severe(
+            "Beim Abruf der Daten vom Schulportal ist ein Fehler aufgetreten.\n"
+                "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
+                "Dadurch wird ein ausführlicher Log generiert, welcher helfen kann, die Ursache des Fehlers zu finden und diesen zu beheben.\n"
+                "Folgende Seite ist betroffen: $url",
+            "ERRORTRACE${response.request?.method}METHOD.BODY${response.body}BODY.STATUSCODE${response.statusCode}STATUSCODE.HEADER${response.headers}HEADER.REASONPHRASE${response.reasonPhrase}REASONPHRASE.REDIRECT${response.isRedirect}REDIRECT.REQUESTHEADER${response.request?.headers}ERRORTRACE");
+        return http.Response.bytes([], 567);
+      }
+    } catch (error, stackrace) {
+      logger.severe(
+          "Der Abruf der Daten vom Schulportal dauerte ungewöhnliche lange und wurde abgebrochen.\n"
+          "Bitte überprüfe deine Internetverbindung."
+          "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
+          "Dadurch wird ein ausführlicher Log generiert, welcher helfen kann, die Ursache des Fehlers zu finden und diesen zu beheben.",
+          error,
+          stackrace);
+      logger.warning("GET Got Catched", error, stackrace);
       return http.Response.bytes([], 444);
     }
 
@@ -304,7 +328,28 @@ class SPH {
       }).timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
-    } catch (_) {
+      if (response.body.contains("Wartungsarbeiten")) {
+        logger.shout(
+            "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
+
+        return http.Response.bytes([], 567);
+      } else if (response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.")) {
+        logger.severe(
+            "Beim Abruf der Daten vom Schulportal ist ein Fehler aufgetreten.\n"
+            "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
+            "Dadurch wird ein ausführlicher Log generiert, welcher helfen kann, die Ursache des Fehlers zu finden und diesen zu beheben.\n"
+            "Folgende Seite ist betroffen: $url", "METHOD${response.request?.method}METHOD.BODY${response.body}BODY.STATUSCODE${response.statusCode}STATUSCODE.HEADER${response.headers}HEADER.REASONPHRASE${response.reasonPhrase}REASONPHRASE.REDIRECT${response.isRedirect}REDIRECT.REQUEST${response.request?.headers}");
+        return http.Response.bytes([], 567);
+      }
+    } catch (error, stackrace) {
+      logger.severe(
+          "Der Abruf der Daten vom Schulportal dauerte ungewöhnliche lange und wurde abgebrochen.\n"
+          "Bitte überprüfe deine Internetverbindung."
+          "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
+          "Dadurch wird ein ausführlicher Log generiert, welcher helfen kann, die Ursache des Fehlers zu finden und diesen zu beheben.",
+          error,
+          stackrace);
+      logger.warning("POST Got Catched", error, stackrace);
       return http.Response.bytes([], 444);
     }
 
@@ -330,15 +375,16 @@ class SPH {
     return uuid;
   }
 
-  static Future<void> update(StorageNotifier notify) async {
-    await getSID();
+  static Future<void> update(StorageNotifier notify, {bool force = false}) async {
+    await getSID(force);
     List errors = [];
     try {
       StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
       notify.notify("main");
       await TimeTable.downloadTimetable();
       notify.notifyAll(["stundenplan"]);
-    } catch (e) {
+    } catch (e, s) {
+      logger.warning("Der Stundenplan konnte nicht aktualisiert werden.", e, s);
       errors.add({
         "type": "Der Stundenplan konnte nicht aktualisiert werden.",
         "error": e
@@ -350,7 +396,9 @@ class SPH {
       notify.notify("main");
       await Vertretungsplan.download();
       notify.notifyAll(["stundenplan", "vertretung"]);
-    } catch (e) {
+    } catch (e, s) {
+      logger.warning(
+          "Der Vertretungsplan konnte nicht aktualisiert werden.", e, s);
       errors.add({
         "type": "Der Vertretungsplan konnte nicht aktualisiert werden.",
         "error": e
@@ -361,7 +409,9 @@ class SPH {
       StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
       notify.notify("main");
       await updateUser();
-    } catch (e) {
+    } catch (e, s) {
+      logger.warning(
+          "Die Benutzerdaten konnten nicht aktualisiert werden.", e, s);
       errors.add({
         "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
         "error": e
@@ -373,7 +423,9 @@ class SPH {
       notify.notify("main");
       await HomeWork.downloadHomework();
       notify.notifyAll(["homework"]);
-    } catch (e) {
+    } catch (e, s) {
+      logger.warning(
+          "Die Hausaufgaben konnten nicht aktualisiert werden.", e, s);
       errors.add({
         "type": "Die Hausaufgaben konnte nicht aktualisiert werden.",
         "error": e
@@ -387,6 +439,7 @@ class SPH {
     if (errors
         .where((element) => element["error"].toString().contains("SID"))
         .isNotEmpty) {
+      logger.shout("password");
       StorageProvider.wrongPassword = true;
     }
 

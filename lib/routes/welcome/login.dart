@@ -283,7 +283,7 @@ class _LoginState extends State<Login> {
                                   username, password, int.parse(schoolId));
 
                               try {
-                                await SPH.getSID();
+                                await SPH.getSID(true);
                                 StorageProvider.saveCredentials(
                                     username, password);
                                 String userID = "";

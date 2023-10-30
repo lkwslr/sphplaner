@@ -10,7 +10,6 @@ import 'package:sphplaner/helper/storage/vertretung.dart';
 
 class Vertretungsplan {
   static download() async {
-    await SPH.getSID();
     Isar isar = StorageProvider.isar;
 
     http.Response response = await SPH.get("/vertretungsplan.php");
@@ -101,8 +100,12 @@ class Vertretungsplan {
             }
           }
         }
-        StorageProvider.vertretungsDate = dates;
         if (vertretungs.isNotEmpty) {
+          await isar.writeTxn(() async {
+            for (String date in dates) {
+              await isar.vertretungs.filter().dateEqualTo(date).deleteAll();
+            }
+          });
           for (Vertretung vertretung in vertretungs) {
             if ((vertretung.classes?.trim() ?? "").isEmpty || // prüft, ob eine Klasse angegeben ist
                 StorageProvider.settings.loadAllVertretung || // prüft ob alle Vertretungen geladen werden sollen
@@ -127,6 +130,7 @@ class Vertretungsplan {
           }
         }
         if (dates.isNotEmpty) {
+          StorageProvider.vertretungsDate = dates;
           for (String date in dates) {
             await isar.writeTxn(() async {
               await isar.vertretungs.put(Vertretung()
