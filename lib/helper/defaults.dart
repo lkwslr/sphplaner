@@ -43,6 +43,8 @@ int getDefaultColor(String fach) {
     return Colors.amber.shade100.value;
   } else if (fach.contains("D")) {
     return Colors.red.shade100.value;
+  } else if (fach.contains("Gr")) {
+    return Colors.lightGreen.shade100.value;
   } else if (fach.contains("G")) {
     String gFach = fach.replaceAll("_G", "");
     if (gFach.contains("G")) {
@@ -103,6 +105,8 @@ String? getDefaultName(String fach) {
     return "Englisch";
   } else if (fach.contains("D")) {
     return "Deutsch";
+  } else if (fach.contains("Gr")) {
+    return "Griechisch";
   } else if (fach.contains("G")) {
     String gFach = fach.replaceAll("_G", "");
     if (gFach.contains("G")) {
