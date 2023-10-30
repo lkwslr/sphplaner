@@ -141,7 +141,7 @@ class _StundenplanState extends State<Stundenplan> {
                 }
 
                 row.add(GestureDetector(
-                  onTap: () async {
+                  onTap: vertretung == null && room.trim() == "" ? null : () async {
                     showDialog(
                         context: context,
                         builder: (BuildContext context) {
