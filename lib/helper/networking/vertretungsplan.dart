@@ -101,16 +101,16 @@ class Vertretungsplan {
           }
         }
         if (vertretungs.isNotEmpty) {
+          StorageProvider.vertretungsDate = dates;
           await isar.writeTxn(() async {
             for (String date in dates) {
               await isar.vertretungs.filter().dateEqualTo(date).deleteAll();
             }
           });
           for (Vertretung vertretung in vertretungs) {
-            if ((vertretung.classes?.trim() ?? "").isEmpty || // prüft, ob eine Klasse angegeben ist
-                StorageProvider.settings.loadAllVertretung || // prüft ob alle Vertretungen geladen werden sollen
+            if ((StorageProvider.settings.loadAllVertretung) || // prüft ob alle Vertretungen geladen werden sollen
                 (vertretung.classes?.trim().toLowerCase() ?? "").contains(
-                    StorageProvider.user.course?.toLowerCase() ?? "") || // prüft, ob die Klasse des benutzers angegeben ist
+                    StorageProvider.user.course?.toLowerCase() ?? "") || // prüft, ob die Klasse des Benutzers angegeben ist
                 (StorageProvider.user.school == 5135 &&
                     int.tryParse(StorageProvider.user.grade ?? "0")! >= 11 &&
                     vertretung.subject.value != null) || vertretung.placeholder) { //letztes testet, ob man bei der krs in der oberstufe bei der vertretung das fach hat, ggf logic gate prüfen
@@ -130,7 +130,6 @@ class Vertretungsplan {
           }
         }
         if (dates.isNotEmpty) {
-          StorageProvider.vertretungsDate = dates;
           for (String date in dates) {
             await isar.writeTxn(() async {
               await isar.vertretungs.put(Vertretung()

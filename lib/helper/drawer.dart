@@ -159,7 +159,7 @@ Widget getDrawer() {
                 'Vertretungsplan',
               ),
               leading: const Icon(
-                Icons.list,
+                Icons.calendar_view_day,
               ),
               onTap: () {
                 StorageProvider.settings.viewMode = "vertretung";

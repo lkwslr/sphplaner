@@ -163,7 +163,7 @@ class _SPHPlaner extends State<SPHPlaner> {
               lightColorScheme = lightDynamic.harmonized();
 
               darkColorScheme = darkDynamic.harmonized();
-              lightColorScheme = lightColorScheme.copyWith(
+              /*lightColorScheme = lightColorScheme.copyWith(
                 primary: sphBlue,
                 onPrimary: const Color(0xffdde3ee),
                 primaryContainer: sphBlue,
@@ -172,7 +172,7 @@ class _SPHPlaner extends State<SPHPlaner> {
                 primary: sphBlue,
                 onPrimary: const Color(0xffdde3ee),
                 primaryContainer: sphBlue,
-              );
+              );*/
             } else {
               lightColorScheme = defaultLightColorScheme;
               darkColorScheme = defaultDarkColorScheme;
