@@ -231,6 +231,16 @@ class _SPHPlaner extends State<SPHPlaner> {
               home: PropertyChangeConsumer<StorageNotifier, String>(
                   properties: const ['main'],
                   builder: (context, notify, child) {
+                    switch (StorageProvider.settings.viewMode) {
+                      case "vertretung":
+                        selectedIndex = 0;
+                        break;
+                      case "hausaufgaben":
+                        selectedIndex = 2;
+                        break;
+                      default:
+                        selectedIndex = 1;
+                    }
                     if (!popUpBuilder) {
                       Future.delayed(Duration.zero, () => showPopUp(context));
                       popUpBuilder = true;
@@ -246,7 +256,6 @@ class _SPHPlaner extends State<SPHPlaner> {
                         drawer: getDrawer(),
                         bottomNavigationBar: NavigationBar(
                           onDestinationSelected: (int index) {
-                            selectedIndex = index;
                             switch (index) {
                               case 0:
                                 {
