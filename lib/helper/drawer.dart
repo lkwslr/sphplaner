@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
@@ -33,7 +34,7 @@ Widget getDrawer() {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xff00bcd4)),
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer),
               padding: const EdgeInsets.all(0),
               child: Stack(
                 fit: StackFit.expand,
@@ -42,16 +43,17 @@ Widget getDrawer() {
                     child: ImageFiltered(
                       imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                       child: Image.asset(
-                        'assets/sph_white_wide.png',
+                        'assets/sph_wide.png',
+                        color: Colors.white,
                       ),
                     ),
                   ),
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                         gradient: LinearGradient(
-                            colors: [Colors.transparent, Color(0xff0575e6)],
+                            colors: [Colors.transparent, Theme.of(context).colorScheme.primary],
                             begin: Alignment.topCenter,
-                            end: Alignment(0, 1))),
+                            end: const Alignment(0, 1))),
                   ),
                   Container(
                       padding: const EdgeInsets.fromLTRB(8, 16, 16, 16),
@@ -223,6 +225,7 @@ Widget getDrawer() {
               applicationVersion: "v${app_info.version}",
               applicationIcon: Image.asset(
                 "assets/sph.png",
+                color: Theme.of(context).colorScheme.primary,
                 width: 64,
               ),
               aboutBoxChildren: [
@@ -271,7 +274,7 @@ Widget _created(BuildContext ctx) {
                 Navigator.push(ctx,
                     MaterialPageRoute(builder: (context) => const EasterEgg()));
               }),
-        const TextSpan(text: 'made by ', style: TextStyle(fontSize: 16)),
+        TextSpan(text: 'made by ', style: TextStyle(fontSize: 16, color: Theme.of(ctx).textTheme.bodyMedium?.color)),
         TextSpan(
             text: 'Leon Wisseler ',
             style: TextStyle(

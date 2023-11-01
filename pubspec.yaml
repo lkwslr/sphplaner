@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 2.5.8+20508
+version: 2.5.9+20509
 
 environment:
   sdk: ">=2.17.0-0 <3.0.0"
@@ -74,9 +74,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter.
-flutter:
-
-  # The following line ensures that the Material Icons font is
+flutter: # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
@@ -87,8 +85,6 @@ flutter:
     - assets/sph_wide.png
     - assets/default.png
     - assets/sph_extra-wide.png
-    - assets/sph_white_wide.png
-    - assets/sph_black_wide.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -102,9 +98,9 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-      - family: sphplaner
-        fonts:
-         - asset: assets/fonts/sphplaner.ttf
+    - family: sphplaner
+      fonts:
+        - asset: assets/fonts/sphplaner.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:

@@ -11,13 +11,11 @@ class Support extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Unterstütze diese App"),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+      appBar: AppBar(title: const Text("Unterstütze diese App")),
       body: ListView(
         children: [
-          Image(image: Theme.of(context).colorScheme.background.value == 4294835455 ? const AssetImage("assets/sph_black_wide.png") : const AssetImage("assets/sph_white_wide.png")),
+          Image.asset("assets/sph_wide.png",
+          color: Theme.of(context).textTheme.bodyMedium?.color,),
           ListTile(
             title: const Text("Teile die App!"),
             subtitle: const Text(
@@ -76,62 +74,62 @@ class Support extends StatelessWidget {
             },
           ),
           if (!Platform.isIOS)
-          const ListTile(
-            title: Text("Unterstütze durch Geld"),
-            subtitle: Text(
-                "Die Entwicklung einer App kostet viel Zeit und Geld. Um die App weiter zu entwickeln und anzubieten bin ich auf deine Unterstützung angewiesen!\n"
-                "Geld spenden kannst du auf den folgenden Wegen:"),
-            leading: Icon(Icons.attach_money),
-          ),
+            const ListTile(
+              title: Text("Unterstütze durch Geld"),
+              subtitle: Text(
+                  "Die Entwicklung einer App kostet viel Zeit und Geld. Um die App weiter zu entwickeln und anzubieten bin ich auf deine Unterstützung angewiesen!\n"
+                  "Geld spenden kannst du auf den folgenden Wegen:"),
+              leading: Icon(Icons.attach_money),
+            ),
           if (!Platform.isIOS)
-          ListTile(
-            leading: Icon(
-              Icons.attach_money,
-              color: Theme.of(context).colorScheme.background,
-            ),
-            subtitle: Column(
-              children: [
-                ListTile(
-                  title: const Text("PayPal"),
-                  leading: const Icon(Icons.paypal),
-                  onTap: () async {
-                    Uri paypal = Uri.parse(
-                        "https://www.paypal.com/donate/?hosted_button_id=GD9ZT87VLH8PQ");
-                    if (await launchUrl(paypal)) {
-                      Fluttertoast.showToast(
-                          msg: "Vielen Dank für deine Unterstützung!",
-                          toastLength: Toast.LENGTH_LONG);
-                    }
-                  },
-                ),
-                ListTile(
-                  title: const Text("Ko-fi"),
-                  leading: const Icon(Icons.coffee),
-                  onTap: () async {
-                    Uri kofi = Uri.parse("https://ko-fi.com/lkwslr");
-                    if (await launchUrl(kofi)) {
-                      Fluttertoast.showToast(
-                          msg: "Vielen Dank für deine Unterstützung!",
-                          toastLength: Toast.LENGTH_LONG);
-                    }
-                  },
-                ),
-                ListTile(
-                  title: const Text("Github Sponsors"),
-                  leading: const Icon(Icons.code),
-                  onTap: () async {
-                    Uri githubSponsors =
-                        Uri.parse("https://github.com/sponsors/lkwslr");
-                    if (await launchUrl(githubSponsors)) {
-                      Fluttertoast.showToast(
-                          msg: "Vielen Dank für deine Unterstützung!",
-                          toastLength: Toast.LENGTH_LONG);
-                    }
-                  },
-                )
-              ],
-            ),
-          )
+            ListTile(
+              leading: Icon(
+                Icons.attach_money,
+                color: Theme.of(context).colorScheme.background,
+              ),
+              subtitle: Column(
+                children: [
+                  ListTile(
+                    title: const Text("PayPal"),
+                    leading: const Icon(Icons.paypal),
+                    onTap: () async {
+                      Uri paypal = Uri.parse(
+                          "https://www.paypal.com/donate/?hosted_button_id=GD9ZT87VLH8PQ");
+                      if (await launchUrl(paypal)) {
+                        Fluttertoast.showToast(
+                            msg: "Vielen Dank für deine Unterstützung!",
+                            toastLength: Toast.LENGTH_LONG);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("Ko-fi"),
+                    leading: const Icon(Icons.coffee),
+                    onTap: () async {
+                      Uri kofi = Uri.parse("https://ko-fi.com/lkwslr");
+                      if (await launchUrl(kofi)) {
+                        Fluttertoast.showToast(
+                            msg: "Vielen Dank für deine Unterstützung!",
+                            toastLength: Toast.LENGTH_LONG);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("Github Sponsors"),
+                    leading: const Icon(Icons.code),
+                    onTap: () async {
+                      Uri githubSponsors =
+                          Uri.parse("https://github.com/sponsors/lkwslr");
+                      if (await launchUrl(githubSponsors)) {
+                        Fluttertoast.showToast(
+                            msg: "Vielen Dank für deine Unterstützung!",
+                            toastLength: Toast.LENGTH_LONG);
+                      }
+                    },
+                  )
+                ],
+              ),
+            )
         ],
       ),
     );
