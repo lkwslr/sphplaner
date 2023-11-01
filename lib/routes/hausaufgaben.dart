@@ -179,9 +179,8 @@ class _HomeWorkState extends State<HomeWork> {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const CreateHA()));
         },
-        child: Icon(
-          Icons.add,
-          color: Theme.of(context).colorScheme.onPrimary,
+        child: const Icon(
+          Icons.add
         ),
       ),
     );
@@ -358,9 +357,8 @@ class _CreateHAState extends State<CreateHA> {
                   });
                 }
               },
-              child: Icon(
-                Icons.save_outlined,
-                color: Theme.of(context).colorScheme.onPrimary,
+              child: const Icon(
+                Icons.save_outlined
               ),
             ),
           );
