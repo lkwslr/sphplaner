@@ -189,13 +189,9 @@ class _FachSettings extends State<FachSettings> {
       ]);
     }
     listitems.addAll([
-      const SizedBox(
+      const Divider(
         height: 32,
-      ),
-      const Align(
-        alignment: Alignment.center,
-        child: Text("Gefahrenzone",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        thickness: 3,
       ),
       ElevatedButton(
           onPressed: () async {
@@ -257,8 +253,8 @@ class _FachSettings extends State<FachSettings> {
           style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
               minimumSize: Size.fromHeight(buttonSizeFactor)),
-          child: const Text("Änderungen speichern",
-              style: TextStyle(color: Colors.white)))
+          child: Text("Änderungen speichern",
+              style: TextStyle(color: Theme.of(context).colorScheme.onPrimary)))
     ]);
 
     return Scaffold(

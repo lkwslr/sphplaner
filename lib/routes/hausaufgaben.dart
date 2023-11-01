@@ -24,6 +24,7 @@ class _HomeWorkState extends State<HomeWork> {
             List<Homework> homeworks = StorageProvider.isar.homeworks
                 .filter()
                 .finishedEqualTo(false)
+                .sortByDue()
                 .findAllSync();
             if (homeworks.isNotEmpty) {
               return ListView.builder(
@@ -35,131 +36,266 @@ class _HomeWorkState extends State<HomeWork> {
                   return Dismissible(
                       key: Key("${homework.id}"),
                       onDismissed: (direction) async {
-                        await StorageProvider.isar.writeTxn(() async {
-                          await StorageProvider.isar.homeworks
-                              .delete(homework.id);
-                        }).then((value) {
-                          notify!.notify("homework");
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              clipBehavior: Clip.none,
-                              behavior: SnackBarBehavior.floating,
-                              action: SnackBarAction(
-                                  label: "Rückgängig",
-                                  onPressed: () async {
+                        if (direction == DismissDirection.startToEnd) {
+                          homework.finished = true;
+                          await StorageProvider.isar.writeTxn(() async {
+                            await StorageProvider.isar.homeworks.put(homework);
+                          }).then((value) {
+                            notify?.notify("homework");
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                clipBehavior: Clip.none,
+                                behavior: SnackBarBehavior.floating,
+                                action: SnackBarAction(
+                                    label: "Rückgängig",
+                                    onPressed: () async {
+                                      homework.finished = false;
+                                      await StorageProvider.isar
+                                          .writeTxn(() async {
+                                        await StorageProvider.isar.homeworks
+                                            .put(homework);
+                                      });
+                                      notify?.notify("homework");
+                                    }),
+                                content: Text(
+                                    '${homework.title} wurde als erledigt markiert.')));
+                          });
+                        } else {
+                          await StorageProvider.isar.writeTxn(() async {
+                            await StorageProvider.isar.homeworks
+                                .delete(homework.id);
+                          }).then((value) {
+                            notify?.notify("homework");
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                clipBehavior: Clip.none,
+                                behavior: SnackBarBehavior.floating,
+                                action: SnackBarAction(
+                                    label: "Rückgängig",
+                                    onPressed: () async {
+                                      Homework restored = Homework()
+                                        ..user.value = homework.user.value
+                                        ..subject.value = homework.subject.value
+                                        ..finished = homework.finished
+                                        ..description = homework.description
+                                        ..title = homework.title
+                                        ..onlineIdentifier =
+                                            homework.onlineIdentifier
+                                        ..online = homework.online
+                                        ..due = homework.due;
+                                      await StorageProvider.isar
+                                          .writeTxn(() async {
+                                        await StorageProvider.isar.homeworks
+                                            .put(restored);
+                                        await restored.subject.save();
+                                        await restored.user.save();
+                                      }).then((value) =>
+                                              notify?.notify("homework"));
+                                    }),
+                                content:
+                                    Text('${homework.title} wurde entfernt.')));
+                          });
+                        }
+                      },
+                      background: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.green,
+                        ),
+                      ),
+                      secondaryBackground: Container(
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.red,
+                        ),
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondaryContainer
+                              .withOpacity(.5),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                    child: Text(
+                                  homework.subject.value?.subjectName ?? "???",
+                                  textAlign: TextAlign.left,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 23),
+                                )),
+                                Expanded(
+                                  child: Text(
+                                    DateFormat("dd.MM.yy").format(
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            homework.due ?? 0)),
+                                    overflow: TextOverflow.fade,
+                                    textAlign: TextAlign.right,
+                                    maxLines: 1,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 23,
+                                        color: DateTime.now().isAfter(DateTime
+                                                .fromMillisecondsSinceEpoch(
+                                                    homework.due ?? 0))
+                                            ? Colors.red
+                                            : null),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Divider(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  homework.title ?? " ",
+                                  style: const TextStyle(fontSize: 23),
+                                  textAlign: TextAlign.left,
+                                )),
+                            SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  homework.description ?? " ",
+                                  textAlign: TextAlign.left,
+                                )),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () async {
+                                    homework.finished = true;
                                     await StorageProvider.isar
                                         .writeTxn(() async {
                                       await StorageProvider.isar.homeworks
                                           .put(homework);
-
+                                    }).then((value) {
+                                      notify?.notify("homework");
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              clipBehavior: Clip.none,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              action: SnackBarAction(
+                                                  label: "Rückgängig",
+                                                  onPressed: () async {
+                                                    homework.finished = false;
+                                                    await StorageProvider.isar
+                                                        .writeTxn(() async {
+                                                      await StorageProvider
+                                                          .isar.homeworks
+                                                          .put(homework);
+                                                    });
+                                                    notify?.notify("homework");
+                                                  }),
+                                              content: Text(
+                                                  '${homework.title} wurde als erledigt markiert.')));
                                     });
-                                    notify.notify("homework");
-                                  }),
-                              content:
-                                  Text('${homework.title} wurde entfernt.')));
-                        });
-                      },
-                      background: Container(color: Colors.red),
-                      child: ListTile(
-                        isThreeLine: true,
-                        title: Text(
-                          homework.title ?? "???",
-                          style: TextStyle(
-                              color: DateTime.now().isAfter(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          homework.due ?? 0))
-                                  ? Colors.red
-                                  : Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.color),
-                        ),
-                        leading: Container(
-                          height: double.infinity,
-                          width: 16,
-                          color: Color(homework.subject.value?.color ??
-                              Colors.white.value),
-                          child: RotatedBox(
-                              quarterTurns: -1,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Text(
-                                    homework.subject.value?.subject ?? "???",
-                                    style: const TextStyle(
-                                        color: Colors.black, fontSize: 12)),
-                              )),
-                        ),
-                        minLeadingWidth: 8,
-                        trailing: Column(
-                          children: [
-                            Text("Erledigen bis",
-                                style: TextStyle(
-                                    color: DateTime.now().isAfter(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                                homework.due ?? 0))
-                                        ? Colors.red
-                                        : Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.color)),
-                            const SizedBox(
-                              height: 2,
+                                  },
+                                  child: const Padding(
+                                    padding:
+                                        EdgeInsets.only(right: 10, left: 10),
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                )),
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => CreateHA(
+                                                  homework: homework,
+                                                )));
+                                  },
+                                  child: const Padding(
+                                    padding:
+                                        EdgeInsets.only(right: 10, left: 10),
+                                    child: Icon(Icons.edit),
+                                  ),
+                                )),
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () async {
+                                    await StorageProvider.isar
+                                        .writeTxn(() async {
+                                      await StorageProvider.isar.homeworks
+                                          .delete(homework.id);
+                                    }).then((value) {
+                                      notify?.notify("homework");
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              clipBehavior: Clip.none,
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              action: SnackBarAction(
+                                                  label: "Rückgängig",
+                                                  onPressed: () async {
+                                                    Homework restored =
+                                                        Homework()
+                                                          ..user.value =
+                                                              homework
+                                                                  .user.value
+                                                          ..subject.value =
+                                                              homework
+                                                                  .subject.value
+                                                          ..finished =
+                                                              homework.finished
+                                                          ..description =
+                                                              homework
+                                                                  .description
+                                                          ..title =
+                                                              homework.title
+                                                          ..onlineIdentifier =
+                                                              homework
+                                                                  .onlineIdentifier
+                                                          ..online =
+                                                              homework.online
+                                                          ..due = homework.due;
+                                                    await StorageProvider.isar
+                                                        .writeTxn(() async {
+                                                      await StorageProvider
+                                                          .isar.homeworks
+                                                          .put(restored);
+                                                      await restored.subject
+                                                          .save();
+                                                      await restored.user
+                                                          .save();
+                                                    }).then((value) =>
+                                                            notify?.notify(
+                                                                "homework"));
+                                                  }),
+                                              content: Text(
+                                                  '${homework.title} wurde entfernt.')));
+                                    });
+                                  },
+                                  child: const Padding(
+                                    padding:
+                                        EdgeInsets.only(right: 10, left: 10),
+                                    child: Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                )),
+                              ],
                             ),
-                            Text(
-                              DateFormat("dd.MM.").format(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                      homework.due ?? 0)),
-                              style: TextStyle(
-                                  color: DateTime.now().isAfter(
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                              homework.due ?? 0))
-                                      ? Colors.red
-                                      : Theme.of(context).colorScheme.secondary,
-                                  fontSize: 24),
-                            )
                           ],
                         ),
-                        subtitle: Text(homework.description ?? "???",
-                            style: TextStyle(
-                                color: DateTime.now().isAfter(
-                                        DateTime.fromMillisecondsSinceEpoch(
-                                            homework.due ?? 0))
-                                    ? Colors.red
-                                    : Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.color),
-                            maxLines: 3,
-                            overflow: TextOverflow.fade),
-                        onTap: () {
-                          if ((homework.description ?? "???").isNotEmpty) {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                      contentPadding: const EdgeInsets.all(16),
-                                      title: Stack(
-                                        children: [
-                                          Align(
-                                            alignment: Alignment.centerLeft,
-                                            child:
-                                                Text(homework.title ?? "???"),
-                                          ),
-                                          Align(
-                                            alignment: Alignment.centerRight,
-                                            child: Text(DateFormat("dd.MM.")
-                                                .format(DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                        homework.due ?? 0))),
-                                          )
-                                        ],
-                                      ),
-                                      content: Padding(
-                                          padding: const EdgeInsets.all(8),
-                                          child: Text(
-                                              homework.description ?? "???")));
-                                });
-                          }
-                        },
                       ));
                 },
               );
@@ -176,19 +312,23 @@ class _HomeWorkState extends State<HomeWork> {
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const CreateHA()));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CreateHA(
+                        homework: Homework(),
+                      )));
         },
-        child: const Icon(
-          Icons.add
-        ),
+        child: const Icon(Icons.add),
       ),
     );
   }
 }
 
 class CreateHA extends StatefulWidget {
-  const CreateHA({Key? key}) : super(key: key);
+  const CreateHA({Key? key, required this.homework}) : super(key: key);
+
+  final Homework homework;
 
   @override
   State<CreateHA> createState() => _CreateHAState();
@@ -196,13 +336,20 @@ class CreateHA extends StatefulWidget {
 
 class _CreateHAState extends State<CreateHA> {
   Subject? subject;
-  DateTime date = DateTime.now();
+  DateTime? date;
   bool error = false;
-  TextEditingController titel = TextEditingController();
-  TextEditingController beschreibung = TextEditingController();
+  TextEditingController? titel;
+  TextEditingController? beschreibung;
+  Homework? homework;
 
   @override
   Widget build(BuildContext context) {
+    homework ??= widget.homework;
+    date ??= DateTime.fromMillisecondsSinceEpoch(
+        homework?.due ?? DateTime.now().millisecondsSinceEpoch);
+    titel ??= TextEditingController(text: homework?.title);
+    beschreibung ??= TextEditingController(text: homework?.description);
+
     return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ["homework"],
         builder: (context, notify, child) {
@@ -224,7 +371,7 @@ class _CreateHAState extends State<CreateHA> {
                   ),
                 ));
           }
-          subject ??= subjects.first;
+          subject ??= homework?.subject.value ?? subjects.first;
           return Scaffold(
             appBar: AppBar(title: const Text('Hausaufgabe erstellen')),
             body: ListView(
@@ -295,7 +442,7 @@ class _CreateHAState extends State<CreateHA> {
                               context: context,
                               builder: (BuildContext context) {
                                 return DatePickerDialog(
-                                    initialDate: DateTime.now(),
+                                    initialDate: date ?? DateTime.now(),
                                     firstDate: DateTime.now(),
                                     lastDate: DateTime.now()
                                         .add(const Duration(days: 365)));
@@ -305,7 +452,8 @@ class _CreateHAState extends State<CreateHA> {
                             });
                           });
                         },
-                        child: Text(DateFormat("EEE, dd. MMMM").format(date)))),
+                        child:
+                            Text(DateFormat("EEE, dd. MMMM").format(date!)))),
                 const Divider(),
                 ListTile(
                     title: Align(
@@ -316,10 +464,7 @@ class _CreateHAState extends State<CreateHA> {
                               fontSize: 20,
                               color: error ? Colors.red : null)),
                     ),
-                    subtitle: TextField(
-                      controller: titel,
-                      maxLength: 16,
-                    )),
+                    subtitle: TextField(controller: titel)),
                 const Divider(),
                 ListTile(
                     title: const Align(
@@ -336,19 +481,20 @@ class _CreateHAState extends State<CreateHA> {
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                if (titel.text.isNotEmpty) {
-                  Homework homework = Homework()
-                    ..user.value = StorageProvider.user
+                if (titel!.text.isNotEmpty) {
+                  homework
+                    ?..user.value = StorageProvider.user
                     ..subject.value = subject
-                    ..title = titel.text
-                    ..description = beschreibung.text
-                    ..due = date.millisecondsSinceEpoch
-                  ..onlineIdentifier = "OFFLINEID=${DateTime.now().microsecondsSinceEpoch}";
+                    ..title = titel?.text
+                    ..description = beschreibung?.text
+                    ..due = date?.millisecondsSinceEpoch
+                    ..onlineIdentifier =
+                        "OFFLINEID=${DateTime.now().microsecondsSinceEpoch}";
 
                   await StorageProvider.isar.writeTxn(() async {
-                    await StorageProvider.isar.homeworks.put(homework);
-                    await homework.subject.save();
-                    await homework.user.save();
+                    await StorageProvider.isar.homeworks.put(homework!);
+                    await homework?.subject.save();
+                    await homework?.user.save();
                     notify!.notify("homework");
                   }).then((value) => Navigator.of(context).pop());
                 } else {
@@ -357,9 +503,7 @@ class _CreateHAState extends State<CreateHA> {
                   });
                 }
               },
-              child: const Icon(
-                Icons.save_outlined
-              ),
+              child: const Icon(Icons.save_outlined),
             ),
           );
         });
