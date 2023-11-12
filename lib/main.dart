@@ -42,6 +42,7 @@ import 'package:sphplaner/routes/hausaufgaben.dart';
 import 'package:sphplaner/routes/settings.dart';
 import 'package:sphplaner/routes/stundenplan.dart';
 import 'package:sphplaner/routes/vertretungsviewer.dart';
+import 'package:sphplaner/routes/welcome/login.dart';
 import 'package:sphplaner/routes/welcome/welcome.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -115,6 +116,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   String result = "Klicken, um in den Online-Modus zu wechseln";
   int selectedIndex = 1;
   final log = Logger('SPHPlaner');
+  bool secureError = false;
 
   @override
   void initState() {
@@ -124,12 +126,21 @@ class _SPHPlaner extends State<SPHPlaner> {
         updateHandler("ignore");
       }
       if (StorageProvider.settings.loggedIn) {
-        SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
-          StorageProvider.settings.updateLockText = "";
-          FlutterNativeSplash.remove();
-        });
+        try {
+          SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
+            if (value) {
+              StorageProvider.settings.updateLockText = "";
+            } else {
+              log.shout("secureStorageError");
+              setState(() {
+                secureError = true;
+              });
+            }
+          });
+        } on PlatformException catch (_) {
+          log.shout("secureStorageError");
+        }
       }
-
       setState(() {
         loaded = true;
       });
@@ -245,7 +256,10 @@ class _SPHPlaner extends State<SPHPlaner> {
                       Future.delayed(Duration.zero, () => showPopUp(context));
                       popUpBuilder = true;
                     }
-                    if (StorageProvider.loggedIn.isNotEmpty) {
+                    print(StorageProvider.vertretungsDate);
+                    if (secureError) {
+                      return Login(secureStorageError: secureError,);
+                    } else if (StorageProvider.loggedIn.isNotEmpty) {
                       return Scaffold(
                         appBar: AppBar(
                           title: Text(StorageProvider.settings.title),
@@ -456,7 +470,6 @@ class _SPHPlaner extends State<SPHPlaner> {
                             StorageProvider.savePassword(
                                 StorageProvider.loggedIn, input.text);
                             StorageProvider.wrongPassword = false;
-                            StorageProvider.dialog = false;
                             Navigator.of(context).pop();
                           },
                           child: const Text("Speichern")),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/services.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -39,11 +40,16 @@ class SPH {
     _school = school;
   }
 
-  static Future<void> setCredetialsFor(String userID) async {
-    _username = await StorageProvider.getUsername(userID);
-    _password = await StorageProvider.getPassword(userID);
-    _school =
-        (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
+  static Future<bool> setCredetialsFor(String userID) async {
+    try {
+      _username = await StorageProvider.getUsername(userID);
+      _password = await StorageProvider.getPassword(userID);
+      _school =
+          (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
+    } on PlatformException catch (_) {
+      return false;
+    }
+    return true;
   }
 
   static Future<String> getSID(bool force) async {

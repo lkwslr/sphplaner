@@ -12,7 +12,9 @@ import 'package:sphplaner/main.dart';
 import 'package:sphplaner/routes/welcome/login_settings.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  const Login({super.key, this.secureStorageError});
+
+  final bool? secureStorageError;
 
   @override
   State<Login> createState() => _LoginState();
@@ -29,10 +31,19 @@ class _LoginState extends State<Login> {
   String info = "Anmelden";
   String errormessage = "";
   List<School>? schoolOptions;
+  bool secureStorageError = false;
+  String hinweisText = "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.";
 
   @override
   Widget build(BuildContext context) {
     schoolOptions ??= SPH.schools;
+    secureStorageError = widget.secureStorageError ?? false;
+
+    if (secureStorageError) {
+      schoolId = "${StorageProvider.user.school}";
+      hinweisText = "Aufgrund eines unerwarteten Fehlers kann die App nicht mehr auf die gespeicherten Zugangsdaten zugreifen.\n"
+          "Bitte gib diese erneut an, alle gespeicherten Daten bleiben erhalten.";
+    }
 
     return Scaffold(
         appBar: AppBar(
@@ -47,11 +58,11 @@ class _LoginState extends State<Login> {
 
                 if (logicalScreenSize.height > logicalScreenSize.width) {
                   return ListView(children: [
-                    const Image(image: AssetImage('assets/sph_wide.png')),
+                    Image.asset('assets/sph_wide.png', color: Theme.of(context).colorScheme.primary,),
                     const Divider(height: 32, color: Colors.transparent),
                     Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: getForm(double.infinity, 40.0, false, notify!))
+                        child: getForm(double.infinity, 40.0, false, notify!, hinweisText, secureStorageError))
                   ]);
                 } else {
                   return Stack(
@@ -61,6 +72,7 @@ class _LoginState extends State<Login> {
                         imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                         child: Image.asset(
                           'assets/sph_extra-wide.png',
+                          color: Theme.of(context).colorScheme.primary,
                           fit: BoxFit.fitWidth,
                         ),
                       ),
@@ -101,7 +113,7 @@ class _LoginState extends State<Login> {
                                               logicalScreenSize.height / 12),
                                           64.0),
                                       true,
-                                      notify!),
+                                      notify!, hinweisText, secureStorageError),
                                 ),
                               )))
                     ],
@@ -111,7 +123,7 @@ class _LoginState extends State<Login> {
             }));
   }
 
-  Form getForm(width, buttonHeight, bool landscape, StorageNotifier notify) {
+  Form getForm(width, buttonHeight, bool landscape, StorageNotifier notify, String hinweisText, bool secureError) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -120,12 +132,13 @@ class _LoginState extends State<Login> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.",
-              style: TextStyle(fontSize: 23),
+            Text(
+              hinweisText,
+              style: TextStyle(fontSize: hinweisText.startsWith("Bitte") ? 23 : 20),
               textAlign: TextAlign.center,
             ),
             const Divider(height: 16, color: Colors.transparent),
+            if (!secureError)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Autocomplete<School>(
@@ -265,7 +278,7 @@ class _LoginState extends State<Login> {
                             if (username == "TESTUSER") {
                               await testLogin();
                             } else {
-                              if (int.tryParse(schoolId) == null) {
+                              if (int.tryParse(schoolId) == null && !secureError) {
                                 setState(() {
                                   info = "Anmelden";
                                   errormessage =
@@ -283,26 +296,36 @@ class _LoginState extends State<Login> {
                                   username, password, int.parse(schoolId));
 
                               try {
-                                await SPH.getSID(true);
-                                StorageProvider.saveCredentials(
-                                    username, password);
-                                String userID = "";
-                                try {
-                                  userID = await SPH.updateUser();
-                                } catch (_) {
-                                  errormessage =
-                                      "Es ist ein unerwarteter Fehler aufgetreten";
-                                }
-                                if (userID != "") {
-                                  StorageProvider.loggedIn = userID;
-                                  await SPH.update(notify).then((value) {
+                                await SPH.getSID(true).then((value) async {
+                                  StorageProvider.resetSecureStorage();
+                                  if (secureError) {
+                                    StorageProvider.saveCredentials(
+                                        username, password);
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
+                                            builder: (context) => const SPHPlaner()));
+                                  } else {
+                                    String userID = "";
+                                    try {
+                                      userID = await SPH.updateUser();
+                                    } catch (_) {
+                                      errormessage =
+                                      "Es ist ein unerwarteter Fehler aufgetreten";
+                                    }
+
+                                    if (userID != "") {
+                                      StorageProvider.loggedIn = userID;
+                                      await SPH.update(notify).then((value) {
+                                        Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
                                                 const LoginSettings()));
-                                  });
-                                }
+                                      });
+                                    }
+                                  }
+                                });
                               } catch (error) {
                                 errormessage =
                                     error.toString().split("SIDERROR=")[1];

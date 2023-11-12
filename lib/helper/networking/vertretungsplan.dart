@@ -22,6 +22,9 @@ class Vertretungsplan {
         List<dom.Element> panels = content.getElementsByClassName("panel");
         List<String> dates = [];
         List<Vertretung> vertretungs = [];
+        if (content.text.replaceAll(" ", "").replaceAll("\n", "").contains("KeineEinträge!AktuellliegenfürdieangemeldetePersonkeineMeldungenüberVertretungenvor!")) {
+          StorageProvider.vertretungsDate = dates;
+        }
 
         for (dom.Element panel in panels) {
           if (panel.id.startsWith("tag")) {

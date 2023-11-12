@@ -29,7 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           if (logicalScreenSize.height > logicalScreenSize.width) {
             return ListView(
               children: [
-                const Image(image: AssetImage('assets/sph_wide.png')),
+                Image.asset("assets/sph_wide.png", color: Theme.of(context).colorScheme.primary,),
                 const Divider(height: 32, color: Colors.transparent),
                 Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -44,6 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                   child: Image.asset(
                     'assets/sph_extra-wide.png',
+                    color: Theme.of(context).colorScheme.primary,
                     fit: BoxFit.fitWidth,
                   ),
                 ),

@@ -118,6 +118,10 @@ class StorageProvider {
     return userID;
   }
 
+  static void resetSecureStorage() {
+    _secure.deleteAll();
+  }
+
   static savePassword(String userID, String password) {
     _secure.write(key: "${userID}_password", value: password);
     SPH.setCredetialsFor(userID);
