@@ -52,7 +52,7 @@ dependencies:
   flutter_native_splash: ^2.3.5
   package_info_plus: ^4.0.2
   dynamic_color: ^1.6.2
-  isar: ^3.1.0+1 # dart run build_runner build
+  isar: ^3.1.0+1 # flutter pub run build_runner build
   isar_flutter_libs: ^3.1.0+1
   fluttertoast: ^8.2.2
   share_plus: ^7.1.0

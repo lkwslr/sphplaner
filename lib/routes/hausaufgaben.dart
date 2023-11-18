@@ -44,7 +44,7 @@ class _HomeWorkState extends State<HomeWork> {
                             await StorageProvider.isar.homeworks.put(homework);
                           }).then((value) {
                             notify?.notify("homework");
-                            updateHeadline(StorageProvider.isar.homeworks
+                            updateHomework(StorageProvider.isar.homeworks
                                 .filter()
                                 .finishedEqualTo(false)
                                 .sortByDue()
@@ -61,7 +61,7 @@ class _HomeWorkState extends State<HomeWork> {
                                         await StorageProvider.isar.homeworks
                                             .put(homework);
                                       });
-                                      updateHeadline(StorageProvider.isar.homeworks
+                                      updateHomework(StorageProvider.isar.homeworks
                                           .filter()
                                           .finishedEqualTo(false)
                                           .sortByDue()
@@ -77,7 +77,7 @@ class _HomeWorkState extends State<HomeWork> {
                                 .delete(homework.id);
                           }).then((value) {
                             notify?.notify("homework");
-                            updateHeadline(StorageProvider.isar.homeworks
+                            updateHomework(StorageProvider.isar.homeworks
                                 .filter()
                                 .finishedEqualTo(false)
                                 .sortByDue()
@@ -106,7 +106,7 @@ class _HomeWorkState extends State<HomeWork> {
                                         await restored.user.save();
                                       }).then((value) =>
                                               notify?.notify("homework"));
-                                      updateHeadline(StorageProvider.isar.homeworks
+                                      updateHomework(StorageProvider.isar.homeworks
                                           .filter()
                                           .finishedEqualTo(false)
                                           .sortByDue()
@@ -519,7 +519,7 @@ class _CreateHAState extends State<CreateHA> {
                     await homework?.user.save();
                     notify!.notify("homework");
                   }).then((value) {
-                    updateHeadline(StorageProvider.isar.homeworks
+                    updateHomework(StorageProvider.isar.homeworks
                         .filter()
                         .finishedEqualTo(false)
                         .sortByDue()

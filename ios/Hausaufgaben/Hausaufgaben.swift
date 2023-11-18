@@ -18,6 +18,7 @@ struct Provider: TimelineProvider {
         completion(entry)
     }
 
+    @available(iOSApplicationExtension 15.0, *)
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [SimpleEntry] = []
 
@@ -39,6 +40,7 @@ struct SimpleEntry: TimelineEntry {
     let emoji: String
 }
 
+@available(iOSApplicationExtension 15.0, *)
 struct HausaufgabenEntryView : View {
     var entry: Provider.Entry
 
@@ -53,6 +55,7 @@ struct HausaufgabenEntryView : View {
     }
 }
 
+@available(iOSApplicationExtension 15.0, *)
 struct Hausaufgaben: Widget {
     let kind: String = "Hausaufgaben"
 
@@ -63,8 +66,7 @@ struct Hausaufgaben: Widget {
                     .containerBackground(.fill.tertiary, for: .widget)
             } else {
                 HausaufgabenEntryView(entry: entry)
-                    .padding()
-                    .background()
+                    .padding().background()
             }
         }
         .configurationDisplayName("My Widget")

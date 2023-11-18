@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 import 'package:sphplaner/helper/storage/user.dart';
@@ -25,4 +27,19 @@ class Homework {
   final user = IsarLink<User>();
 
   final subject = IsarLink<Subject>();
+
+  @override
+  String toString() {
+    Map homework = {
+      "title": title,
+      "description": description,
+      "due": due,
+      "finished": finished,
+      "online": online,
+      "onlineIdentifier": onlineIdentifier,
+      "user": user.value?.username,
+      "subject": subject.value?.subjectName
+    };
+    return jsonEncode(homework);
+  }
 }

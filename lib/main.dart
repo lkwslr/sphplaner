@@ -22,6 +22,7 @@
      */
 
 import 'dart:async';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,15 +30,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
+import 'package:sphplaner/helper/drawer.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/log.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
-import 'package:sphplaner/helper/drawer.dart';
 import 'package:sphplaner/helper/theme.dart';
 import 'package:sphplaner/routes/hausaufgaben.dart';
 import 'package:sphplaner/routes/settings.dart';
@@ -45,7 +47,6 @@ import 'package:sphplaner/routes/stundenplan.dart';
 import 'package:sphplaner/routes/vertretungsviewer.dart';
 import 'package:sphplaner/routes/welcome/login.dart';
 import 'package:sphplaner/routes/welcome/welcome.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'helper/storage/homework.dart';
@@ -53,7 +54,6 @@ import 'helper/storage/homework.dart';
 const String appGroupId = 'group.hausaufgabenwidget';
 const String iOSWidgetName = 'Hausaufgaben';
 const String androidWidgetName = 'Hausaufgaben';
-
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -116,10 +116,12 @@ updateHandler(String action) {
       return;
   }
 }
-
-void updateHeadline(List<Homework> homeworks) {
-  // Save the headline data to the widget
-  HomeWidget.saveWidgetData<List<Homework>>('homeworks', homeworks);
+void updateHomework(List<Homework> homeworks) {
+  homeworks.sort((a, b) => a.due?.compareTo(b.due ?? 0) ?? 0);
+  List<String> widgetHomework = homeworks.map((element) {
+    return element.toString();
+  }).toList();
+  HomeWidget.saveWidgetData<List<String>>('homeworks', widgetHomework);
   HomeWidget.updateWidget(
     iOSName: iOSWidgetName,
     androidName: androidWidgetName,
@@ -276,7 +278,9 @@ class _SPHPlaner extends State<SPHPlaner> {
                     }
                     print(StorageProvider.vertretungsDate);
                     if (secureError) {
-                      return Login(secureStorageError: secureError,);
+                      return Login(
+                        secureStorageError: secureError,
+                      );
                     } else if (StorageProvider.loggedIn.isNotEmpty) {
                       return Scaffold(
                         appBar: AppBar(
