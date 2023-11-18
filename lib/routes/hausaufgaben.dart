@@ -7,8 +7,10 @@ import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 
+import '../main.dart';
+
 class HomeWork extends StatefulWidget {
-  const HomeWork({Key? key}) : super(key: key);
+  const HomeWork({super.key});
 
   @override
   State<HomeWork> createState() => _HomeWorkState();
@@ -42,6 +44,11 @@ class _HomeWorkState extends State<HomeWork> {
                             await StorageProvider.isar.homeworks.put(homework);
                           }).then((value) {
                             notify?.notify("homework");
+                            updateHeadline(StorageProvider.isar.homeworks
+                                .filter()
+                                .finishedEqualTo(false)
+                                .sortByDue()
+                                .findAllSync());
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 clipBehavior: Clip.none,
                                 behavior: SnackBarBehavior.floating,
@@ -54,6 +61,11 @@ class _HomeWorkState extends State<HomeWork> {
                                         await StorageProvider.isar.homeworks
                                             .put(homework);
                                       });
+                                      updateHeadline(StorageProvider.isar.homeworks
+                                          .filter()
+                                          .finishedEqualTo(false)
+                                          .sortByDue()
+                                          .findAllSync());
                                       notify?.notify("homework");
                                     }),
                                 content: Text(
@@ -65,6 +77,11 @@ class _HomeWorkState extends State<HomeWork> {
                                 .delete(homework.id);
                           }).then((value) {
                             notify?.notify("homework");
+                            updateHeadline(StorageProvider.isar.homeworks
+                                .filter()
+                                .finishedEqualTo(false)
+                                .sortByDue()
+                                .findAllSync());
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 clipBehavior: Clip.none,
                                 behavior: SnackBarBehavior.floating,
@@ -89,6 +106,11 @@ class _HomeWorkState extends State<HomeWork> {
                                         await restored.user.save();
                                       }).then((value) =>
                                               notify?.notify("homework"));
+                                      updateHeadline(StorageProvider.isar.homeworks
+                                          .filter()
+                                          .finishedEqualTo(false)
+                                          .sortByDue()
+                                          .findAllSync());
                                     }),
                                 content:
                                     Text('${homework.title} wurde entfernt.')));
@@ -326,7 +348,7 @@ class _HomeWorkState extends State<HomeWork> {
 }
 
 class CreateHA extends StatefulWidget {
-  const CreateHA({Key? key, required this.homework}) : super(key: key);
+  const CreateHA({super.key, required this.homework});
 
   final Homework homework;
 
@@ -496,7 +518,15 @@ class _CreateHAState extends State<CreateHA> {
                     await homework?.subject.save();
                     await homework?.user.save();
                     notify!.notify("homework");
-                  }).then((value) => Navigator.of(context).pop());
+                  }).then((value) {
+                    updateHeadline(StorageProvider.isar.homeworks
+                        .filter()
+                        .finishedEqualTo(false)
+                        .sortByDue()
+                        .findAllSync());
+                    Navigator.of(context).pop();
+                  });
+
                 } else {
                   setState(() {
                     error = true;

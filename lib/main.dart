@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
@@ -46,6 +47,13 @@ import 'package:sphplaner/routes/welcome/login.dart';
 import 'package:sphplaner/routes/welcome/welcome.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'helper/storage/homework.dart';
+
+const String appGroupId = 'group.hausaufgabenwidget';
+const String iOSWidgetName = 'Hausaufgaben';
+const String androidWidgetName = 'Hausaufgaben';
+
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -109,6 +117,15 @@ updateHandler(String action) {
   }
 }
 
+void updateHeadline(List<Homework> homeworks) {
+  // Save the headline data to the widget
+  HomeWidget.saveWidgetData<List<Homework>>('homeworks', homeworks);
+  HomeWidget.updateWidget(
+    iOSName: iOSWidgetName,
+    androidName: androidWidgetName,
+  );
+}
+
 class _SPHPlaner extends State<SPHPlaner> {
   bool loaded = false;
   bool popUpBuilder = false;
@@ -121,6 +138,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   @override
   void initState() {
     super.initState();
+    HomeWidget.setAppGroupId(appGroupId);
     StorageProvider.initializeStorage().then((value) {
       if (StorageProvider.settings.update) {
         updateHandler("ignore");
