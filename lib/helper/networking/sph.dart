@@ -287,7 +287,7 @@ class SPH {
         logger.shout(
             "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
         return http.Response.bytes([], 567);
-      } else if (response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.")) {
+      } else if ((response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.")) && !url.contains("meinunterricht.php")) {
         logger.severe(
             "Beim Abruf der Daten vom Schulportal ist ein Fehler aufgetreten.\n"
                 "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
@@ -339,7 +339,7 @@ class SPH {
             "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
 
         return http.Response.bytes([], 567);
-      } else if (response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.")) {
+      } else if (response.body.contains("<h1>Fehler</h1>") || response.body.contains("Die Funktion ist für diesen Account nicht freigeschaltet.") && !url.contains("meinunterricht.php")) {
         logger.severe(
             "Beim Abruf der Daten vom Schulportal ist ein Fehler aufgetreten.\n"
             "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "

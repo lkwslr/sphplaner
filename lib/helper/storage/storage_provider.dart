@@ -21,9 +21,6 @@ class StorageProvider {
   static SettingsProvider settings = SettingsProvider();
   static User? _user;
 
-
-
-
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _isar ??= await Isar.open([

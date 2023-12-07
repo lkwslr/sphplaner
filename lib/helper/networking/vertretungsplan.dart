@@ -23,6 +23,10 @@ class Vertretungsplan {
         List<String> dates = [];
         List<Vertretung> vertretungs = [];
         if (content.text.replaceAll(" ", "").replaceAll("\n", "").contains("KeineEinträge!AktuellliegenfürdieangemeldetePersonkeineMeldungenüberVertretungenvor!")) {
+          if (DateTime.now().weekday <= 5) {
+            dates.add(DateFormat("dd.MM.yyyy").format(DateTime.now()));
+          }
+
           StorageProvider.vertretungsDate = dates;
         }
 
