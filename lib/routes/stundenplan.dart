@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
+import 'package:logging/logging.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
+import 'package:sphplaner/helper/storage/homework.dart';
 import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
@@ -22,11 +24,12 @@ class _StundenplanState extends State<Stundenplan> {
   double cellWidth = 1;
   double cellHeight = 64;
   double hourCellWidth = 1;
+  Logger logger = Logger("Stundenplan");
 
   @override
   Widget build(BuildContext context) {
     return PropertyChangeConsumer<StorageNotifier, String>(
-        properties: const ['stundenplan'],
+        properties: const ['stundenplan', 'homework'],
         builder: (context, notify, _) {
           Size logicalScreenSize = MediaQuery.of(context).size;
           cellWidth = (logicalScreenSize.width / 5.5) - 9;
@@ -43,7 +46,6 @@ class _StundenplanState extends State<Stundenplan> {
 
           List<String> dates = StorageProvider.vertretungsDate;
           List<Widget> columns = [buildHeader(dates[0], dates[1])];
-
           for (int hour = 1; hour <= StorageProvider.timelist.length; hour++) {
             List<Widget> row = [];
             for (int day = 0; day <= 5; day++) {
@@ -59,45 +61,44 @@ class _StundenplanState extends State<Stundenplan> {
                   ),
                   child: Column(
                     children: [
-                      SizedBox(
-                          height: (cellWidth > 128)
-                              ? (cellHeight - 4) / 2
-                              : cellHeight - 4,
+                      Expanded(
+                        child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(hour.toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 23,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondaryContainer))),
+                      ),
+                      if (cellWidth > 128)
+                        Expanded(
                           child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(hour.toString(),
+                              fit: BoxFit.fitWidth,
+                              child: Text(StorageProvider.timelist[hour - 1],
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 23,
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .onSecondaryContainer)))),
-                      if (cellWidth > 128)
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                            height: (cellHeight - 4) / 2,
-                            child: FittedBox(
-                                fit: BoxFit.fitWidth,
-                                child: Text(StorageProvider.timelist[hour - 1],
-                                    style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSecondaryContainer))))
+                                          .onSecondaryContainer))),
+                        )
                     ],
                   ),
                 ));
               } else {
                 String subject = " ";
                 String room = " ";
+                String teacher = " ";
                 Color color = Colors.transparent;
                 Color textcolor = Colors.black;
                 String type = " ";
                 String note = " ";
                 String date = " ";
+                Homework? homework;
                 try {
                   date = dates.firstWhere(
-                      (element) =>
-                          DateFormat("dd.MM.yyyy").parse(element).weekday ==
+                          (element) =>
+                      DateFormat("dd.MM.yyyy").parse(element).weekday ==
                           day,
                       orElse: () => "01.01.1970");
                 } on FormatException catch (_) {}
@@ -112,6 +113,10 @@ class _StundenplanState extends State<Stundenplan> {
                     .dayOfWeekHourEqualTo(day, hour)
                     .findFirstSync();
 
+                homework = StorageProvider.isar.homeworks.filter().subject((subject) {
+                  return subject.subjectEqualTo(lesson?.subject.value?.subject);
+                }).findFirstSync();
+
                 if (StorageProvider.settings.showVertretung &&
                     vertretung != null) {
                   textcolor = Colors.red;
@@ -121,12 +126,16 @@ class _StundenplanState extends State<Stundenplan> {
                   if (subject.trim() == "") {
                     subject = vertretung.subject.value?.subject ?? "???";
                   }
+                  teacher = vertretung.teacher ?? " ";
                   room = vertretung.room ?? " ";
                   type = vertretung.type ?? " ";
                   note = vertretung.note ?? " ";
                   if (["Entfall", "Freisetzung"].contains(type) ||
                       ["fällt aus"].contains(note)) {
                     subject = "---";
+                    room = "---";
+                  }
+                  if (room.trim() == "") {
                     room = "---";
                   }
                   color = Color(vertretung.subject.value?.color ?? 4292600319);
@@ -136,10 +145,19 @@ class _StundenplanState extends State<Stundenplan> {
                     subject = lesson?.subject.value?.subject ?? " ";
                   }
                   room = lesson?.room ?? " ";
+                  teacher = lesson?.subject.value?.teacher ?? " ";
                   color = Color(lesson?.subject.value?.color ??
                       Theme.of(context).colorScheme.secondaryContainer.value);
                 }
-
+                if (subject.trim() == "") {
+                  subject = lesson != null ? "---" : " ";
+                }
+                if (room.trim() == "") {
+                  room = lesson != null ? "---" : " ";
+                }
+                if (teacher.trim() == "") {
+                  teacher = lesson != null ? "---" : " ";
+                }
                 row.add(GestureDetector(
                   onTap: vertretung == null && room.trim() == "" ? null : () async {
                     showDialog(
@@ -152,14 +170,9 @@ class _StundenplanState extends State<Stundenplan> {
                                   "Informationen zu ${lesson?.subject.value?.subjectName ?? lesson?.subject.value?.subject}"),
                               content: Container(
                                 padding:
-                                    const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                                const EdgeInsets.fromLTRB(16, 8, 16, 16),
                                 child: Column(
                                   children: [
-                                    const Text(
-                                        "Diese Informationen zeigen keine Vertretung an!"),
-                                    const SizedBox(
-                                      height: 16,
-                                    ),
                                     Row(
                                       children: [
                                         const Expanded(
@@ -192,6 +205,92 @@ class _StundenplanState extends State<Stundenplan> {
                                                 "${lesson?.subject.value?.teacher}"))
                                       ],
                                     ),
+                                    if (vertretung != null)
+                                      Column(
+                                          children: [
+                                            const SizedBox(
+                                              height: 16,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Vertretung", style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.left,),
+                                              ],
+                                            ),const SizedBox(
+                                              height: 8,
+                                            ),
+
+                                            Row(
+                                              children: [
+                                                const Expanded(
+                                                    child: Text("Fach: ")),
+                                                Expanded(
+                                                    child: Text(
+                                                        subject))
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Expanded(child: Text("Raum: ")),
+                                                Expanded(child: Text(room))
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Expanded(child: Text("Lehrer: ")),
+                                                Expanded(
+                                                    child: Text(teacher))
+                                              ],
+                                            ),
+                                            if (vertretung.type?.isNotEmpty ?? false)
+                                              Row(
+                                                children: [
+                                                  const Expanded(child: Text("Art: ")),
+                                                  Expanded(
+                                                      child: Text("${vertretung.type}"))
+                                                ],
+                                              ),
+                                            if (vertretung.note?.isNotEmpty ?? false)
+                                              Row(
+                                                children: [
+                                                  const Expanded(child: Text("Hinweis: ")),
+                                                  Expanded(
+                                                      child: Text("${vertretung.note}"))
+                                                ],
+                                              ),
+                                          ]
+                                      ),
+                                    if (homework != null)
+                                      Column(
+                                          children: [
+                                            const SizedBox(
+                                              height: 16,
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text("Hausaufgaben", style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.left,),
+                                              ],
+                                            ),const SizedBox(
+                                              height: 8,
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Expanded(child: Text("Titel: ")),
+                                                Expanded(child: Text("${homework.title}"))
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                const Expanded(
+                                                    child: Text("Zu erledigen bis: ")),
+                                                Expanded(
+                                                    child: Text(
+                                                        DateFormat("dd.MM.yy").format(
+                                                            DateTime.fromMillisecondsSinceEpoch(
+                                                                homework.due ?? 0))))
+                                              ],
+                                            ),
+                                          ]
+                                      ),
                                   ],
                                 ),
                               ));
@@ -238,7 +337,7 @@ class _StundenplanState extends State<Stundenplan> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         FachSettings(subject: Subject()))).then(
-                                (value) => Navigator.of(context).pop(value));
+                                    (value) => Navigator.of(context).pop(value));
                           },
                           child: const Text(
                             "Fach hinzufügen",
@@ -293,7 +392,7 @@ class _StundenplanState extends State<Stundenplan> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   TextEditingController roomController =
-                                      TextEditingController();
+                                  TextEditingController();
                                   return AlertDialog(
                                     contentPadding: const EdgeInsets.all(8),
                                     scrollable: true,
@@ -309,22 +408,22 @@ class _StundenplanState extends State<Stundenplan> {
                                                     style: ElevatedButton
                                                         .styleFrom(
                                                       disabledBackgroundColor:
-                                                          Color(lesson
-                                                                  .subject
-                                                                  .value
-                                                                  ?.color ??
-                                                              Colors
-                                                                  .white.value),
+                                                      Color(lesson
+                                                          .subject
+                                                          .value
+                                                          ?.color ??
+                                                          Colors
+                                                              .white.value),
                                                       disabledForegroundColor:
-                                                          Colors.black,
+                                                      Colors.black,
                                                       minimumSize:
-                                                          const Size.fromHeight(
-                                                              32),
+                                                      const Size.fromHeight(
+                                                          32),
                                                     ),
                                                     child: Text(lesson
-                                                            .subject
-                                                            .value
-                                                            ?.subjectName ??
+                                                        .subject
+                                                        .value
+                                                        ?.subjectName ??
                                                         lesson.subject.value
                                                             ?.subject ??
                                                         "")))
@@ -372,40 +471,79 @@ class _StundenplanState extends State<Stundenplan> {
                       });
                     });
                   },
-                  child: Container(
-                      width: cellWidth,
-                      height: cellHeight,
-                      margin: const EdgeInsets.all(4),
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            height: (cellHeight - 4) / 2,
-                            padding: const EdgeInsets.all(2),
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Text(subject,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: textcolor)),
-                            ),
+                  child: Stack(
+                    children: [
+                      Container(
+                          width: cellWidth,
+                          height: cellHeight,
+                          margin: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(5),
                           ),
-                          Container(
-                            height: (cellHeight - 4) / 2,
-                            padding: const EdgeInsets.all(2),
-                            child: FittedBox(
-                              fit: BoxFit.contain,
-                              child: Text(room,
-                                  style: TextStyle(
-                                      color: textcolor)),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  child: FittedBox(
+                                    fit: BoxFit.contain,
+                                    child: Text(subject,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: textcolor)),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Expanded(child: Container(
+                                          padding: const EdgeInsets.all(2),
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Text(room,
+                                                style: TextStyle(
+                                                    color: textcolor)),
+                                          )
+                                      ),),
+                                      if (cellWidth >= 120)
+                                        Expanded(child: Container(
+                                            padding: const EdgeInsets.all(2),
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Text(teacher,
+                                                  style: TextStyle(
+                                                      color: textcolor)),
+                                            )
+                                        ),)
+                                    ],
+                                  )
+                              ),
+                            ],
+                          )),
+                      if (note.trim() != "" || homework != null)
+                        Container(
+                            width: cellWidth + 6,
+                            height: cellHeight + 6,
+                            alignment: Alignment.topRight,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.info, color: Colors.red,size: 14,),
+                                  ],
+                                )
                             )
-                          ),
-                        ],
-                      )),
+                        ),
+                    ],
+                  ),
                 ));
               }
             }
@@ -452,7 +590,10 @@ class _StundenplanState extends State<Stundenplan> {
               borderRadius: BorderRadius.circular(5),
             ),
             child: RotatedBox(
-                quarterTurns: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 0,
+                quarterTurns:
+                MediaQuery.of(context).orientation == Orientation.portrait
+                    ? 3
+                    : 0,
                 child: FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(e,
@@ -475,34 +616,36 @@ class _StundenplanState extends State<Stundenplan> {
             borderRadius: BorderRadius.circular(5),
           ),
           child: (StorageProvider.settings.showVertretung &&
-                  (shortToday == e || shortTomorrow == e))
+              (shortToday == e || shortTomorrow == e))
               ? Column(
-                  children: [
-                    Container(
-                        height: (cellHeight - 4) / 2,
-                        padding: const EdgeInsets.all(2),
-                        child: FittedBox(
-                            fit: BoxFit.fitWidth,
-                            child: Text(e,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary)))),
-                    Container(
-                        height: (cellHeight - 4) / 2,
-                        padding: const EdgeInsets.all(4),
-                        child: FittedBox(
-                            fit: BoxFit.fitWidth,
-                            child: Text(shortToday == e ? today : tomorrow,
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary))))
-                  ],
-                ) : Container(
-              height: (cellHeight - 4) / 2,
-              padding: EdgeInsets.all(cellHeight/4),
+            children: [
+              Expanded(
+                child: Container(
+                    padding: const EdgeInsets.all(2),
+                    child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(e,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary)))),
+              ),
+              Expanded(
+                child: Container(
+                    padding: const EdgeInsets.all(4),
+                    child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(shortToday == e ? today : tomorrow,
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary)))),
+              )
+            ],
+          )
+              : Container(
+              padding: EdgeInsets.all(cellHeight / 4),
               child: FittedBox(
                   fit: BoxFit.fitHeight,
                   child: Text(e,
@@ -516,3 +659,4 @@ class _StundenplanState extends State<Stundenplan> {
     );
   }
 }
+
