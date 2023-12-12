@@ -113,7 +113,7 @@ class _StundenplanState extends State<Stundenplan> {
                     .dayOfWeekHourEqualTo(day, hour)
                     .findFirstSync();
 
-                homework = StorageProvider.isar.homeworks.filter().subject((subject) {
+                homework = StorageProvider.isar.homeworks.filter().finishedEqualTo(false).subject((subject) {
                   return subject.subjectEqualTo(lesson?.subject.value?.subject);
                 }).findFirstSync();
 
