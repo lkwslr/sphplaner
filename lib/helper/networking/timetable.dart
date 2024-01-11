@@ -11,14 +11,9 @@ import 'package:sphplaner/helper/storage/subject.dart';
 class TimeTable {
   static downloadTimetable() async {
     Isar isar = StorageProvider.isar;
-
-    // TODO: TEXT FÜR AUSWAHL SEITE
-    /*
-    Wähle deine Kurse aus. Kurse, die zur selben Zeit stattfinden wurden in einer Kategorie zusammengefasst
-     */
-
     List<List> availableLesson = [];
     List<String> timelist = [];
+    int offset = 0;
 
     http.Response response = await SPH.get("/stundenplan.php");
     if (response.statusCode == 200) {
@@ -48,8 +43,14 @@ class TimeTable {
             timetableContainer.getElementsByTagName("tbody")[0];
 
         for (dom.Element tr in timetable.getElementsByTagName("tr")) {
-          timelist.add(tr.getElementsByClassName("VonBis")[0].text);
-          availableLesson.add([true, true, true, true, true]);
+          if (tr.text.trim().isNotEmpty){ // Warum? - Siehe in else
+            timelist.add(tr.getElementsByClassName("VonBis")[0].text);
+            availableLesson.add([true, true, true, true, true]);
+          } else {
+            offset++;
+            //Weil das Schulportal manchmal unverständliche Sachen macht,
+            // wie in diesem Fall eine leere Tabellen Zeile zu Beginn
+          }
         }
 
         StorageProvider.timelist = timelist;
@@ -104,13 +105,13 @@ class TimeTable {
                       }
                       List<Lesson> lessons = [];
                       Lesson? lesson = await StorageProvider.isar.lessons
-                          .getByDayOfWeekHour(currentDay, currentHour + 1);
+                          .getByDayOfWeekHour(currentDay, currentHour + 1 - offset);
 
                       if (lesson == null) {
                         lessons.add(Lesson()
                           ..subject.value = subject
                           ..dayOfWeek = currentDay
-                          ..hour = currentHour + 1
+                          ..hour = currentHour + 1 - offset
                           ..room = room);
                       } else {
                         lessons.add(lesson..subject.value = subject
@@ -122,13 +123,13 @@ class TimeTable {
                         availableLesson[currentHour + 1][currentDay - 1] =
                             false;
                         Lesson? lesson = await StorageProvider.isar.lessons
-                            .getByDayOfWeekHour(currentDay, currentHour + 1);
+                            .getByDayOfWeekHour(currentDay, currentHour + 1 - offset);
 
                         if (lesson == null) {
                           lessons.add(Lesson()
                             ..subject.value = subject
                             ..dayOfWeek = currentDay
-                            ..hour = currentHour + 2
+                            ..hour = currentHour + 2 - offset
                             ..room = room);
                         } else {
                           lessons.add(lesson..subject.value = subject

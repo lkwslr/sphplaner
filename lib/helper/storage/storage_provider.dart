@@ -166,7 +166,7 @@ class StorageProvider {
 
   static String get loggedIn {
     String userID = getSharedPrefs("loggedIn");
-    _user = isar.users.getByUsernameSync(userID); //TODO: web
+    _user ??= isar.users.getByUsernameSync(userID);
     return userID;
   }
 

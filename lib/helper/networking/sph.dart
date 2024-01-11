@@ -14,8 +14,10 @@ import 'package:sphplaner/helper/networking/homework.dart';
 import 'package:sphplaner/helper/networking/sph_settings.dart';
 import 'package:sphplaner/helper/networking/timetable.dart';
 import 'package:sphplaner/helper/networking/vertretungsplan.dart';
+import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
+import 'package:sphplaner/helper/storage/subject.dart';
 import 'package:sphplaner/helper/storage/user.dart';
 
 import '../school.dart';
@@ -28,11 +30,11 @@ class SPH {
   static const String _baseURL = "https://start.schulportal.hessen.de";
   static const int _timeout = 30;
   static String _sid = "";
-  static int _lastSid = 0;
   static String _sessionKey = "";
   static final AESCrypto aes = AESCrypto();
   static RSACrypto? rsa;
   static final logger = Logger("SPH Networking");
+  static bool alive = false;
 
   static setCredetials(String username, String password, int school) {
     _username = username;
@@ -56,30 +58,27 @@ class SPH {
     assert(_username != null, "Username not set");
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
-    //      Anzahl m  -> m   -> s
-    if (_lastSid + 1 * 60 * 1000 < DateTime.now().millisecondsSinceEpoch ||
-        _sid.isEmpty || force) {
-      CookieStore.clearCookies();
-      http.Response loginResponse = await post(
-          "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
-          {
-            "value":
-                "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
-          });
 
-      if (loginResponse.statusCode != 302) {
+    if ((_sid.isEmpty || force || !alive) && !alive) {
+      http.Response loginResponse = http.Response("empty", 444);
+      int retry = 0;
+      logger.info("Anmelden bei Schulportal starten.");
+      while (loginResponse.statusCode != 302 || retry > 5) {
+        CookieStore.clearCookies();
         loginResponse = await post(
             "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
             {
               "value":
-                  "user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+              "url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&timezone=1&skin=sp&user2=$_username&user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
             });
+        retry++;
+        logger.info("Versuch: $retry - StatusCode: ${loginResponse.statusCode}");
       }
 
       if (loginResponse.statusCode == 302 &&
           loginResponse.headers['location'] != null) {
         http.Response sidResponse =
-            await get(loginResponse.headers['location']!);
+            await get(loginResponse.headers['location']!); //302 Redirect wird bei GET direkt gefolgt
         if (sidResponse.statusCode == 444) {
           _sid = "";
           return _sid;
@@ -87,17 +86,39 @@ class SPH {
 
         if (sidResponse.body.contains("SPH-Login")) {
           _sid = CookieStore.getSID();
-          _lastSid = DateTime.now().millisecondsSinceEpoch;
         }
+        alive = true;
+        keepAlive();
       } else {
         _sid = "";
         throw Exception(
             "SIDERROR=Der Benutzername oder das Passwort sind falsch.");
       }
+    } else {
+      logger.info("Überspringe Anmelden, da sid verfügbar und nicht älter als 15min");
     }
     return _sid;
   }
 
+  static Future<void> keepAlive() async {
+    if (alive == false) {
+      return;
+    }
+    http.Response keepAliveResponse = await post(
+        "https://start.schulportal.hessen.de/ajax_login.php",
+        {
+          "value":
+          "name=${CookieStore.getSID()}"
+        });
+    if (keepAliveResponse.body == "0") {
+      alive = false;
+    } else {
+      Future.delayed(const Duration(seconds: 30), keepAlive);
+    }
+    logger.info("Keeping Alive: ${keepAliveResponse.body}");
+  }
+
+  //todo funktion audrufen
   static Future<String> cryptoLogin() async {
     if (_sessionKey == "") {
       String uuid = _generateUUID();
@@ -382,7 +403,18 @@ class SPH {
   }
 
   static Future<void> update(StorageNotifier notify, {bool force = false}) async {
-    await getSID(force);
+    try {
+      await getSID(force);
+    } catch (error, stacktrace) {
+      logger.severe("password", error, stacktrace);
+      return;
+    }
+    if (force) {
+      StorageProvider.isar.writeTxn(() async {
+        StorageProvider.isar.lessons.clear();
+        StorageProvider.isar.subjects.clear();
+      });
+    }
     List errors = [];
     try {
       StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
@@ -460,7 +492,6 @@ class SPH {
     _username = null;
     _password = null;
     _sid = "";
-    _lastSid = 0;
     _sessionKey = "";
     rsa = null;
   }
