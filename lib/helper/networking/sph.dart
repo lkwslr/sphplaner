@@ -404,6 +404,9 @@ class SPH {
 
   static Future<void> update(StorageNotifier notify, {bool force = false}) async {
     try {
+      StorageProvider.settings.updateLockText =
+      "Starte Anmeldung beim Schulportal...";
+      notify.notify("main");
       await getSID(force);
     } catch (error, stacktrace) {
       logger.severe("password", error, stacktrace);
