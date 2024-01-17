@@ -426,7 +426,7 @@ class SPH {
 
   static Future<void> update(StorageNotifier notify, {bool force = false}) async {
     try {
-      await getSID(force, notify);
+      await getSID(force, notify: notify);
     } catch (error, stacktrace) {
       logger.severe("password", error, stacktrace);
       return;
