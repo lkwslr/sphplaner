@@ -54,16 +54,27 @@ class SPH {
     return true;
   }
 
-  static Future<String> getSID(bool force) async {
+  static Future<String> getSID(bool force, {StorageNotifier? notify}) async {
     assert(_username != null, "Username not set");
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
     if ((_sid.isEmpty || force || !alive) && !alive) {
+      if (notify != null) {
+        StorageProvider.settings.updateLockText =
+        "Starte Anmeldung beim Schulportal...";
+        notify.notify("main");
+      }
       http.Response loginResponse = http.Response("empty", 444);
       int retry = 0;
       logger.info("Anmelden bei Schulportal starten.");
-      while (loginResponse.statusCode != 302 || retry > 5) {
+      while (loginResponse.statusCode != 302 && retry < 5) {
+        retry++;
+        if (notify != null && StorageProvider.debugLog) {
+          StorageProvider.settings.updateLockText =
+          "Anmeldung - Versuch $retry von 5";
+          notify.notify("main");
+        }
         CookieStore.clearCookies();
         loginResponse = await post(
             "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
@@ -71,12 +82,17 @@ class SPH {
               "value":
               "url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&timezone=1&skin=sp&user2=$_username&user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
             });
-        retry++;
         logger.info("Versuch: $retry - StatusCode: ${loginResponse.statusCode}");
       }
 
       if (loginResponse.statusCode == 302 &&
           loginResponse.headers['location'] != null) {
+        if (notify != null && StorageProvider.debugLog) {
+          StorageProvider.settings.updateLockText =
+          "Anmeldung - Passwort korrekt - Weiterleitung wird gefolgt";
+          notify.notify("main");
+        }
+        logger.info("Anmeldung - Passwort korrekt - Weiterleitung wird gefolgt");
         http.Response sidResponse =
             await get(loginResponse.headers['location']!); //302 Redirect wird bei GET direkt gefolgt
         if (sidResponse.statusCode == 444) {
@@ -87,6 +103,11 @@ class SPH {
         if (sidResponse.body.contains("SPH-Login")) {
           _sid = CookieStore.getSID();
         }
+        if (notify != null && StorageProvider.debugLog) {
+          StorageProvider.settings.updateLockText =
+          "Login erfolgreich - Keeping Alive";
+          notify.notify("main");
+        }
         alive = true;
         keepAlive();
       } else {
@@ -95,7 +116,7 @@ class SPH {
             "SIDERROR=Der Benutzername oder das Passwort sind falsch.");
       }
     } else {
-      logger.info("Überspringe Anmelden, da sid verfügbar und nicht älter als 15min");
+      logger.info("Überspringe Anmelden, da keepAlive");
     }
     return _sid;
   }
@@ -110,12 +131,13 @@ class SPH {
           "value":
           "name=${CookieStore.getSID()}"
         });
+    logger.info("Keeping Alive: ${keepAliveResponse.body}");
     if (keepAliveResponse.body == "0") {
       alive = false;
     } else {
       Future.delayed(const Duration(seconds: 30), keepAlive);
     }
-    logger.info("Keeping Alive: ${keepAliveResponse.body}");
+
   }
 
   //todo funktion audrufen
@@ -404,7 +426,7 @@ class SPH {
 
   static Future<void> update(StorageNotifier notify, {bool force = false}) async {
     try {
-      await getSID(force);
+      await getSID(force, notify);
     } catch (error, stacktrace) {
       logger.severe("password", error, stacktrace);
       return;
