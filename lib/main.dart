@@ -137,6 +137,11 @@ class _SPHPlaner extends State<SPHPlaner> {
         updateHandler("ignore");
       }
       if (StorageProvider.settings.loggedIn) {
+        StorageProvider.getUsername(StorageProvider.loggedIn).then((value) {
+          if (value == "") {
+            secureError = true;
+          }
+        });
         try {
           SPH.setCredentialsFor(StorageProvider.loggedIn).then((value) {
             if (value) {
