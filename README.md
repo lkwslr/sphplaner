@@ -14,7 +14,6 @@ Eingegebene Zugangsdaten werden nur innerhalb der App gespeichert und können ni
 
 - Stundenplan
 - Vertretungsplan
-- Änderungen des Profils für das Schulportal
 - Offline Nutzung möglich
 - Hausaufgaben / TODO-Liste
 
@@ -27,10 +26,13 @@ Eingegebene Zugangsdaten werden nur innerhalb der App gespeichert und können ni
 ## Download
 
 [Google Play](https://play.google.com/store/apps/details?id=de.lkwslr.sphplaner)
+[AppStore](https://apps.apple.com/de/app/sph-planer/id6469423220)
 
 ## Screenshots
-<img src="/screenshots/b18ac7514257482481873bf76ed8cf7b.png" alt="smartphone01.png" width="256"> <img src="/screenshots/35db828bbac54becbf987078a59671b2.png" alt="smartphone02.png" width="256"> <img src="/screenshots/74fafc7b346646bc9ef560901ded0fb9.png" alt="smartphone03.png" width="256"> 
-<img src="/screenshots/99dcee6de459421fb539185d4ef92f15.png" alt="tablet01.png" height="256">
-<img src="/screenshots/4dfaed4398c247e086ac1fcbb9db6337.png" alt="tablet02.png" height="256">
-<img src="/screenshots/4ea4ee4922fb4da5b0d0b7e3d78395ed.png" alt="tablet03.png" height="256">
+<img src="/images/Screenshots/iOS%20-%206.7%20Zoll/Stundenplan.png" alt="Dein Stundenplan - zeigt an, was wirklich ist" width="256"> <img src="/images/Screenshots/iOS%20-%206.7%20Zoll/Vertretungsplan.png" alt="Dein Vertretungsplan - übersichtlich & aktuell" width="256"> <img src="/images/Screenshots/iOS%20-%206.7%20Zoll/Hausaufgaben.png" alt="Deine Hausaufgaben - auf einen Blick" width="256"> 
+<img src="/images/Screenshots/iOS%20-%206.7%20Zoll/Hausaufgaben%20erstellen.png" alt="Einfaches hinzufügen - damit du nichts vergisst" width="256">
+<img src="/images/Screenshots/iOS%20-%206.7%20Zoll/Farbeinstellungen.png" alt="Deine Farben - für deinen Stil" width="256">
 
+## Contribution
+Falls du dich bei der App Entwicklung beteiligen möchtest, freue ich mich sehr darüber.
+Setze dich jedoch am besten vorher mit mir in Kontakt.
