@@ -138,7 +138,7 @@ class _SPHPlaner extends State<SPHPlaner> {
       }
       if (StorageProvider.settings.loggedIn) {
         try {
-          SPH.setCredetialsFor(StorageProvider.loggedIn).then((value) {
+          SPH.setCredentialsFor(StorageProvider.loggedIn).then((value) {
             if (value) {
               StorageProvider.settings.updateLockText = "";
             } else {

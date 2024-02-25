@@ -36,13 +36,13 @@ class SPH {
   static final logger = Logger("SPH Networking");
   static bool alive = false;
 
-  static setCredetials(String username, String password, int school) {
+  static setCredentials(String username, String password, int school) {
     _username = username;
     _password = password;
     _school = school;
   }
 
-  static Future<bool> setCredetialsFor(String userID) async {
+  static Future<bool> setCredentialsFor(String userID) async {
     try {
       _username = await StorageProvider.getUsername(userID);
       _password = await StorageProvider.getPassword(userID);
@@ -59,7 +59,9 @@ class SPH {
     assert(_password != null, "Password not set");
     assert(_school != null, "School not set");
 
-    if ((_sid.isEmpty || force || !alive) && !alive) {
+    bool override = true;
+
+    if (((_sid.isEmpty || force || !alive) && !alive) || override) {
       if (notify != null) {
         StorageProvider.settings.updateLockText =
         "Starte Anmeldung beim Schulportal...";

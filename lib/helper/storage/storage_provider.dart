@@ -121,7 +121,7 @@ class StorageProvider {
 
   static savePassword(String userID, String password) {
     _secure.write(key: "${userID}_password", value: password);
-    SPH.setCredetialsFor(userID);
+    SPH.setCredentialsFor(userID);
   }
 
   static Future<void> saveUser() async {

@@ -292,15 +292,15 @@ class _LoginState extends State<Login> {
                                 info = "Überprüfe Zugangsdaten...";
                               });
 
-                              SPH.setCredetials(
+                              SPH.setCredentials(
                                   username, password, int.parse(schoolId));
 
                               try {
                                 await SPH.getSID(true).then((value) async {
                                   StorageProvider.resetSecureStorage();
+                                  StorageProvider.saveCredentials(
+                                      username, password);
                                   if (secureError) {
-                                    StorageProvider.saveCredentials(
-                                        username, password);
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
