@@ -17,6 +17,15 @@ class Support extends StatelessWidget {
           Image.asset("assets/sph_wide.png",
           color: Theme.of(context).textTheme.bodyMedium?.color,),
           ListTile(
+            title: const Text("Für weitere Informationen besuche die Webseite!"),
+            subtitle: const Text(
+                "Auf der Webseite findest du weitere Informationen über diese App"),
+            leading: const Icon(Icons.open_in_browser),
+            onTap: () async {
+              await launchUrl(Uri.parse("https://www.lkwslr.de/sphplaner"));
+            },
+          ),
+          ListTile(
             title: const Text("Teile die App!"),
             subtitle: const Text(
                 "Je mehr Leute die App nutzen, desto besser. Außerdem ist das für dich die einfachste Art mich zu unterstützen.\nKomplett kostenlos!"),
