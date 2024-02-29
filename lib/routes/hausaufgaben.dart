@@ -8,7 +8,7 @@ import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 
 class HomeWork extends StatefulWidget {
-  const HomeWork({Key? key}) : super(key: key);
+  const HomeWork({super.key});
 
   @override
   State<HomeWork> createState() => _HomeWorkState();
@@ -72,7 +72,6 @@ class _HomeWorkState extends State<HomeWork> {
                                     label: "Rückgängig",
                                     onPressed: () async {
                                       Homework restored = Homework()
-                                        ..user.value = homework.user.value
                                         ..subject.value = homework.subject.value
                                         ..finished = homework.finished
                                         ..description = homework.description
@@ -86,7 +85,6 @@ class _HomeWorkState extends State<HomeWork> {
                                         await StorageProvider.isar.homeworks
                                             .put(restored);
                                         await restored.subject.save();
-                                        await restored.user.save();
                                       }).then((value) =>
                                               notify?.notify("homework"));
                                     }),
@@ -247,9 +245,6 @@ class _HomeWorkState extends State<HomeWork> {
                                                   onPressed: () async {
                                                     Homework restored =
                                                         Homework()
-                                                          ..user.value =
-                                                              homework
-                                                                  .user.value
                                                           ..subject.value =
                                                               homework
                                                                   .subject.value
@@ -272,8 +267,6 @@ class _HomeWorkState extends State<HomeWork> {
                                                           .isar.homeworks
                                                           .put(restored);
                                                       await restored.subject
-                                                          .save();
-                                                      await restored.user
                                                           .save();
                                                     }).then((value) =>
                                                             notify?.notify(
@@ -326,7 +319,7 @@ class _HomeWorkState extends State<HomeWork> {
 }
 
 class CreateHA extends StatefulWidget {
-  const CreateHA({Key? key, required this.homework}) : super(key: key);
+  const CreateHA({super.key, required this.homework});
 
   final Homework homework;
 
@@ -483,8 +476,7 @@ class _CreateHAState extends State<CreateHA> {
               onPressed: () async {
                 if (titel!.text.isNotEmpty) {
                   homework
-                    ?..user.value = StorageProvider.user
-                    ..subject.value = subject
+                    ?..subject.value = subject
                     ..title = titel?.text
                     ..description = beschreibung?.text
                     ..due = date?.millisecondsSinceEpoch
@@ -494,9 +486,10 @@ class _CreateHAState extends State<CreateHA> {
                   await StorageProvider.isar.writeTxn(() async {
                     await StorageProvider.isar.homeworks.put(homework!);
                     await homework?.subject.save();
-                    await homework?.user.save();
+                  }).then((value) {
                     notify!.notify("homework");
-                  }).then((value) => Navigator.of(context).pop());
+                    Navigator.of(context).pop();
+                  });
                 } else {
                   setState(() {
                     error = true;

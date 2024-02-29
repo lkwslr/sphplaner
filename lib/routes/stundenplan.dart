@@ -523,7 +523,7 @@ class _StundenplanState extends State<Stundenplan> {
                               ),
                             ],
                           )),
-                      if (note.trim() != "" || homework != null)
+                      if (note.trim() != "" || (homework != null && StorageProvider.showHomeworkInfo))
                         Container(
                             width: cellWidth + 6,
                             height: cellHeight + 6,

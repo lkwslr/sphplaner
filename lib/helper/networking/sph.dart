@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:flutter/services.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -11,22 +10,17 @@ import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/crypto.dart';
 import 'package:sphplaner/helper/networking/cookie.dart';
 import 'package:sphplaner/helper/networking/homework.dart';
-import 'package:sphplaner/helper/networking/sph_settings.dart';
 import 'package:sphplaner/helper/networking/timetable.dart';
 import 'package:sphplaner/helper/networking/vertretungsplan.dart';
 import 'package:sphplaner/helper/storage/lesson.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
-import 'package:sphplaner/helper/storage/user.dart';
 
 import '../school.dart';
 
 class SPH {
   static List<School> schools = [];
-  static String? _username;
-  static String? _password;
-  static int? _school;
   static const String _baseURL = "https://start.schulportal.hessen.de";
   static const int _timeout = 30;
   static String _sid = "";
@@ -35,33 +29,27 @@ class SPH {
   static RSACrypto? rsa;
   static final logger = Logger("SPH Networking");
   static bool alive = false;
-
-  static setCredentials(String username, String password, int school) {
-    _username = username;
-    _password = password;
-    _school = school;
-  }
-
-  static Future<bool> setCredentialsFor(String userID) async {
-    try {
-      _username = await StorageProvider.getUsername(userID);
-      _password = await StorageProvider.getPassword(userID);
-      _school =
-          (await StorageProvider.isar.users.getByUsername(userID))?.school ?? 0;
-    } on PlatformException catch (_) {
-      return false;
-    }
-    return true;
-  }
+  static int time = 0;
 
   static Future<String> getSID(bool force, {StorageNotifier? notify}) async {
-    assert(_username != null, "Username not set");
-    assert(_password != null, "Password not set");
-    assert(_school != null, "School not set");
+    if (DateTime.now().millisecondsSinceEpoch - time <= 1000 * 3) {
+      return _sid;
+    }
+    String username = await StorageProvider.getUsername();
+    String password = await StorageProvider.getPassword();
+    int school = await StorageProvider.getSchool();
 
-    bool override = true;
+    if (username == "TESTUSER") {
+      return throw Exception(
+          "SIDERROR=Mit dem Demo-Account können keine Netzwerkanfragen durchgeführt werden."
+      );
+    } else if (username == "UNKNOWN" || password == "UNKNWON" || school == 0) {
+      return throw Exception(
+          "SIDERROR=Der Benutzername, das Passwort oder die Schule sind nicht gesetzt.");
+    }
 
-    if (((_sid.isEmpty || force || !alive) && !alive) || override) {
+    if (((_sid.isEmpty || force || !alive) && !alive)) {
+      time = DateTime.now().millisecondsSinceEpoch;
       if (notify != null) {
         StorageProvider.settings.updateLockText =
         "Starte Anmeldung beim Schulportal...";
@@ -79,10 +67,10 @@ class SPH {
         }
         CookieStore.clearCookies();
         loginResponse = await post(
-            "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$_school",
+            "https://login.schulportal.hessen.de/?url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&skin=sp&i=$school",
             {
               "value":
-              "url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&timezone=1&skin=sp&user2=$_username&user=$_school.$_username&password=${Uri.encodeComponent("$_password").replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
+              "url=aHR0cHM6Ly9jb25uZWN0LnNjaHVscG9ydGFsLmhlc3Nlbi5kZS8%3D&timezone=1&skin=sp&user2=$username&user=$school.$username&password=${Uri.encodeComponent(password).replaceAll("!", "%21").replaceAll(")", "%29").replaceAll("(", "%28")}"
             });
         logger.info("Versuch: $retry - StatusCode: ${loginResponse.statusCode}");
       }
@@ -134,7 +122,8 @@ class SPH {
           "name=${CookieStore.getSID()}"
         });
     logger.info("Keeping Alive: ${keepAliveResponse.body}");
-    if (keepAliveResponse.body == "0") {
+    if (keepAliveResponse.body == "0" || keepAliveResponse.body.contains("Fehler")) {
+      logger.info("Keeping Alive: canceled");
       alive = false;
     } else {
       Future.delayed(const Duration(seconds: 30), keepAlive);
@@ -196,12 +185,8 @@ class SPH {
     return schools;
   }
 
-  static Future<String> updateUser() async {
-    String userID = "";
-
+  static Future<bool> updateUser() async {
     if (_sid != "") {
-      Isar isar = StorageProvider.isar;
-
       String schoolID = "";
       String schoolName = "";
       String firstName = "";
@@ -261,56 +246,46 @@ class SPH {
         image = base64Encode(userImage.bodyBytes);
       }
 
-      userID = base64Encode(utf8.encode(_username!));
 
-      final User user = await isar.users.getByUsername(userID) ?? User()
-        ..username = userID;
+      if (schoolID.isNotEmpty) {
+        StorageProvider.school = int.parse(schoolID);
+      }
 
-      await isar.writeTxn(() async {
-        user.autoUpdate ??= true;
-        user.theme ??= "system";
+      if (schoolName.isNotEmpty) {
+        StorageProvider.schoolName = schoolName;
+      }
 
-        if (schoolID.isNotEmpty) {
-          user.school = int.parse(schoolID);
-        }
+      if (firstName.isNotEmpty) {
+        StorageProvider.firstName = firstName;
+      }
 
-        if (schoolName.isNotEmpty) {
-          user.schoolName = schoolName;
-        }
+      if (lastName.isNotEmpty) {
+        StorageProvider.lastName = lastName;
+      }
 
-        if (firstName.isNotEmpty) {
-          user.firstName = firstName;
-          user.displayName ??= firstName;
-        }
+      if (email.isNotEmpty) {
+        StorageProvider.email = email;
+      }
 
-        if (lastName.isNotEmpty) {
-          user.lastName = lastName;
-        }
+      if (birthDate.isNotEmpty) {
+        StorageProvider.birthDate = birthDate;
+      }
 
-        if (email.isNotEmpty) {
-          user.email = email;
-        }
+      if (image.isNotEmpty) {
+        StorageProvider.profileImage = image;
+      }
 
-        if (birthDate.isNotEmpty) {
-          user.birthDate = birthDate;
-        }
+      if (grade.isNotEmpty) {
+        StorageProvider.grade = grade;
+      }
 
-        if (image.isNotEmpty) {
-          user.profileImage = image;
-        }
+      if (course.isNotEmpty) {
+        StorageProvider.course = course;
+      }
 
-        if (grade.isNotEmpty) {
-          user.grade = grade;
-        }
-
-        if (course.isNotEmpty) {
-          user.course = course;
-        }
-
-        await isar.users.put(user);
-      });
+      return true;
     }
-    return userID;
+    return false;
   }
 
   static get(String url) async {
@@ -430,6 +405,10 @@ class SPH {
     try {
       await getSID(force, notify: notify);
     } catch (error, stacktrace) {
+      if ("$error".contains("Demo")) {
+        logger.severe("Der Demo-Account hat begrenzte Möglichkeiten.");
+        return;
+      }
       logger.severe("password", error, stacktrace);
       return;
     }
@@ -452,6 +431,20 @@ class SPH {
         "error": e
       });
     }
+
+    try { // Muss vor Vertretungsplan bleiben, da sonst keine Vertretung geladen wird
+      StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
+      notify.notify("main");
+      await updateUser();
+    } catch (e, s) {
+      logger.warning(
+          "Die Benutzerdaten konnten nicht aktualisiert werden.", e, s);
+      errors.add({
+        "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
     try {
       StorageProvider.settings.updateLockText =
           "Aktualisiere Vertretungsplan...";
@@ -463,19 +456,6 @@ class SPH {
           "Der Vertretungsplan konnte nicht aktualisiert werden.", e, s);
       errors.add({
         "type": "Der Vertretungsplan konnte nicht aktualisiert werden.",
-        "error": e
-      });
-    }
-
-    try {
-      StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
-      notify.notify("main");
-      await updateUser();
-    } catch (e, s) {
-      logger.warning(
-          "Die Benutzerdaten konnten nicht aktualisiert werden.", e, s);
-      errors.add({
-        "type": "Die Benutzerdaten konnten nicht aktualisiert werden.",
         "error": e
       });
     }
@@ -494,9 +474,9 @@ class SPH {
       });
     }
 
-    if (StorageProvider.emailChange != "") {
+    /*if (StorageProvider.emailChange != "") {
       await SPHSettings.checkEMail();
-    }
+    }*/
 
     if (errors
         .where((element) => element["error"].toString().contains("SID"))
@@ -513,8 +493,6 @@ class SPH {
 
   static clear() {
     schools = <School>[];
-    _username = null;
-    _password = null;
     _sid = "";
     _sessionKey = "";
     rsa = null;

@@ -32,7 +32,6 @@ class HomeWork {
 
           if (homework == null) {
             homework = Homework()
-              ..user.value = StorageProvider.user
               ..title = title
               ..description = description
               ..online = true
@@ -40,7 +39,6 @@ class HomeWork {
 
             await isar.writeTxn(() async {
               await isar.homeworks.putByOnlineIdentifier(homework!);
-              await homework.user.save();
             });
           }
         }

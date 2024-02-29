@@ -104,12 +104,6 @@ const VertretungSchema = CollectionSchema(
       name: r'subject',
       target: r'Subject',
       single: true,
-    ),
-    r'user': LinkSchema(
-      id: -2474590537616143110,
-      name: r'user',
-      target: r'User',
-      single: true,
     )
   },
   embeddedSchemas: {},
@@ -246,13 +240,12 @@ Id _vertretungGetId(Vertretung object) {
 }
 
 List<IsarLinkBase<dynamic>> _vertretungGetLinks(Vertretung object) {
-  return [object.subject, object.user];
+  return [object.subject];
 }
 
 void _vertretungAttach(IsarCollection<dynamic> col, Id id, Vertretung object) {
   object.id = id;
   object.subject.attach(col, col.isar.collection<Subject>(), r'subject', id);
-  object.user.attach(col, col.isar.collection<User>(), r'user', id);
 }
 
 extension VertretungByIndex on IsarCollection<Vertretung> {
@@ -1993,19 +1986,6 @@ extension VertretungQueryLinks
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> subjectIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.linkLength(r'subject', 0, true, 0, true);
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> user(
-      FilterQuery<User> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'user');
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> userIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'user', 0, true, 0, true);
     });
   }
 }

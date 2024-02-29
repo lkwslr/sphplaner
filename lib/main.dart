@@ -76,19 +76,19 @@ Future<void> main() async {
   Logger.root.onRecord.listen((record) async {
     if (kDebugMode) {
       print(
-          '${record.loggerName} - ${record.level.name}: ${record.time}: ${record
-              .message}');
+          '${record.loggerName} - ${record.level.name} - ${record.time}: ${record.message} - stacktrace: ${record.stackTrace}');
       if (record.level.value >= 1000) {
         print(getAppState());
       }
     }
     if (StorageProvider.debugLog || record.level.value >= 1000) {
+      String message = "MESSAGE${record.message}ENDMESSAGE.APPSTATE${getAppState()}ENDAPPSTATE";
       await StorageProvider.isar.writeTxn(() async {
         await StorageProvider.isar.logs.put(Log()
           ..name = record.loggerName
           ..level = record.level.name
           ..time = record.time.millisecondsSinceEpoch
-          ..message = "MESSAGE${record.message}ENDMESSAGE.APPSTATE${getAppState()}ENDAPPSTATE");
+          ..message = message);
       });
     }
   });
@@ -133,30 +133,6 @@ class _SPHPlaner extends State<SPHPlaner> {
   void initState() {
     super.initState();
     StorageProvider.initializeStorage().then((value) {
-      if (StorageProvider.settings.update) {
-        updateHandler("ignore");
-      }
-      if (StorageProvider.settings.loggedIn) {
-        StorageProvider.getUsername(StorageProvider.loggedIn).then((value) {
-          if (value == "") {
-            secureError = true;
-          }
-        });
-        try {
-          SPH.setCredentialsFor(StorageProvider.loggedIn).then((value) {
-            if (value) {
-              StorageProvider.settings.updateLockText = "";
-            } else {
-              log.shout("secureStorageError");
-              setState(() {
-                secureError = true;
-              });
-            }
-          });
-        } on PlatformException catch (_) {
-          log.shout("secureStorageError");
-        }
-      }
       setState(() {
         loaded = true;
       });
@@ -173,10 +149,6 @@ class _SPHPlaner extends State<SPHPlaner> {
     return OrientationBuilder(builder: (context, _) {
       return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ['theme'], builder: (context, notify, child) {
-        /*bool autoUpdate = StorageProvider.user?.autoUpdate ?? true;
-        if (autoUpdate) {
-          SPH.update(notify!);
-        }*/
 
         return DynamicColorBuilder(
             builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
@@ -239,7 +211,7 @@ class _SPHPlaner extends State<SPHPlaner> {
                 darkTheme: ThemeData(colorScheme: darkColorScheme,
                   useMaterial3: true,
                   inputDecorationTheme: customDarkInputTheme,),
-                themeMode: StorageProvider.settings.theme,
+                themeMode: StorageProvider.theme,
                 home: PropertyChangeConsumer<StorageNotifier, String>(
                     properties: const ['main'],
                     builder: (context, notify, child) {
@@ -259,8 +231,12 @@ class _SPHPlaner extends State<SPHPlaner> {
                       }
 
                       if (secureError) {
-                        return Login(secureStorageError: secureError,);
-                      } else if (StorageProvider.loggedIn.isNotEmpty) {
+                        return Login(skipUpdate: secureError,);
+                      } else if (StorageProvider.loggedIn) {
+                        /*bool autoUpdate = StorageProvider.user.autoUpdate ?? true;
+                        if (autoUpdate) {
+                          SPH.update(notify!);
+                        }*/
                         return Scaffold(appBar: AppBar(
                           title: Text(StorageProvider.settings.title),
                           bottom: bottomAppBar(context),
@@ -388,56 +364,9 @@ class _SPHPlaner extends State<SPHPlaner> {
     await for (LogRecord event in stream) {
 
       if (event.message == "password") {
-        await Future.delayed(const Duration(milliseconds: 500), () =>
-            showDialog(context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  ValueNotifier<bool> obscure = ValueNotifier<bool>(true);
-
-                  TextEditingController input = TextEditingController();
-
-                  return AlertDialog(scrollable: true,
-                    title: const Text("Passwort"),
-                    content: Column(children: [
-                      const Text(
-                          "Anscheinend hast du dein Passwort außerhalb der App geändert. Damit die App weiterhin funktioniert, gib bitte das neue Passwort ein!"),
-                      const SizedBox(height: 8,),
-                      ValueListenableBuilder(valueListenable: obscure,
-                        builder: (context, bool value, _) {
-                          return TextField(controller: input,
-                            obscureText: value,
-                            decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                labelText: 'Aktuelles Passwort',
-                                suffixIcon: GestureDetector(onTap: () {
-                                  obscure.value = !value;
-                                },
-                                  child: Icon(Icons.remove_red_eye,
-                                      color: value ? null : Theme
-                                          .of(context)
-                                          .colorScheme
-                                          .primary),)),);
-                        },)
-                    ],),
-                    actions: [
-                      TextButton(onPressed: () {
-                        StorageProvider.dialog = false;
-                        StorageProvider.wrongPassword = false;
-                        StorageProvider.deleteAll().then((value) {
-                          Navigator.pushAndRemoveUntil(context,
-                              MaterialPageRoute(
-                                  builder: (_) => const SPHPlaner()),
-                              ModalRoute.withName('/'));
-                        });
-                      }, child: const Text("Abmelden")),
-                      ElevatedButton(onPressed: () {
-                        StorageProvider.savePassword(
-                            StorageProvider.loggedIn, input.text);
-                        StorageProvider.wrongPassword = false;
-                        Navigator.of(context).pop();
-                      }, child: const Text("Speichern")),
-                    ],);
-                }));
+        setState(() {
+          secureError = true;
+        });
       } else if (event.level.name == "SHOUT") {
         await Future.delayed(const Duration(milliseconds: 500), () =>
             showDialog(context: ctx,
@@ -513,7 +442,7 @@ String getAppState() {
   state += "settings.loadAllVertretung: ${StorageProvider.settings.loadAllVertretung}\n";
   state += "settings.logging: ${StorageProvider.settings.logging}\n";
   state += "settings.showVertretung: ${StorageProvider.settings.showVertretung}\n";
-  state += "settings.theme: ${StorageProvider.settings.theme}\n";
+  state += "settings.theme: ${StorageProvider.theme}\n";
   state += "settings.update: ${StorageProvider.settings.update}\n";
   state += "settings.updateLock: ${StorageProvider.settings.updateLock}\n";
   state += "settings.updateLockText: ${StorageProvider.settings.updateLockText}\n";

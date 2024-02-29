@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
-import 'package:sphplaner/helper/storage/user.dart';
 
 part 'vertretung.g.dart';
 
@@ -25,6 +24,4 @@ class Vertretung {
   String? note;
 
   bool placeholder = false;
-
-  final user = IsarLink<User>();
 }

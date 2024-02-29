@@ -18,7 +18,7 @@ class TimeTable {
     http.Response response = await SPH.get("/stundenplan.php");
     if (response.statusCode == 200) {
       List<Map<String, String>> vidcourses = [];
-      if (StorageProvider.user.school == 5135) {
+      if (await StorageProvider.getSchool() == 5135) {
         http.Response vidresponse = await SPH.get("/videokonferenz.php");
         if (vidresponse.statusCode == 200) {
           dom.Document vidkonferenz = parse(vidresponse.body);
@@ -28,8 +28,8 @@ class TimeTable {
           if (vidtable != null) {
             for (dom.Element vidlistitem
                 in vidtable.getElementsByTagName("tr")) {
-              String name = vidlistitem.getElementsByTagName("td")[0].text;
-              String teacher = vidlistitem.getElementsByTagName("td")[1].text;
+              String name = vidlistitem.getElementsByTagName("td")[0].text.trim();
+              String teacher = vidlistitem.getElementsByTagName("td")[1].text.trim();
               vidcourses.add({"name": name, "teacher": teacher});
             }
           }
@@ -81,7 +81,7 @@ class TimeTable {
                     String teacher =
                         course.getElementsByTagName("small")[0].text.trim();
                     if (_checkLesson(subjectName, teacher, vidcourses) ||
-                        (StorageProvider.user.school != 5135)) {
+                        (await StorageProvider.getSchool() != 5135)) {
                       String room = course.text
                           .trim()
                           .replaceAll(RegExp(r'\s+'), " ")

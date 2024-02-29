@@ -1,6 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
-import 'package:sphplaner/helper/storage/user.dart';
 
 part 'homework.g.dart';
 
@@ -20,9 +19,6 @@ class Homework {
 
   @Index(unique: true, replace: true)
   String? onlineIdentifier;
-
-  @Backlink(to: 'homeworks')
-  final user = IsarLink<User>();
 
   final subject = IsarLink<Subject>();
 }

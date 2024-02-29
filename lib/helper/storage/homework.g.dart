@@ -69,13 +69,6 @@ const HomeworkSchema = CollectionSchema(
     )
   },
   links: {
-    r'user': LinkSchema(
-      id: 2460500947705068757,
-      name: r'user',
-      target: r'User',
-      single: true,
-      linkName: r'homeworks',
-    ),
     r'subject': LinkSchema(
       id: -6400455214299485423,
       name: r'subject',
@@ -177,12 +170,11 @@ Id _homeworkGetId(Homework object) {
 }
 
 List<IsarLinkBase<dynamic>> _homeworkGetLinks(Homework object) {
-  return [object.user, object.subject];
+  return [object.subject];
 }
 
 void _homeworkAttach(IsarCollection<dynamic> col, Id id, Homework object) {
   object.id = id;
-  object.user.attach(col, col.isar.collection<User>(), r'user', id);
   object.subject.attach(col, col.isar.collection<Subject>(), r'subject', id);
 }
 
@@ -984,19 +976,6 @@ extension HomeworkQueryObject
 
 extension HomeworkQueryLinks
     on QueryBuilder<Homework, Homework, QFilterCondition> {
-  QueryBuilder<Homework, Homework, QAfterFilterCondition> user(
-      FilterQuery<User> q) {
-    return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'user');
-    });
-  }
-
-  QueryBuilder<Homework, Homework, QAfterFilterCondition> userIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'user', 0, true, 0, true);
-    });
-  }
-
   QueryBuilder<Homework, Homework, QAfterFilterCondition> subject(
       FilterQuery<Subject> q) {
     return QueryBuilder.apply(this, (query) {

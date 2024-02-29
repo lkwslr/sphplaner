@@ -7,9 +7,8 @@ import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:isar/isar.dart';
-import 'package:sphplaner/helper/storage/user.dart';
 
-class SPHSettings {
+/*class SPHSettings {
   static Future<bool> changePassword(
       String oldPassword, String newPassword) async {
     await SPH.getSID(false);
@@ -224,3 +223,4 @@ class SPHSettings {
     return;
   }
 }
+*/

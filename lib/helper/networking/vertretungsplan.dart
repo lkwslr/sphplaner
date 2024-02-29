@@ -117,9 +117,9 @@ class Vertretungsplan {
           for (Vertretung vertretung in vertretungs) {
             if ((StorageProvider.settings.loadAllVertretung) || // prüft ob alle Vertretungen geladen werden sollen
                 (vertretung.classes?.trim().toLowerCase() ?? "").contains(
-                    StorageProvider.user.course?.toLowerCase() ?? "") || // prüft, ob die Klasse des Benutzers angegeben ist
-                (StorageProvider.user.school == 5135 &&
-                    int.tryParse(StorageProvider.user.grade ?? "0")! >= 11 &&
+                    StorageProvider.course.toLowerCase()) || // prüft, ob die Klasse des Benutzers angegeben ist
+                (await StorageProvider.getSchool() == 5135 &&
+                    int.tryParse(StorageProvider.grade)! >= 11 &&
                     vertretung.subject.value != null) || vertretung.placeholder) { //letztes testet, ob man bei der krs in der oberstufe bei der vertretung das fach hat, ggf logic gate prüfen
               Vertretung? test = await isar.vertretungs
                   .where()

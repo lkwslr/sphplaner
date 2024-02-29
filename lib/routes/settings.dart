@@ -8,15 +8,12 @@ import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 import 'package:sphplaner/main.dart';
-/*import 'package:sphplaner/routes/settings_email.dart';
-import 'package:sphplaner/routes/settings_password.dart';
-import 'package:sphplaner/routes/settings_profilbild.dart';*/
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sphplaner/routes/fach_settings.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+  const Settings({super.key});
 
   @override
   State<Settings> createState() => _Settings();
@@ -88,64 +85,6 @@ class _Settings extends State<Settings> {
         child: const Text("Abmelden"));
   }
 
-  /*Widget _plan() {
-    return Column(
-      children: [
-        const Align(
-          alignment: Alignment.center,
-          child: Text("Ansicht Stundenplan",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-        Row(
-          children: [
-            const Expanded(
-              child: ListTile(
-                title: Text("Vertretung nach 18 Uhr"),
-                subtitle: Text(
-                  "Nach 18 Uhr wird die Vertretung für den heutigen Tag ausgeblendet.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            Switch(
-              value: backend.hideToday,
-              onChanged: (changed) {
-                backend.hideToday = changed;
-              },
-            )
-          ],
-        ),
-        const Divider(height: 32, thickness: 3)
-      ],
-    );
-  }*/
-
-  /* Widget _autoUpdate() {
-    return Column(
-      children: [
-        const Align(
-          alignment: Alignment.center,
-          child: Text("Automatische Verbindungen",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-        ),
-        Row(
-          children: [
-            const Expanded(child: Text("Aktualisierung beim Start")),
-            Switch(
-              value: StorageProvider.user!.autoUpdate!,
-              onChanged: (changed) {
-                StorageProvider.user!.autoUpdate = changed;
-                StorageProvider.saveUser();
-                notify!.notify("settings");
-              },
-            )
-          ],
-        ),
-        const Divider(height: 32, thickness: 3)
-      ],
-    );
-  } */
-
   Widget _userSettings() {
     return Column(
       children: [
@@ -213,7 +152,7 @@ class _Settings extends State<Settings> {
       onPressed: () {
         Fluttertoast.showToast(
             msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
-        /*Navigator.push(
+        /* TODO Navigator.push(
             context, MaterialPageRoute(builder: (context) => const Email()));*/
       },
       child: const SizedBox(
@@ -242,7 +181,7 @@ class _Settings extends State<Settings> {
       onPressed: () {
         Fluttertoast.showToast(
             msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
-        /*Navigator.push(
+        /* TODO Navigator.push(
             context, MaterialPageRoute(builder: (context) => const Password()));*/
       },
       child: const SizedBox(
@@ -271,7 +210,7 @@ class _Settings extends State<Settings> {
       onPressed: () {
         Fluttertoast.showToast(
             msg: "Coming Soon...", toastLength: Toast.LENGTH_SHORT);
-        /*Navigator.push(context,
+        /*TODO Navigator.push(context,
             MaterialPageRoute(builder: (context) => Profilbild(notify: notify!)));*/
       },
       child: const SizedBox(
@@ -367,7 +306,7 @@ class _Settings extends State<Settings> {
             )
           ],
         ),
-        /*Row(
+        /* TODO Row(
           children: [
             Expanded(
               child: ElevatedButton(
@@ -506,6 +445,8 @@ Widget anzeigeName(BuildContext context, double buttonSizeFactorXSmall) {
   );
 }
 
+// StorageProvider.user.autoUpdate
+
 Widget plan(StorageNotifier notify) {
   return Column(
     children: [
@@ -518,10 +459,32 @@ Widget plan(StorageNotifier notify) {
         children: [
           const Expanded(
             child: ListTile(
+              title: Text("Automatische Aktualisierung"),
+              subtitle: Text(
+                "Wenn diese Funktion aktiviert ist,"
+                    " meldet sich die App beim Start automatisch beim Schulportal an "
+                    "und aktualisiert den Stundenplan und die Vertretungen.",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.autoUpdate,
+            onChanged: (changed) async {
+              StorageProvider.autoUpdate = changed;
+              notify.notifyAll(["settings"]);
+            },
+          )
+        ],
+      ),
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
               title: Text("Vertretung im Stundenplan"),
               subtitle: Text(
                 "Achtung, es kann bei manchen Schulen zu Fehlern kommen, wenn der Vertretungsplan in den Stundenplan integriert wird, da manchmal Vertretung für Fächer angezeigt wird, die nicht belegt sind.\n"
-                "Bitte berücksichtige dies bei der Aktivierung!",
+                    "Bitte berücksichtige dies bei der Aktivierung!",
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ),
@@ -530,6 +493,27 @@ Widget plan(StorageNotifier notify) {
             value: StorageProvider.settings.showVertretung,
             onChanged: (changed) {
               StorageProvider.settings.showVertretung = changed;
+              notify.notifyAll(["stundenplan", "settings"]);
+            },
+          )
+        ],
+      ),
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
+              title: Text("Hausaufgaben im Stundenplan"),
+              subtitle: Text(
+                "Wenn diese Option aktiviert ist, wird bei allen Fächern, "
+                    "in denen Hausaufgaben vorhanden sind, ein kleines i im Stundenplan angezeigt.",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.showHomeworkInfo,
+            onChanged: (changed) {
+              StorageProvider.showHomeworkInfo = changed;
               notify.notifyAll(["stundenplan", "settings"]);
             },
           )
@@ -624,8 +608,7 @@ Future anzeigeNameDialog(BuildContext context) {
       .value;
 
   TextEditingController controller =
-      TextEditingController(text: "${StorageProvider.user.displayName}");
-  //TODO: In zukünftiger Version: Benutzername nach Leerzeichen gesplittet und auswählbar machen, daran Custom Text anpassen
+      TextEditingController(text: StorageProvider.displayName);
   return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -642,11 +625,9 @@ Future anzeigeNameDialog(BuildContext context) {
                 minimumSize: const Size.fromHeight(40),
               ),
               onPressed: () async {
-                StorageProvider.user.displayName = controller.text;
-                await StorageProvider.saveUser().then((value) {
-                  notify.notify("main");
-                  Navigator.of(context).pop();
-                });
+                StorageProvider.displayName = controller.text;
+                notify.notify("main");
+                Navigator.of(context).pop();
               },
               child: const Text("Speichern"),
             )

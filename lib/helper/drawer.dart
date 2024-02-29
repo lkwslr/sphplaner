@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sphplaner/helper/app_info.dart' as app_info;
@@ -21,7 +20,7 @@ Widget getDrawer() {
   return PropertyChangeConsumer<StorageNotifier, String>(
     properties: const ['main'],
     builder: (context, notify, child) {
-      String username = "${StorageProvider.user.displayName}";
+      String username = StorageProvider.displayName;
       String hey;
       if (username.trim().isEmpty) {
         hey = "Hey";
@@ -75,25 +74,25 @@ Widget getDrawer() {
                                           ListTile(
                                             title: const Text("Name"),
                                             subtitle: Text(
-                                                "${StorageProvider.user.firstName} ${StorageProvider.user.lastName}"),
+                                                "${StorageProvider.firstName} ${StorageProvider.lastName}"),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("E-Mail"),
                                             subtitle: Text(
-                                                "${StorageProvider.user.email}"),
+                                                StorageProvider.email),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Geburtsdatum"),
                                             subtitle: Text(
-                                                "${StorageProvider.user.birthDate}"),
+                                                StorageProvider.birthDate),
                                           ),
                                           const Divider(),
                                           ListTile(
                                             title: const Text("Klasse"),
                                             subtitle: Text(
-                                                "${StorageProvider.user.course}"),
+                                                StorageProvider.course),
                                           ),
                                           const Divider(),
                                           ListTile(
@@ -109,7 +108,7 @@ Widget getDrawer() {
                                                 child: Image(
                                                   image: MemoryImage(
                                                       base64Decode(
-                                                          StorageProvider.user.profileImage!)),
+                                                          StorageProvider.profileImage)),
                                                 ),
                                               )),
                                         ],
@@ -132,7 +131,7 @@ Widget getDrawer() {
                                 shape: BoxShape.circle,
                                 image: DecorationImage(
                                     image: MemoryImage(base64Decode(
-                                        StorageProvider.user.profileImage!))),
+                                        StorageProvider.profileImage))),
                               ),
                             ),
                           ),
