@@ -23,19 +23,28 @@ class _LoginState extends State<Login> {
   String schoolId = "";
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
-  bool _wrongData = false;
+  bool _loadingSchools = true;
   bool obscure = true;
   String username = "";
   String password = "";
   String info = "Anmelden";
   String errormessage = "";
-  List<School>? schoolOptions;
   String hinweisText = "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.";
+  List<School> schools = [];
+
+  @override
+  void initState() {
+    SPH.downloadSchoolInfo().then((value) {
+      setState(() {
+        schools = value;
+        _loadingSchools = false;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    schoolOptions ??= SPH.schools;
-
     return Scaffold(
         appBar: AppBar(
           title: const Text("SPH Planer"),
@@ -147,10 +156,16 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Autocomplete<School>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
+                  if (!_loadingSchools && schools.isEmpty) {
+                    return <School>[const School(name: "Schulen konnten nicht geladen werden.\nGib eine ID an!", city: "", id: "0")];
+                  }
                   if (textEditingValue.text.isEmpty) {
+                    if (_loadingSchools) {
+                      return <School>[const School(name: "Bitte habe einen Moment Geduld...", city: "", id: "0")];
+                    }
                     return const Iterable<School>.empty();
                   } else if (textEditingValue.text.length >= 3) {
-                    return schoolOptions!.where((School school) {
+                    return schools.where((School school) {
                       String compareSchool = "$school".toLowerCase();
                       bool contains = true;
                       for (String word
@@ -162,8 +177,7 @@ class _LoginState extends State<Login> {
                       return contains;
                     }).toList();
                   } else {
-                    return schoolOptions!
-                        .where((School school) => school.name
+                    return schools.where((School school) => school.name
                             .toLowerCase()
                             .startsWith(textEditingValue.text.toLowerCase()))
                         .toList();
@@ -185,7 +199,7 @@ class _LoginState extends State<Login> {
                         border: const OutlineInputBorder(),
                         focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
-                                color: schoolId != ""
+                                color: schoolId.length > 1
                                     ? Colors.green
                                     : Theme.of(context).colorScheme.primary,
                                 width: 2))),
@@ -221,7 +235,7 @@ class _LoginState extends State<Login> {
                 decoration: const InputDecoration(labelText: 'Benutzername'),
                 readOnly: _loading,
                 validator: (value) {
-                  if (value!.isEmpty || _wrongData) {
+                  if (value!.isEmpty) {
                     return 'Bitte gib einen gültigen Benutzernamen an.';
                   }
                   return null;
@@ -253,7 +267,7 @@ class _LoginState extends State<Login> {
                 obscureText: obscure,
                 readOnly: _loading,
                 validator: (value) {
-                  if (value!.isEmpty || _wrongData) {
+                  if (value!.isEmpty) {
                     return 'Bitte gib ein gültiges Passwort an.';
                   } else {
                     return null;
@@ -271,7 +285,6 @@ class _LoginState extends State<Login> {
                   onPressed: _loading
                       ? null
                       : () async {
-                          _wrongData = false;
                           if (_formKey.currentState!.validate()) {
                             setState(() {
                               _loading = true;
@@ -301,8 +314,12 @@ class _LoginState extends State<Login> {
                               StorageProvider.username = username;
                               StorageProvider.password = password;
 
+                              // Absichtliches Warten, damit Zugangsdaten zu 100% gespeichert sind
+                              await Future.delayed(const Duration(seconds: 1));
+
                               try {
                                 await SPH.getSID(true).then((value) async {
+                                  StorageProvider.loggedIn = true;
                                   if (widget.skipUpdate ?? false) {
                                     Navigator.pushReplacement(
                                         context,
@@ -310,7 +327,6 @@ class _LoginState extends State<Login> {
                                             builder: (context) => const SPHPlaner()));
                                   } else {
                                     try {
-                                      StorageProvider.loggedIn = true;
                                       await SPH.update(notify).then((value) {
                                         Navigator.pushReplacement(
                                             context,

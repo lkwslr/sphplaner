@@ -204,6 +204,7 @@ class StorageProvider {
     try {
       return _prefs?.getBool("loggedIn") ?? false;
     } catch (error) {
+      _prefs?.remove("loggedIn");
       _prefs?.setBool("loggedIn", true);
       return true;
     }

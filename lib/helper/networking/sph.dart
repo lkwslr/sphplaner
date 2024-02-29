@@ -32,7 +32,7 @@ class SPH {
   static int time = 0;
 
   static Future<String> getSID(bool force, {StorageNotifier? notify}) async {
-    if (DateTime.now().millisecondsSinceEpoch - time <= 1000 * 3) {
+    if (DateTime.now().millisecondsSinceEpoch - time <= 1000 * 3 && !force) {
       return _sid;
     }
     String username = await StorageProvider.getUsername();

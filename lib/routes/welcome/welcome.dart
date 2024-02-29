@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:sphplaner/helper/networking/sph.dart';
 import 'login.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -14,7 +13,6 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   String buttonText = "Jetzt anmelden";
-  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -102,27 +100,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           color: Colors.transparent,
         ),
         ElevatedButton(
-            onPressed: loading
-                ? null
-                : () async {
-                    setState(() {
-                      buttonText = "Downloade Schulinfos...";
-                      loading = true;
-                    });
-
-                    List schools = await SPH.downloadSchoolInfo();
-
-                    if (schools.isNotEmpty) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Login()));
-                    } else {
-                      setState(() {
-                        buttonText = "Jetzt anmelden";
-                        loading = false;
-                      });
-                    }
+            onPressed: () async {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Login()));
                   },
             style: ElevatedButton.styleFrom(
               minimumSize: Size.fromHeight(buttonHeight),
@@ -131,9 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: Text(
               buttonText,
               style: TextStyle(
-                  color: loading
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onPrimary),
+                  color: Theme.of(context).colorScheme.onPrimary),
             ))
       ],
     );

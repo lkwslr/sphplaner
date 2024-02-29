@@ -7,7 +7,7 @@ import 'package:sphplaner/main.dart';
 import 'package:sphplaner/routes/settings.dart';
 
 class LoginSettings extends StatefulWidget {
-  const LoginSettings({Key? key}) : super(key: key);
+  const LoginSettings({super.key});
 
   @override
   State<LoginSettings> createState() => _LoginSettings();
