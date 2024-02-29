@@ -18,6 +18,7 @@ class StorageProvider {
   static SharedPreferences? _prefs;
   static const FlutterSecureStorage _secure = FlutterSecureStorage();
   static SettingsProvider settings = SettingsProvider();
+  static bool didAutoUpdate = false;
 
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -202,13 +203,10 @@ class StorageProvider {
   static bool get loggedIn {
     try {
       return _prefs?.getBool("loggedIn") ?? false;
-    } catch (_) {
-      bool value = _prefs?.getString("loggedIn") == "true" ? true : false;
-      _prefs?.remove("loggedIn");
-      loggedIn = value;
-      return value;
+    } catch (error) {
+      _prefs?.setBool("loggedIn", true);
+      return true;
     }
-
   }
 
   static set loggedIn(bool value) {

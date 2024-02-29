@@ -104,22 +104,6 @@ class SPHPlaner extends StatefulWidget {
   State<SPHPlaner> createState() => _SPHPlaner();
 }
 
-updateHandler(String action) {
-  switch (action) {
-    case "reset":
-      {
-        return StorageProvider.deleteAll().then((value) {
-          StorageProvider.initializeStorage().then((value) =>
-          StorageProvider.settings.update = true);
-        });
-      }
-    case "ignore":
-      return;
-    default:
-      return;
-  }
-}
-
 class _SPHPlaner extends State<SPHPlaner> {
   bool loaded = false;
   bool popUpBuilder = false;
@@ -127,7 +111,7 @@ class _SPHPlaner extends State<SPHPlaner> {
   String result = "Klicken, um in den Online-Modus zu wechseln";
   int selectedIndex = 1;
   final log = Logger('SPHPlaner');
-  bool secureError = false;
+  bool credentialError = false;
 
   @override
   void initState() {
@@ -149,7 +133,6 @@ class _SPHPlaner extends State<SPHPlaner> {
     return OrientationBuilder(builder: (context, _) {
       return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ['theme'], builder: (context, notify, child) {
-
         return DynamicColorBuilder(
             builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
               ColorScheme lightColorScheme;
@@ -230,13 +213,13 @@ class _SPHPlaner extends State<SPHPlaner> {
                         popUpBuilder = true;
                       }
 
-                      if (secureError) {
-                        return Login(skipUpdate: secureError,);
+                      if (credentialError) {
+                        return Login(skipUpdate: credentialError);
                       } else if (StorageProvider.loggedIn) {
-                        /*bool autoUpdate = StorageProvider.user.autoUpdate ?? true;
-                        if (autoUpdate) {
+                        if (StorageProvider.autoUpdate && !StorageProvider.didAutoUpdate) {
+                          StorageProvider.didAutoUpdate = true;
                           SPH.update(notify!);
-                        }*/
+                        }
                         return Scaffold(appBar: AppBar(
                           title: Text(StorageProvider.settings.title),
                           bottom: bottomAppBar(context),
@@ -365,7 +348,7 @@ class _SPHPlaner extends State<SPHPlaner> {
 
       if (event.message == "password") {
         setState(() {
-          secureError = true;
+          credentialError = true;
         });
       } else if (event.level.name == "SHOUT") {
         await Future.delayed(const Duration(milliseconds: 500), () =>
@@ -443,7 +426,6 @@ String getAppState() {
   state += "settings.logging: ${StorageProvider.settings.logging}\n";
   state += "settings.showVertretung: ${StorageProvider.settings.showVertretung}\n";
   state += "settings.theme: ${StorageProvider.theme}\n";
-  state += "settings.update: ${StorageProvider.settings.update}\n";
   state += "settings.updateLock: ${StorageProvider.settings.updateLock}\n";
   state += "settings.updateLockText: ${StorageProvider.settings.updateLockText}\n";
   state += "CookieStore.getCookies(): ${CookieStore.getCookies()}\n";

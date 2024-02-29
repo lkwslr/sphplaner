@@ -36,11 +36,6 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     schoolOptions ??= SPH.schools;
 
-    if (widget.skipUpdate ?? false) {
-      hinweisText = "Aufgrund eines unerwarteten Fehlers kann sich die App nicht mehr beim Schulportal anmelden.\n"
-          "Bitte melde dich erneut an. Alle gespeicherten Daten (z.B. Hausaufgaben) bleiben erhalten";
-    }
-
     return Scaffold(
         appBar: AppBar(
           title: const Text("SPH Planer"),
@@ -58,7 +53,7 @@ class _LoginState extends State<Login> {
                     const Divider(height: 32, color: Colors.transparent),
                     Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: getForm(double.infinity, 40.0, false, notify!, hinweisText))
+                        child: getForm(double.infinity, 40.0, false, notify!))
                   ]);
                 } else {
                   return Stack(
@@ -109,7 +104,7 @@ class _LoginState extends State<Login> {
                                               logicalScreenSize.height / 12),
                                           64.0),
                                       true,
-                                      notify!, hinweisText),
+                                      notify!),
                                 ),
                               )))
                     ],
@@ -119,7 +114,7 @@ class _LoginState extends State<Login> {
             }));
   }
 
-  Form getForm(width, buttonHeight, bool landscape, StorageNotifier notify, String hinweisText) {
+  Form getForm(width, buttonHeight, bool landscape, StorageNotifier notify) {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -128,11 +123,25 @@ class _LoginState extends State<Login> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              hinweisText,
-              style: TextStyle(fontSize: hinweisText.startsWith("Bitte") ? 23 : 20),
-              textAlign: TextAlign.center,
+            if (widget.skipUpdate ?? false)
+            const Text(
+              "Durch ein Update o.ä. wurden deine Zugangsdaten aus dem App-Speicher entfernt, "
+                  "weswegen du diese jetzt erneut angeben musst.",
+              style: TextStyle(fontSize: 20),
+              textAlign: TextAlign.left,
             ),
+            if (widget.skipUpdate ?? false)
+              const Text(
+                "Alle anderen Daten, wie Einstellungen und Hausaufgaben, bleiben erhalten!",
+                style: TextStyle(fontSize: 20, color: Colors.red),
+                textAlign: TextAlign.left,
+              ),
+            if (!(widget.skipUpdate ?? false))
+              const Text(
+                "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.",
+                style: TextStyle(fontSize: 23),
+                textAlign: TextAlign.center,
+              ),
             const Divider(height: 16, color: Colors.transparent),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
