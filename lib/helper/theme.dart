@@ -20,11 +20,9 @@ get defaultLightColorScheme => const ColorScheme(
     onError: Color(0xff000000),
     errorContainer: Color(0xfffddade),
     onErrorContainer: Color(0xff400013),
-    background: Color(0xfffdfcff),
-    onBackground: Color(0xff161c24),
     surface: Color(0xfffdfcff),
     onSurface: Color(0xff161c24),
-    surfaceVariant: Color(0xffdce3f1),
+    surfaceContainerHighest: Color(0xffdce3f1),
     onSurfaceVariant: Color(0xff404753),
     outline: Color(0xff6f7683),
     outlineVariant: Color(0xffbfc7d5),
@@ -51,11 +49,9 @@ get defaultDarkColorScheme => const ColorScheme(
     onError: Color(0xff670023),
     errorContainer: Color(0xff910034),
     onErrorContainer: Color(0xfffcb4bd),
-    background: Color(0xff161c24),
-    onBackground: Color(0xffdde3ee),
     surface: Color(0xff161c24),
     onSurface: Color(0xffdde3ee),
-    surfaceVariant: Color(0xff404753),
+    surfaceContainerHighest: Color(0xff404753),
     onSurfaceVariant: Color(0xffbfc7d5),
     outline: Color(0xff8a919e),
     outlineVariant: Color(0xff404753),
@@ -63,5 +59,3 @@ get defaultDarkColorScheme => const ColorScheme(
     onInverseSurface: Color(0xff2b313a),
     inversePrimary: Color(0xff0060a9),
     surfaceTint: Color(0xffa2c9ff));
-
-

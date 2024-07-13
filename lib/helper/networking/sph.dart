@@ -5,7 +5,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/crypto.dart';
 import 'package:sphplaner/helper/networking/cookie.dart';
@@ -100,10 +99,8 @@ class SPH {
         }
         alive = true;
         keepAlive();
-      } else {
-        _sid = "";
-        throw Exception(
-            "SIDERROR=Der Benutzername oder das Passwort sind falsch.");
+      } else if (loginResponse.statusCode == 567) {
+        return "";
       }
     } else {
       logger.info("Überspringe Anmelden, da keepAlive");
@@ -303,7 +300,7 @@ class SPH {
           .timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
-      if (response.body.contains("Wartungsarbeiten")) {
+      if (response.body.contains("Wartungsarbeiten") || response.body.contains("Allgemeiner Fehler")) {
         logger.shout(
             "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
         return http.Response.bytes([], 567);
@@ -354,7 +351,7 @@ class SPH {
       }).timeout(const Duration(seconds: _timeout), onTimeout: () {
         throw TimeoutException;
       });
-      if (response.body.contains("Wartungsarbeiten")) {
+      if (response.body.contains("Wartungsarbeiten") || response.body.contains("Allgemeiner Fehler")) {
         logger.shout(
             "Das Schulportal befindet sich aktuell leider in Wartungsarbeiten. Bitte versuche es später erneut.");
 
@@ -365,7 +362,7 @@ class SPH {
             "Falls dieser Fehler öfters auftreten sollte, schalte bitte den Debug-Modus ein. "
             "Dadurch wird ein ausführlicher Log generiert, welcher helfen kann, die Ursache des Fehlers zu finden und diesen zu beheben.\n"
             "Folgende Seite ist betroffen: $url", "METHOD${response.request?.method}METHOD.BODY${response.body}BODY.STATUSCODE${response.statusCode}STATUSCODE.HEADER${response.headers}HEADER.REASONPHRASE${response.reasonPhrase}REASONPHRASE.REDIRECT${response.isRedirect}REDIRECT.REQUEST${response.request?.headers}");
-        return http.Response.bytes([], 567);
+        return http.Response.bytes([], 568);
       }
     } catch (error, stackrace) {
       logger.severe(

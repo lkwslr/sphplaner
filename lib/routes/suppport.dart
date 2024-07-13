@@ -32,7 +32,7 @@ class Support extends StatelessWidget {
             leading: const Icon(Icons.share),
             onTap: () async {
               final box = context.findRenderObject() as RenderBox?;
-              final result = await Share.shareWithResult(
+              final result = await Share.share(
                 "https://www.lkwslr.de/sphplaner",
                 subject: "SPH Planer",
                 sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
@@ -94,7 +94,7 @@ class Support extends StatelessWidget {
             ListTile(
               leading: Icon(
                 Icons.attach_money,
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.surface,
               ),
               subtitle: Column(
                 children: [

@@ -49,10 +49,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Container(
                   decoration: BoxDecoration(
                       gradient: LinearGradient(colors: [
-                    Theme.of(context).colorScheme.background.withOpacity(1),
-                    Theme.of(context).colorScheme.background.withOpacity(.5),
-                    Theme.of(context).colorScheme.background.withOpacity(.5),
-                    Theme.of(context).colorScheme.background.withOpacity(.5)
+                    Theme.of(context).colorScheme.surface.withOpacity(1),
+                    Theme.of(context).colorScheme.surface.withOpacity(.5),
+                    Theme.of(context).colorScheme.surface.withOpacity(.5),
+                    Theme.of(context).colorScheme.surface.withOpacity(.5)
                   ], begin: Alignment.topCenter, end: const Alignment(0, 1))),
                 ),
                 SingleChildScrollView(

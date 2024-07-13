@@ -1,4 +1,4 @@
-import 'dart:convert';
+/*import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:sphplaner/helper/networking/sph.dart';
@@ -8,7 +8,7 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:isar/isar.dart';
 
-/*class SPHSettings {
+class SPHSettings {
   static Future<bool> changePassword(
       String oldPassword, String newPassword) async {
     await SPH.getSID(false);

@@ -1,7 +1,5 @@
 import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sphplaner/helper/app_info.dart';
-import 'package:sphplaner/helper/storage/storage_provider.dart';
 
 // Für runtime-Einstellungen
 class SettingsProvider {

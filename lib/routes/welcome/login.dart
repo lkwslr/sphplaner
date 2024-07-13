@@ -82,19 +82,19 @@ class _LoginState extends State<Login> {
                                 colors: [
                               Theme.of(context)
                                   .colorScheme
-                                  .background
+                                  .surface
                                   .withOpacity(1),
                               Theme.of(context)
                                   .colorScheme
-                                  .background
+                                  .surface
                                   .withOpacity(.5),
                               Theme.of(context)
                                   .colorScheme
-                                  .background
+                                  .surface
                                   .withOpacity(.5),
                               Theme.of(context)
                                   .colorScheme
-                                  .background
+                                  .surface
                                   .withOpacity(.5)
                             ],
                                 begin: Alignment.topCenter,

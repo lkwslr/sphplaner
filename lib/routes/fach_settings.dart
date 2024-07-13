@@ -10,7 +10,7 @@ import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/storage/subject.dart';
 
 class FachSettings extends StatefulWidget {
-  const FachSettings({Key? key, required this.subject}) : super(key: key);
+  const FachSettings({super.key, required this.subject});
   final Subject subject;
 
   @override

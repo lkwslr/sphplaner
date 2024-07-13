@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class EasterEgg extends StatefulWidget {
-  const EasterEgg({Key? key}) : super(key: key);
+  const EasterEgg({super.key});
 
   @override
   State<EasterEgg> createState() => _EasterEgg();
@@ -15,7 +15,8 @@ class _EasterEgg extends State<EasterEgg> {
 
   @override
   Widget build(BuildContext context) {
-    Size logicalScreenSize = View.of(context).physicalSize / View.of(context).devicePixelRatio;
+    Size logicalScreenSize =
+        View.of(context).physicalSize / View.of(context).devicePixelRatio;
     double logicalWidth = logicalScreenSize.width;
     colWidth = (logicalWidth - 56) / 6;
 
