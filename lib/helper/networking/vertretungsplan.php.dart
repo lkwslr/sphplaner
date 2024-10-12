@@ -7,7 +7,6 @@ import 'package:sphplaner/helper/defaults.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/lehrkraft.dart';
 import 'package:sphplaner/helper/storage/lerngruppe.dart';
-import 'package:sphplaner/helper/storage/schulstunde.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 
 import '../storage/vertretung.dart';
