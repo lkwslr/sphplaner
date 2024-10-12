@@ -1,16 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
 import 'package:sphplaner/main.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sphplaner/routes/fach_settings.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -60,7 +57,6 @@ class _Settings extends State<Settings> {
                     plan(notify!),
                     _theme(),
                     //_autoUpdate(),
-                    colors(context, buttonSizeFactorSmall),
                     _imexport(),
                     _logout()
                   ],
@@ -284,28 +280,6 @@ class _Settings extends State<Settings> {
             )
           ],
         ),
-        Row(
-          children: [
-            const Expanded(
-              child: ListTile(
-                title: Text("Gesamten Vertretungsplan laden"),
-                subtitle: Text(
-                  "ACHTUNG: NUR AKTIVIEREN, WENN KEINE VERTRETUNG ANGEZEIGT WIRD!!!"
-                      "Aktivieren, um den gesamten Vertretungsplan unabängig von deiner Klasse zu laden.\n"
-                      "Kann helfen, Vertretung anzuzeigen, falls deine Klasse nicht richtig geladen werden konnte.",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ),
-            ),
-            Switch(
-              value: StorageProvider.settings.loadAllVertretung,
-              onChanged: StorageProvider.advancedDisabled ? null : (changed) {
-                StorageProvider.settings.loadAllVertretung = changed;
-                notify?.notifyAll(["stundenplan", "settings"]);
-              },
-            )
-          ],
-        ),
         /* TODO Row(
           children: [
             Expanded(
@@ -519,85 +493,29 @@ Widget plan(StorageNotifier notify) {
           )
         ],
       ),
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
+              title: Text("Gesamten Vertretungsplan anzeigen"),
+              subtitle: Text(
+                "In der Vertretungsplan-Ansicht wird er gesamte verfügbare Vertretungsplan angezeigt.\n"
+                    "Im Stundenplan werden weiterhin nur Vertretungen angezeigt, die auf die angemeldete Person zu treffen.",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.settings.showAllVertretung,
+            onChanged: (changed) {
+              StorageProvider.settings.showAllVertretung = changed;
+              notify.notifyAll(["vertretung", "settings"]);
+            },
+          )
+        ],
+      ),
       const Divider(height: 32, thickness: 3)
     ],
-  );
-}
-
-Widget colors(BuildContext context, double buttonSizeFactorSmall) {
-  List<Widget> faecher = [
-    const Align(
-      alignment: Alignment.center,
-      child: Text("Einstellungen für deine Fächer",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-    )
-  ];
-  for (Subject subject in StorageProvider.isar.subjects.where().findAllSync()) {
-    if (buttonSizeFactorSmall > 40) {
-      faecher.add(const SizedBox(height: 8));
-    }
-
-    String subjectName = subject.subjectName ?? "";
-    if (subjectName.trim() == "") {
-      subjectName = subject.subject ?? "???";
-    }
-
-    faecher.add(ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => FachSettings(subject: subject)));
-        },
-        style: ElevatedButton.styleFrom(
-            backgroundColor: Color(subject.color),
-            minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
-        child: SizedBox(
-          width: double.infinity,
-          height: 32,
-          child: Stack(
-            children: [
-              Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                      "$subjectName ${subjectName == subject.subject ? "" : "(${subject.subject})"}",
-                      style: const TextStyle(color: Colors.black))),
-              const Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(Icons.arrow_forward, color: Colors.black)),
-            ],
-          ),
-        )));
-  }
-
-  faecher.add(ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => FachSettings(subject: Subject())));
-      },
-      style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          minimumSize: Size.fromHeight(buttonSizeFactorSmall)),
-      child: const SizedBox(
-        width: double.infinity,
-        height: 32,
-        child: Stack(
-          children: [
-            Align(
-                alignment: Alignment.centerLeft,
-                child: Text("neues Fach hinzufügen",
-                    style: TextStyle(color: Colors.black))),
-            Align(
-                alignment: Alignment.centerRight,
-                child: Icon(Icons.arrow_forward, color: Colors.black)),
-          ],
-        ),
-      )));
-  faecher.add(const Divider(height: 32, thickness: 3));
-  return Column(
-    children: faecher,
   );
 }
 

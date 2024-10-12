@@ -6,12 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sphplaner/helper/defaults.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/homework.dart';
-import 'package:sphplaner/helper/storage/lesson.dart';
+import 'package:sphplaner/helper/storage/lehrkraft.dart';
+import 'package:sphplaner/helper/storage/lerngruppe.dart';
 import 'package:sphplaner/helper/storage/log.dart';
+import 'package:sphplaner/helper/storage/schulstunde.dart';
 import 'package:sphplaner/helper/storage/settings_provider.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
-import 'package:sphplaner/helper/storage/teacher.dart';
 import 'package:sphplaner/helper/storage/vertretung.dart';
+
+import 'leistungskontrolle.dart';
 
 class StorageProvider {
   static Isar? _isar;
@@ -23,12 +25,13 @@ class StorageProvider {
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();
     _isar ??= await Isar.open([
-      SubjectSchema,
-      TeacherSchema,
-      LessonSchema,
       HomeworkSchema,
       VertretungSchema,
-      LogSchema
+      LogSchema,
+      LerngruppeSchema,
+      LehrkraftSchema,
+      LeistungskontrolleSchema,
+      SchulstundeSchema
     ], name: "sphplaner", directory: dir.path);
 
     _prefs ??= await SharedPreferences.getInstance();

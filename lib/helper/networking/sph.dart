@@ -9,12 +9,11 @@ import 'package:logging/logging.dart';
 import 'package:sphplaner/helper/crypto.dart';
 import 'package:sphplaner/helper/networking/cookie.dart';
 import 'package:sphplaner/helper/networking/homework.dart';
+import 'package:sphplaner/helper/networking/kalender.php.dart';
 import 'package:sphplaner/helper/networking/timetable.dart';
-import 'package:sphplaner/helper/networking/vertretungsplan.dart';
-import 'package:sphplaner/helper/storage/lesson.dart';
+import 'package:sphplaner/helper/networking/vertretungsplan.php.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
 
 import '../school.dart';
 
@@ -409,27 +408,12 @@ class SPH {
       logger.severe("password", error, stacktrace);
       return;
     }
-    if (force) {
+    if (force) { //TODO
       StorageProvider.isar.writeTxn(() async {
-        StorageProvider.isar.lessons.clear();
-        StorageProvider.isar.subjects.clear();
       });
     }
     List errors = [];
     try {
-      StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
-      notify.notify("main");
-      await TimeTable.downloadTimetable();
-      notify.notifyAll(["stundenplan"]);
-    } catch (e, s) {
-      logger.warning("Der Stundenplan konnte nicht aktualisiert werden.", e, s);
-      errors.add({
-        "type": "Der Stundenplan konnte nicht aktualisiert werden.",
-        "error": e
-      });
-    }
-
-    try { // Muss vor Vertretungsplan bleiben, da sonst keine Vertretung geladen wird
       StorageProvider.settings.updateLockText = "Aktualisiere Benutzerdaten...";
       notify.notify("main");
       await updateUser();
@@ -444,9 +428,37 @@ class SPH {
 
     try {
       StorageProvider.settings.updateLockText =
+      "Aktualisiere Kalender...";
+      notify.notify("main");
+      await downloadKalender();
+      notify.notifyAll(["kalender"]);
+    } catch (e, s) {
+      logger.warning(
+          "Der Kalender konnte nicht aktualisiert werden.", e, s);
+      errors.add({
+        "type": "Der Kalender konnte nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
+    try {
+      StorageProvider.settings.updateLockText = "Aktualisiere Stundenplan...";
+      notify.notify("main");
+      await TimeTable.downloadTimetable();
+      notify.notifyAll(["stundenplan"]);
+    } catch (e, s) {
+      logger.warning("Der Stundenplan konnte nicht aktualisiert werden.", e, s);
+      errors.add({
+        "type": "Der Stundenplan konnte nicht aktualisiert werden.",
+        "error": e
+      });
+    }
+
+    try {
+      StorageProvider.settings.updateLockText =
           "Aktualisiere Vertretungsplan...";
       notify.notify("main");
-      await Vertretungsplan.download();
+      await downloadVertretungsplan();
       notify.notifyAll(["stundenplan", "vertretung"]);
     } catch (e, s) {
       logger.warning(

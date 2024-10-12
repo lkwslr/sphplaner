@@ -69,10 +69,10 @@ const HomeworkSchema = CollectionSchema(
     )
   },
   links: {
-    r'subject': LinkSchema(
-      id: -6400455214299485423,
-      name: r'subject',
-      target: r'Subject',
+    r'lerngruppe': LinkSchema(
+      id: 3777471899200012129,
+      name: r'lerngruppe',
+      target: r'Lerngruppe',
       single: true,
     )
   },
@@ -80,7 +80,7 @@ const HomeworkSchema = CollectionSchema(
   getId: _homeworkGetId,
   getLinks: _homeworkGetLinks,
   attach: _homeworkAttach,
-  version: '3.1.0+1',
+  version: '3.1.8',
 );
 
 int _homeworkEstimateSize(
@@ -170,12 +170,13 @@ Id _homeworkGetId(Homework object) {
 }
 
 List<IsarLinkBase<dynamic>> _homeworkGetLinks(Homework object) {
-  return [object.subject];
+  return [object.lerngruppe];
 }
 
 void _homeworkAttach(IsarCollection<dynamic> col, Id id, Homework object) {
   object.id = id;
-  object.subject.attach(col, col.isar.collection<Subject>(), r'subject', id);
+  object.lerngruppe
+      .attach(col, col.isar.collection<Lerngruppe>(), r'lerngruppe', id);
 }
 
 extension HomeworkByIndex on IsarCollection<Homework> {
@@ -976,16 +977,16 @@ extension HomeworkQueryObject
 
 extension HomeworkQueryLinks
     on QueryBuilder<Homework, Homework, QFilterCondition> {
-  QueryBuilder<Homework, Homework, QAfterFilterCondition> subject(
-      FilterQuery<Subject> q) {
+  QueryBuilder<Homework, Homework, QAfterFilterCondition> lerngruppe(
+      FilterQuery<Lerngruppe> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'subject');
+      return query.link(q, r'lerngruppe');
     });
   }
 
-  QueryBuilder<Homework, Homework, QAfterFilterCondition> subjectIsNull() {
+  QueryBuilder<Homework, Homework, QAfterFilterCondition> lerngruppeIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'subject', 0, true, 0, true);
+      return query.linkLength(r'lerngruppe', 0, true, 0, true);
     });
   }
 }

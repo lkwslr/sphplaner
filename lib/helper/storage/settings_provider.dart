@@ -6,6 +6,7 @@ class SettingsProvider {
   Isar? _isar;
   SharedPreferences? _prefs;
   String viewMode = "stundenplan";
+  bool lerngruppen = true;
 
   initializeSettings(Isar isar, SharedPreferences prefs) {
     _isar ??= isar;
@@ -48,6 +49,10 @@ class SettingsProvider {
         return "Stundenplan";
       case "hausaufgaben":
         return "Hausaufgaben";
+      case "lerngruppen":
+        return "Lerngruppen";
+      case "kalender":
+        return "Kalender";
       default:
         return "SPH Planer";
     }
@@ -65,9 +70,9 @@ class SettingsProvider {
 
   set showVertretung(bool value) => _prefs?.setBool("showVertretung", value);
 
-  bool get loadAllVertretung => _prefs?.getBool("loadAllVertretung") ?? false;
+  bool get showAllVertretung => _prefs?.getBool("loadAllVertretung") ?? false;
 
-  set loadAllVertretung(bool value) =>
+  set showAllVertretung(bool value) =>
       _prefs?.setBool("loadAllVertretung", value);
 
   bool get logging => _prefs?.getBool("logging") ?? true;

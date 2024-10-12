@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 
-int getDefaultColor(String fach) {
+int? getDefaultColor(String? fach) {
+  if (fach == null) {
+    return null;
+  }
   fach = fach.toUpperCase();
+
+  //Fach auf lange Namen prüfen
+  int color = getDefaultColorName(fach);
+  if (color != 0) {
+    return color;
+  }
+
   if (fach.contains("REV") || fach.contains("RKA") || fach.contains("RJÜD")) {
     return Colors.grey.shade300.value;
+  } else if (fach.contains("TUT")) {
+    return Colors.deepPurpleAccent.shade100.value;
   } else if (fach.contains("ETH")) {
     return Colors.grey.shade300.value;
   } else if (fach.contains("POWI") || fach.contains("PW")) {
@@ -59,9 +71,66 @@ int getDefaultColor(String fach) {
   }
 }
 
-String? getDefaultName(String fach, {bool check = false}) {
+int getDefaultColorName(String fach) {
+  if (fach.contains("RELIGION") || fach.contains("ETHIK")) {
+    return Colors.grey.shade300.value;
+  } else if (fach.contains("TUTORENSTUNDE")) {
+    return Colors.deepPurpleAccent.shade100.value;
+  } else if (fach.contains("POWI")) {
+    return Colors.pink.shade100.value;
+  } else if (fach.contains("INFORMATIK")) {
+    return Colors.teal.shade100.value;
+  } else if (fach.contains("BIOLOGIE")) {
+    return Colors.lightGreen.shade100.value;
+  } else if (fach.contains("DARSTELLENDES SPIEL")) {
+    return Colors.cyan.shade100.value;
+  } else if (fach.contains("SPORT")) {
+    return Colors.blueGrey.shade200.value;
+  } else if (fach.contains("ERDKUNDE")) {
+    return Colors.green.shade100.value;
+  } else if (fach.contains("GEOGRAPHIE")) {
+    return Colors.green.shade100.value;
+  } else if (fach.contains("MUSIK")) {
+    return Colors.yellow.shade100.value;
+  } else if (fach.contains("KUNST")) {
+    return Colors.purple.shade100.value;
+  } else if (fach.contains("PHYSIK")) {
+    return Colors.deepPurple.shade100.value;
+  } else if (fach.contains("CHEMIE")) {
+    return Colors.lime.shade100.value;
+  } else if (fach.contains("MATHEMATIK")) {
+    return Colors.lightBlue.shade100.value;
+  } else if (fach.contains("FRANZÖSISCH")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("SPANISCH")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("ITALIENISCH")) {
+    return Colors.orange.shade100.value;
+  } else if (fach.contains("ENGLISCH")) {
+    return Colors.amber.shade100.value;
+  } else if (fach.contains("DEUTSCH")) {
+    return Colors.red.shade100.value;
+  } else if (fach.contains("GRIECHISCH")) {
+    return Colors.lightGreen.shade100.value;
+  } else if (fach.contains("GESCHICHTE")) {
+    return Colors.brown.shade100.value;
+  } else if (fach.contains("LATEIN")) {
+    return Colors.indigo.shade100.value;
+  } else {
+    return 0;
+  }
+}
+
+String? getDefaultName(String? fach, {bool check = false}) {
+  if (fach == null) {
+    return fach;
+  }
   fach = fach.toUpperCase();
-  if (fach.contains("REV") || fach.contains("RKA") || fach.contains("RJÜD")) {
+  if (fach.contains("AG")){
+    return null;
+  } else if (fach.contains("TUT")) {
+    return "Tutorenstunde";
+  } else if (fach.contains("REV") || fach.contains("RKA") || fach.contains("RJÜD")) {
     return "Religion";
   } else if (fach.contains("ETH")) {
     return "Ethik";
@@ -81,7 +150,7 @@ String? getDefaultName(String fach, {bool check = false}) {
   } else if (fach.contains("EK")) {
     return "Erdkunde";
   } else if (fach.contains("GEO")) {
-    return "Geologie";
+    return "Geographie";
   } else if (fach.contains("MU")) {
     return "Musik";
   } else if (fach.contains("KU")) {

@@ -1,5 +1,3 @@
-//TODO: wenn stundenplan geupdatet wird überprüfen, ob die fächer immer noch die gleichen sind, wenn sich fächer im Stundenplan geändert haben erneut Bildschim vom Login-Flow anzeigen
-
 //TODO: user update, checked nach email change
 
 //TODO: settings (email, password, photo)
@@ -12,7 +10,11 @@
 
 //TODO: pop up zur weiterempfehlung
 
-//TODO: github CD
+//TODO Handling von Fachnamen
+
+//TODO Hausaufgaben, bzw meinUnterricht
+//https://start.schulportal.hessen.de/meinunterricht.php?a=sus_week&w=8 g
+// ggf mit scrollview, wo am Ende immer eine Woche früher geladen wird
 
 //TODO: Notifier-Options
 /*
@@ -25,7 +27,7 @@
       LOG-LEVEL:
         SHOUT: Standard User Notification for Information
         SEVERE: User Notification for Errors (sent with error and stacktrace for easy email reporting)
-        WARNING: Detailede Information from Errors from level SEVERE for Log
+        WARNING: Detailed Information from Errors from level SEVERE for Log
         INFO: DEBUG Information, only Log
      */
 
@@ -49,7 +51,8 @@ import 'package:sphplaner/helper/storage/log.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/theme.dart';
-import 'package:sphplaner/routes/hausaufgaben.dart';
+import 'package:sphplaner/routes/kalender.dart';
+import 'package:sphplaner/routes/lerngruppen.dart';
 import 'package:sphplaner/routes/settings.dart';
 import 'package:sphplaner/routes/stundenplan.dart';
 import 'package:sphplaner/routes/vertretungsviewer.dart';
@@ -164,6 +167,9 @@ class _SPHPlaner extends State<SPHPlaner> {
               darkColorScheme = defaultDarkColorScheme;
             }
 
+            lightColorScheme = defaultLightColorScheme;
+            darkColorScheme = defaultDarkColorScheme;
+
             InputDecorationTheme customLightInputTheme = InputDecorationTheme(
                 enabledBorder: OutlineInputBorder(
                     borderSide:
@@ -221,8 +227,14 @@ class _SPHPlaner extends State<SPHPlaner> {
                       case "vertretung":
                         selectedIndex = 0;
                         break;
-                      case "hausaufgaben":
+                      /*TODO case "hausaufgaben":
                         selectedIndex = 2;
+                        break;*/
+                      case "lerngruppen":
+                        selectedIndex = 2; //3, wenn hausaufgaben vorhanden
+                        break;
+                      case "kalender":
+                        selectedIndex = 3; //4, wenn hausaufgaben vorhanden
                         break;
                       default:
                         selectedIndex = 1;
@@ -264,10 +276,22 @@ class _SPHPlaner extends State<SPHPlaner> {
                                       "stundenplan";
                                   break;
                                 }
-                              case 2:
+                                /*TODO case 2:
                                 {
                                   StorageProvider.settings.viewMode =
                                       "hausaufgaben";
+                                  break;
+                                }*/
+                              case 2: //3, wenn hausaufgaben vorhanden
+                                {
+                                  StorageProvider.settings.viewMode =
+                                  "lerngruppen";
+                                  break;
+                                }
+                              case 3: //4, wenn hausaufgaben vorhanden
+                                {
+                                  StorageProvider.settings.viewMode =
+                                  "kalender";
                                   break;
                                 }
                             }
@@ -292,13 +316,29 @@ class _SPHPlaner extends State<SPHPlaner> {
                               icon: const Icon(Icons.calendar_month_outlined),
                               label: 'Stundenplan',
                             ),
-                            NavigationDestination(
+                            /*TODO NavigationDestination(
                               selectedIcon: Icon(
                                 Icons.book,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                               icon: const Icon(Icons.book_outlined),
                               label: 'Hausaufgaben',
+                            ),*/
+                            NavigationDestination(
+                              selectedIcon: Icon(
+                                Icons.groups,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              icon: const Icon(Icons.groups_outlined),
+                              label: 'Lerngruppen',
+                            ),
+                            NavigationDestination(
+                              selectedIcon: Icon(
+                                Icons.calendar_month,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              icon: const Icon(Icons.calendar_month_outlined),
+                              label: 'Kalender',
                             ),
                           ],
                         ),
@@ -319,8 +359,12 @@ class _SPHPlaner extends State<SPHPlaner> {
     switch (view) {
       case "vertretung":
         return const VertretungsViewer();
-      case "hausaufgaben":
-        return const HomeWork();
+      case "lerngruppen":
+        return const LerngruppenViewer();
+      /*TODO case "hausaufgaben":
+        return const HomeWork();*/
+      case "kalender":
+        return Kalender();
       default:
         return const Stundenplan();
     }
@@ -342,31 +386,21 @@ class _SPHPlaner extends State<SPHPlaner> {
 
   List<Widget>? buildActions(String view, BuildContext context) {
     List<Widget> actions = [
+      if (StorageProvider.settings.updateLock)
       Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
           child: PropertyChangeConsumer<StorageNotifier, String>(
             properties: const ['updateLock'],
             builder: (context, notify, child) {
-              return GestureDetector(
-                onTap: () async {
-                  if (!StorageProvider.settings.updateLock) {
-                    await SPH.update(notify!);
-                  }
-                },
-                child: StorageProvider.settings.updateLock
-                    ? Center(
-                        child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: Theme.of(context).textTheme.bodyMedium?.color,
-                        ),
-                      ))
-                    : const Icon(
-                        Icons.refresh,
-                      ),
-              );
+              return Center(
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ));
             },
           )),
       Padding(
@@ -473,7 +507,7 @@ String getAppState() {
   state += "isar.directory: ${StorageProvider.isar.directory}\n";
   state += "settings.title: ${StorageProvider.settings.title}\n";
   state +=
-      "settings.loadAllVertretung: ${StorageProvider.settings.loadAllVertretung}\n";
+      "settings.loadAllVertretung: ${StorageProvider.settings.showAllVertretung}\n";
   state += "settings.logging: ${StorageProvider.settings.logging}\n";
   state +=
       "settings.showVertretung: ${StorageProvider.settings.showVertretung}\n";

@@ -54,7 +54,8 @@ android {
     }
 
     compileSdkVersion 34
-    ndkVersion flutter.ndkVersion
+    // ndkVersion flutter.ndkVersion
+    ndkVersion '27.0.12077973'
 
     compileOptions {
         coreLibraryDesugaringEnabled true
@@ -92,6 +93,7 @@ android {
             ndk {
                 debugSymbolLevel 'FULL'
             }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             manifestPlaceholders = [appName: "DEBUG Planer"]
@@ -99,6 +101,7 @@ android {
             versionNameSuffix '-DEBUG'
             minifyEnabled true
             signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     namespace 'de.lkwslr.sphplaner'

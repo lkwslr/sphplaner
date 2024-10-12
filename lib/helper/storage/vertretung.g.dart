@@ -17,55 +17,70 @@ const VertretungSchema = CollectionSchema(
   name: r'Vertretung',
   id: -3664050377336799535,
   properties: {
-    r'classes': PropertySchema(
+    r'art': PropertySchema(
       id: 0,
-      name: r'classes',
+      name: r'art',
       type: IsarType.string,
     ),
-    r'date': PropertySchema(
+    r'datum': PropertySchema(
       id: 1,
-      name: r'date',
+      name: r'datum',
       type: IsarType.string,
     ),
-    r'dayOfWeek': PropertySchema(
+    r'fach': PropertySchema(
       id: 2,
-      name: r'dayOfWeek',
-      type: IsarType.long,
+      name: r'fach',
+      type: IsarType.string,
     ),
-    r'hour': PropertySchema(
+    r'hinweis': PropertySchema(
       id: 3,
-      name: r'hour',
-      type: IsarType.long,
+      name: r'hinweis',
+      type: IsarType.string,
     ),
-    r'note': PropertySchema(
+    r'kurs': PropertySchema(
       id: 4,
-      name: r'note',
+      name: r'kurs',
+      type: IsarType.string,
+    ),
+    r'lehrkraft': PropertySchema(
+      id: 5,
+      name: r'lehrkraft',
       type: IsarType.string,
     ),
     r'placeholder': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'placeholder',
       type: IsarType.bool,
     ),
-    r'room': PropertySchema(
-      id: 6,
-      name: r'room',
-      type: IsarType.string,
-    ),
-    r'teacher': PropertySchema(
+    r'raum': PropertySchema(
       id: 7,
-      name: r'teacher',
+      name: r'raum',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(
+    r'stunden': PropertySchema(
       id: 8,
-      name: r'type',
+      name: r'stunden',
+      type: IsarType.longList,
+    ),
+    r'vertretungsFach': PropertySchema(
+      id: 9,
+      name: r'vertretungsFach',
       type: IsarType.string,
     ),
-    r'vertrSubject': PropertySchema(
-      id: 9,
-      name: r'vertrSubject',
+    r'vertretungsLehrkraft': PropertySchema(
+      id: 10,
+      name: r'vertretungsLehrkraft',
       type: IsarType.string,
+    ),
+    r'vertretungsRaum': PropertySchema(
+      id: 11,
+      name: r'vertretungsRaum',
+      type: IsarType.string,
+    ),
+    r'wochentag': PropertySchema(
+      id: 12,
+      name: r'wochentag',
+      type: IsarType.long,
     )
   },
   estimateSize: _vertretungEstimateSize,
@@ -73,36 +88,12 @@ const VertretungSchema = CollectionSchema(
   deserialize: _vertretungDeserialize,
   deserializeProp: _vertretungDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'date_dayOfWeek_hour': IndexSchema(
-      id: 2896883763141730327,
-      name: r'date_dayOfWeek_hour',
-      unique: true,
-      replace: true,
-      properties: [
-        IndexPropertySchema(
-          name: r'date',
-          type: IndexType.hash,
-          caseSensitive: true,
-        ),
-        IndexPropertySchema(
-          name: r'dayOfWeek',
-          type: IndexType.value,
-          caseSensitive: false,
-        ),
-        IndexPropertySchema(
-          name: r'hour',
-          type: IndexType.value,
-          caseSensitive: false,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {
-    r'subject': LinkSchema(
-      id: -7159617878317990325,
-      name: r'subject',
-      target: r'Subject',
+    r'lerngruppe': LinkSchema(
+      id: -7100061387903415292,
+      name: r'lerngruppe',
+      target: r'Lerngruppe',
       single: true,
     )
   },
@@ -110,7 +101,7 @@ const VertretungSchema = CollectionSchema(
   getId: _vertretungGetId,
   getLinks: _vertretungGetLinks,
   attach: _vertretungAttach,
-  version: '3.1.0+1',
+  version: '3.1.8',
 );
 
 int _vertretungEstimateSize(
@@ -120,43 +111,62 @@ int _vertretungEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
-    final value = object.classes;
+    final value = object.art;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.date;
+    final value = object.datum;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.note;
+    final value = object.fach;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.room;
+    final value = object.hinweis;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.teacher;
+    final value = object.kurs;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.type;
+    final value = object.lehrkraft;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
   }
   {
-    final value = object.vertrSubject;
+    final value = object.raum;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.stunden.length * 8;
+  {
+    final value = object.vertretungsFach;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.vertretungsLehrkraft;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.vertretungsRaum;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -170,16 +180,19 @@ void _vertretungSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.classes);
-  writer.writeString(offsets[1], object.date);
-  writer.writeLong(offsets[2], object.dayOfWeek);
-  writer.writeLong(offsets[3], object.hour);
-  writer.writeString(offsets[4], object.note);
-  writer.writeBool(offsets[5], object.placeholder);
-  writer.writeString(offsets[6], object.room);
-  writer.writeString(offsets[7], object.teacher);
-  writer.writeString(offsets[8], object.type);
-  writer.writeString(offsets[9], object.vertrSubject);
+  writer.writeString(offsets[0], object.art);
+  writer.writeString(offsets[1], object.datum);
+  writer.writeString(offsets[2], object.fach);
+  writer.writeString(offsets[3], object.hinweis);
+  writer.writeString(offsets[4], object.kurs);
+  writer.writeString(offsets[5], object.lehrkraft);
+  writer.writeBool(offsets[6], object.placeholder);
+  writer.writeString(offsets[7], object.raum);
+  writer.writeLongList(offsets[8], object.stunden);
+  writer.writeString(offsets[9], object.vertretungsFach);
+  writer.writeString(offsets[10], object.vertretungsLehrkraft);
+  writer.writeString(offsets[11], object.vertretungsRaum);
+  writer.writeLong(offsets[12], object.wochentag);
 }
 
 Vertretung _vertretungDeserialize(
@@ -189,17 +202,20 @@ Vertretung _vertretungDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Vertretung();
-  object.classes = reader.readStringOrNull(offsets[0]);
-  object.date = reader.readStringOrNull(offsets[1]);
-  object.dayOfWeek = reader.readLongOrNull(offsets[2]);
-  object.hour = reader.readLongOrNull(offsets[3]);
+  object.art = reader.readStringOrNull(offsets[0]);
+  object.datum = reader.readStringOrNull(offsets[1]);
+  object.fach = reader.readStringOrNull(offsets[2]);
+  object.hinweis = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.note = reader.readStringOrNull(offsets[4]);
-  object.placeholder = reader.readBool(offsets[5]);
-  object.room = reader.readStringOrNull(offsets[6]);
-  object.teacher = reader.readStringOrNull(offsets[7]);
-  object.type = reader.readStringOrNull(offsets[8]);
-  object.vertrSubject = reader.readStringOrNull(offsets[9]);
+  object.kurs = reader.readStringOrNull(offsets[4]);
+  object.lehrkraft = reader.readStringOrNull(offsets[5]);
+  object.placeholder = reader.readBool(offsets[6]);
+  object.raum = reader.readStringOrNull(offsets[7]);
+  object.stunden = reader.readLongList(offsets[8]) ?? [];
+  object.vertretungsFach = reader.readStringOrNull(offsets[9]);
+  object.vertretungsLehrkraft = reader.readStringOrNull(offsets[10]);
+  object.vertretungsRaum = reader.readStringOrNull(offsets[11]);
+  object.wochentag = reader.readLongOrNull(offsets[12]);
   return object;
 }
 
@@ -215,21 +231,27 @@ P _vertretungDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readBool(offset)) as P;
-    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readBool(offset)) as P;
     case 7:
       return (reader.readStringOrNull(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongList(offset) ?? []) as P;
     case 9:
       return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readStringOrNull(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -240,103 +262,13 @@ Id _vertretungGetId(Vertretung object) {
 }
 
 List<IsarLinkBase<dynamic>> _vertretungGetLinks(Vertretung object) {
-  return [object.subject];
+  return [object.lerngruppe];
 }
 
 void _vertretungAttach(IsarCollection<dynamic> col, Id id, Vertretung object) {
   object.id = id;
-  object.subject.attach(col, col.isar.collection<Subject>(), r'subject', id);
-}
-
-extension VertretungByIndex on IsarCollection<Vertretung> {
-  Future<Vertretung?> getByDateDayOfWeekHour(
-      String? date, int? dayOfWeek, int? hour) {
-    return getByIndex(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
-  }
-
-  Vertretung? getByDateDayOfWeekHourSync(
-      String? date, int? dayOfWeek, int? hour) {
-    return getByIndexSync(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
-  }
-
-  Future<bool> deleteByDateDayOfWeekHour(
-      String? date, int? dayOfWeek, int? hour) {
-    return deleteByIndex(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
-  }
-
-  bool deleteByDateDayOfWeekHourSync(String? date, int? dayOfWeek, int? hour) {
-    return deleteByIndexSync(r'date_dayOfWeek_hour', [date, dayOfWeek, hour]);
-  }
-
-  Future<List<Vertretung?>> getAllByDateDayOfWeekHour(List<String?> dateValues,
-      List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dateValues.length;
-    assert(dayOfWeekValues.length == len && hourValues.length == len,
-        'All index values must have the same length');
-    final values = <List<dynamic>>[];
-    for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
-    }
-
-    return getAllByIndex(r'date_dayOfWeek_hour', values);
-  }
-
-  List<Vertretung?> getAllByDateDayOfWeekHourSync(List<String?> dateValues,
-      List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dateValues.length;
-    assert(dayOfWeekValues.length == len && hourValues.length == len,
-        'All index values must have the same length');
-    final values = <List<dynamic>>[];
-    for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
-    }
-
-    return getAllByIndexSync(r'date_dayOfWeek_hour', values);
-  }
-
-  Future<int> deleteAllByDateDayOfWeekHour(List<String?> dateValues,
-      List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dateValues.length;
-    assert(dayOfWeekValues.length == len && hourValues.length == len,
-        'All index values must have the same length');
-    final values = <List<dynamic>>[];
-    for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
-    }
-
-    return deleteAllByIndex(r'date_dayOfWeek_hour', values);
-  }
-
-  int deleteAllByDateDayOfWeekHourSync(List<String?> dateValues,
-      List<int?> dayOfWeekValues, List<int?> hourValues) {
-    final len = dateValues.length;
-    assert(dayOfWeekValues.length == len && hourValues.length == len,
-        'All index values must have the same length');
-    final values = <List<dynamic>>[];
-    for (var i = 0; i < len; i++) {
-      values.add([dateValues[i], dayOfWeekValues[i], hourValues[i]]);
-    }
-
-    return deleteAllByIndexSync(r'date_dayOfWeek_hour', values);
-  }
-
-  Future<Id> putByDateDayOfWeekHour(Vertretung object) {
-    return putByIndex(r'date_dayOfWeek_hour', object);
-  }
-
-  Id putByDateDayOfWeekHourSync(Vertretung object, {bool saveLinks = true}) {
-    return putByIndexSync(r'date_dayOfWeek_hour', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByDateDayOfWeekHour(List<Vertretung> objects) {
-    return putAllByIndex(r'date_dayOfWeek_hour', objects);
-  }
-
-  List<Id> putAllByDateDayOfWeekHourSync(List<Vertretung> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'date_dayOfWeek_hour', objects,
-        saveLinks: saveLinks);
-  }
+  object.lerngruppe
+      .attach(col, col.isar.collection<Lerngruppe>(), r'lerngruppe', id);
 }
 
 extension VertretungQueryWhereSort
@@ -414,354 +346,40 @@ extension VertretungQueryWhere
       ));
     });
   }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateIsNullAnyDayOfWeekHour() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [null],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateIsNotNullAnyDayOfWeekHour() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToAnyDayOfWeekHour(String? date) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [date],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateNotEqualToAnyDayOfWeekHour(String? date) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [],
-              upper: [date],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [],
-              upper: [date],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekIsNullAnyHour(String? date) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [date, null],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekIsNotNullAnyHour(String? date) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, null],
-        includeLower: false,
-        upper: [
-          date,
-        ],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToAnyHour(String? date, int? dayOfWeek) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [date, dayOfWeek],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekNotEqualToAnyHour(String? date, int? dayOfWeek) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date],
-              upper: [date, dayOfWeek],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek],
-              includeLower: false,
-              upper: [date],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek],
-              includeLower: false,
-              upper: [date],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date],
-              upper: [date, dayOfWeek],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekGreaterThanAnyHour(
-    String? date,
-    int? dayOfWeek, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, dayOfWeek],
-        includeLower: include,
-        upper: [date],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekLessThanAnyHour(
-    String? date,
-    int? dayOfWeek, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date],
-        upper: [date, dayOfWeek],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateEqualToDayOfWeekBetweenAnyHour(
-    String? date,
-    int? lowerDayOfWeek,
-    int? upperDayOfWeek, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, lowerDayOfWeek],
-        includeLower: includeLower,
-        upper: [date, upperDayOfWeek],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourIsNull(String? date, int? dayOfWeek) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [date, dayOfWeek, null],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourIsNotNull(String? date, int? dayOfWeek) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, dayOfWeek, null],
-        includeLower: false,
-        upper: [
-          date,
-          dayOfWeek,
-        ],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekHourEqualTo(String? date, int? dayOfWeek, int? hour) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'date_dayOfWeek_hour',
-        value: [date, dayOfWeek, hour],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourNotEqualTo(
-          String? date, int? dayOfWeek, int? hour) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek],
-              upper: [date, dayOfWeek, hour],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek, hour],
-              includeLower: false,
-              upper: [date, dayOfWeek],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek, hour],
-              includeLower: false,
-              upper: [date, dayOfWeek],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'date_dayOfWeek_hour',
-              lower: [date, dayOfWeek],
-              upper: [date, dayOfWeek, hour],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourGreaterThan(
-    String? date,
-    int? dayOfWeek,
-    int? hour, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, dayOfWeek, hour],
-        includeLower: include,
-        upper: [date, dayOfWeek],
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourLessThan(
-    String? date,
-    int? dayOfWeek,
-    int? hour, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, dayOfWeek],
-        upper: [date, dayOfWeek, hour],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterWhereClause>
-      dateDayOfWeekEqualToHourBetween(
-    String? date,
-    int? dayOfWeek,
-    int? lowerHour,
-    int? upperHour, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'date_dayOfWeek_hour',
-        lower: [date, dayOfWeek, lowerHour],
-        includeLower: includeLower,
-        upper: [date, dayOfWeek, upperHour],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
 }
 
 extension VertretungQueryFilter
     on QueryBuilder<Vertretung, Vertretung, QFilterCondition> {
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'classes',
+        property: r'art',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      classesIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'classes',
+        property: r'art',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesEqualTo(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      classesGreaterThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -769,14 +387,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesLessThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -784,14 +402,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesBetween(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -800,7 +418,7 @@ extension VertretungQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'classes',
+        property: r'art',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -810,105 +428,104 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesStartsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesEndsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesContains(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'classes',
+        property: r'art',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesMatches(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'classes',
+        property: r'art',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> classesIsEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'classes',
+        property: r'art',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      classesIsNotEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> artIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'classes',
+        property: r'art',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'date',
+        property: r'datum',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'date',
+        property: r'datum',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateEqualTo(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateGreaterThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -916,14 +533,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateLessThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -931,14 +548,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateBetween(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -947,7 +564,7 @@ extension VertretungQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'date',
+        property: r'datum',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -957,211 +574,366 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateStartsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateEndsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateContains(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'date',
+        property: r'datum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateMatches(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'date',
+        property: r'datum',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateIsEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> datumIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'date',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dateIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'date',
+        property: r'datum',
         value: '',
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      dayOfWeekIsNull() {
+      datumIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'datum',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'dayOfWeek',
+        property: r'fach',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fach',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fach',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'fach',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'fach',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fach',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> fachIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'fach',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'hinweis',
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      dayOfWeekIsNotNull() {
+      hinweisIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'dayOfWeek',
+        property: r'hinweis',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dayOfWeekEqualTo(
-      int? value) {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'dayOfWeek',
+        property: r'hinweis',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      dayOfWeekGreaterThan(
-    int? value, {
+      hinweisGreaterThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'dayOfWeek',
+        property: r'hinweis',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dayOfWeekLessThan(
-    int? value, {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisLessThan(
+    String? value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'dayOfWeek',
+        property: r'hinweis',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> dayOfWeekBetween(
-    int? lower,
-    int? upper, {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisBetween(
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'dayOfWeek',
+        property: r'hinweis',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'hour',
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'hinweis',
+        value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'hour',
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'hinweis',
+        value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourEqualTo(
-      int? value) {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'hinweis',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'hinweis',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hinweisIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hour',
-        value: value,
+        property: r'hinweis',
+        value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      hinweisIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hour',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourLessThan(
-    int? value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hour',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> hourBetween(
-    int? lower,
-    int? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hour',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
+        property: r'hinweis',
+        value: '',
       ));
     });
   }
@@ -1219,36 +991,36 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'note',
+        property: r'kurs',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'note',
+        property: r'kurs',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteEqualTo(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteGreaterThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1256,14 +1028,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteLessThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1271,14 +1043,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteBetween(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1287,7 +1059,7 @@ extension VertretungQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'note',
+        property: r'kurs',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1297,69 +1069,221 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteStartsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteEndsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteContains(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'note',
+        property: r'kurs',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteMatches(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'note',
+        property: r'kurs',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteIsEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'note',
+        property: r'kurs',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> noteIsNotEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> kursIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'note',
+        property: r'kurs',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lehrkraft',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lehrkraft',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lehrkraft',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'lehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lehrkraftMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'lehrkraft',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lehrkraft',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lehrkraftIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'lehrkraft',
         value: '',
       ));
     });
@@ -1375,36 +1299,36 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'room',
+        property: r'raum',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'room',
+        property: r'raum',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomEqualTo(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomGreaterThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1412,14 +1336,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomLessThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1427,14 +1351,14 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomBetween(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1443,7 +1367,7 @@ extension VertretungQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'room',
+        property: r'raum',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1453,253 +1377,252 @@ extension VertretungQueryFilter
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomStartsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomEndsWith(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomContains(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'room',
+        property: r'raum',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomMatches(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'room',
+        property: r'raum',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomIsEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'room',
+        property: r'raum',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> roomIsNotEmpty() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> raumIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'room',
+        property: r'raum',
         value: '',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'teacher',
-      ));
-    });
-  }
-
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      teacherIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'teacher',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+      stundenElementEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'teacher',
+        property: r'stunden',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      teacherGreaterThan(
-    String? value, {
+      stundenElementGreaterThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'teacher',
+        property: r'stunden',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherLessThan(
-    String? value, {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenElementLessThan(
+    int value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'teacher',
+        property: r'stunden',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherBetween(
-    String? lower,
-    String? upper, {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenElementBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'teacher',
+        property: r'stunden',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'teacher',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'teacher',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'teacher',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'teacher',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> teacherIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'teacher',
-        value: '',
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      teacherIsNotEmpty() {
+      stundenLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'teacher',
-        value: '',
-      ));
+      return query.listLength(
+        r'stunden',
+        length,
+        true,
+        length,
+        true,
+      );
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> stundenIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'stunden',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'stunden',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'stunden',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'stunden',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      stundenLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'stunden',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'type',
+        property: r'vertretungsFach',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeIsNotNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'type',
+        property: r'vertretungsFach',
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeEqualTo(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'type',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeGreaterThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1707,14 +1630,15 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'type',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeLessThan(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -1722,14 +1646,15 @@ extension VertretungQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'type',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeBetween(
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsFachBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -1738,159 +1663,7 @@ extension VertretungQueryFilter
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'type',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'type',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'type',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'type',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'type',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'type',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> typeIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'type',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'vertrSubject',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'vertrSubject',
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'vertrSubject',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'vertrSubject',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'vertrSubject',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1901,13 +1674,13 @@ extension VertretungQueryFilter
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectStartsWith(
+      vertretungsFachStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1915,13 +1688,13 @@ extension VertretungQueryFilter
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectEndsWith(
+      vertretungsFachEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1929,10 +1702,10 @@ extension VertretungQueryFilter
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectContains(String value, {bool caseSensitive = true}) {
+      vertretungsFachContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         value: value,
         caseSensitive: caseSensitive,
       ));
@@ -1940,10 +1713,10 @@ extension VertretungQueryFilter
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectMatches(String pattern, {bool caseSensitive = true}) {
+      vertretungsFachMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         wildcard: pattern,
         caseSensitive: caseSensitive,
       ));
@@ -1951,21 +1724,401 @@ extension VertretungQueryFilter
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectIsEmpty() {
+      vertretungsFachIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         value: '',
       ));
     });
   }
 
   QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
-      vertrSubjectIsNotEmpty() {
+      vertretungsFachIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'vertrSubject',
+        property: r'vertretungsFach',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'vertretungsLehrkraft',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'vertretungsLehrkraft',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vertretungsLehrkraft',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vertretungsLehrkraft',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vertretungsLehrkraft',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertretungsLehrkraft',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsLehrkraftIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vertretungsLehrkraft',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'vertretungsRaum',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'vertretungsRaum',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'vertretungsRaum',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'vertretungsRaum',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'vertretungsRaum',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'vertretungsRaum',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      vertretungsRaumIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'vertretungsRaum',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      wochentagIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'wochentag',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      wochentagIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'wochentag',
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> wochentagEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wochentag',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      wochentagGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'wochentag',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> wochentagLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'wochentag',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> wochentagBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'wochentag',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1976,79 +2129,92 @@ extension VertretungQueryObject
 
 extension VertretungQueryLinks
     on QueryBuilder<Vertretung, Vertretung, QFilterCondition> {
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> subject(
-      FilterQuery<Subject> q) {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> lerngruppe(
+      FilterQuery<Lerngruppe> q) {
     return QueryBuilder.apply(this, (query) {
-      return query.link(q, r'subject');
+      return query.link(q, r'lerngruppe');
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition> subjectIsNull() {
+  QueryBuilder<Vertretung, Vertretung, QAfterFilterCondition>
+      lerngruppeIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.linkLength(r'subject', 0, true, 0, true);
+      return query.linkLength(r'lerngruppe', 0, true, 0, true);
     });
   }
 }
 
 extension VertretungQuerySortBy
     on QueryBuilder<Vertretung, Vertretung, QSortBy> {
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByClasses() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByArt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'classes', Sort.asc);
+      return query.addSortBy(r'art', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByClassesDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByArtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'classes', Sort.desc);
+      return query.addSortBy(r'art', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDate() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDatum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'date', Sort.asc);
+      return query.addSortBy(r'datum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDateDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDatumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'date', Sort.desc);
+      return query.addSortBy(r'datum', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDayOfWeek() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByFach() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dayOfWeek', Sort.asc);
+      return query.addSortBy(r'fach', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByDayOfWeekDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByFachDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dayOfWeek', Sort.desc);
+      return query.addSortBy(r'fach', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByHour() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByHinweis() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hour', Sort.asc);
+      return query.addSortBy(r'hinweis', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByHourDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByHinweisDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hour', Sort.desc);
+      return query.addSortBy(r'hinweis', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByNote() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByKurs() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'note', Sort.asc);
+      return query.addSortBy(r'kurs', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByNoteDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByKursDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'note', Sort.desc);
+      return query.addSortBy(r'kurs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByLehrkraft() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lehrkraft', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByLehrkraftDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lehrkraft', Sort.desc);
     });
   }
 
@@ -2064,102 +2230,118 @@ extension VertretungQuerySortBy
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByRoom() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByRaum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'room', Sort.asc);
+      return query.addSortBy(r'raum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByRoomDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByRaumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'room', Sort.desc);
+      return query.addSortBy(r'raum', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByTeacher() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertretungsFach() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'teacher', Sort.asc);
+      return query.addSortBy(r'vertretungsFach', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByTeacherDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      sortByVertretungsFachDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'teacher', Sort.desc);
+      return query.addSortBy(r'vertretungsFach', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByType() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      sortByVertretungsLehrkraft() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.asc);
+      return query.addSortBy(r'vertretungsLehrkraft', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByTypeDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      sortByVertretungsLehrkraftDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.desc);
+      return query.addSortBy(r'vertretungsLehrkraft', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertrSubject() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertretungsRaum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vertrSubject', Sort.asc);
+      return query.addSortBy(r'vertretungsRaum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByVertrSubjectDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      sortByVertretungsRaumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vertrSubject', Sort.desc);
+      return query.addSortBy(r'vertretungsRaum', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByWochentag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wochentag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> sortByWochentagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wochentag', Sort.desc);
     });
   }
 }
 
 extension VertretungQuerySortThenBy
     on QueryBuilder<Vertretung, Vertretung, QSortThenBy> {
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByClasses() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByArt() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'classes', Sort.asc);
+      return query.addSortBy(r'art', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByClassesDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByArtDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'classes', Sort.desc);
+      return query.addSortBy(r'art', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDate() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDatum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'date', Sort.asc);
+      return query.addSortBy(r'datum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDateDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDatumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'date', Sort.desc);
+      return query.addSortBy(r'datum', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDayOfWeek() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByFach() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dayOfWeek', Sort.asc);
+      return query.addSortBy(r'fach', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByDayOfWeekDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByFachDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'dayOfWeek', Sort.desc);
+      return query.addSortBy(r'fach', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByHour() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByHinweis() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hour', Sort.asc);
+      return query.addSortBy(r'hinweis', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByHourDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByHinweisDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hour', Sort.desc);
+      return query.addSortBy(r'hinweis', Sort.desc);
     });
   }
 
@@ -2175,15 +2357,27 @@ extension VertretungQuerySortThenBy
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByNote() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByKurs() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'note', Sort.asc);
+      return query.addSortBy(r'kurs', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByNoteDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByKursDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'note', Sort.desc);
+      return query.addSortBy(r'kurs', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByLehrkraft() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lehrkraft', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByLehrkraftDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lehrkraft', Sort.desc);
     });
   }
 
@@ -2199,87 +2393,112 @@ extension VertretungQuerySortThenBy
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByRoom() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByRaum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'room', Sort.asc);
+      return query.addSortBy(r'raum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByRoomDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByRaumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'room', Sort.desc);
+      return query.addSortBy(r'raum', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByTeacher() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertretungsFach() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'teacher', Sort.asc);
+      return query.addSortBy(r'vertretungsFach', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByTeacherDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      thenByVertretungsFachDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'teacher', Sort.desc);
+      return query.addSortBy(r'vertretungsFach', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByType() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      thenByVertretungsLehrkraft() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.asc);
+      return query.addSortBy(r'vertretungsLehrkraft', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByTypeDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      thenByVertretungsLehrkraftDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'type', Sort.desc);
+      return query.addSortBy(r'vertretungsLehrkraft', Sort.desc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertrSubject() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertretungsRaum() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vertrSubject', Sort.asc);
+      return query.addSortBy(r'vertretungsRaum', Sort.asc);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByVertrSubjectDesc() {
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy>
+      thenByVertretungsRaumDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'vertrSubject', Sort.desc);
+      return query.addSortBy(r'vertretungsRaum', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByWochentag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wochentag', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QAfterSortBy> thenByWochentagDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wochentag', Sort.desc);
     });
   }
 }
 
 extension VertretungQueryWhereDistinct
     on QueryBuilder<Vertretung, Vertretung, QDistinct> {
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByClasses(
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByArt(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'classes', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'art', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByDate(
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByDatum(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'date', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'datum', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByDayOfWeek() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'dayOfWeek');
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByHour() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hour');
-    });
-  }
-
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByNote(
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByFach(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'fach', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByHinweis(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hinweis', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByKurs(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'kurs', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByLehrkraft(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lehrkraft', caseSensitive: caseSensitive);
     });
   }
 
@@ -2289,31 +2508,46 @@ extension VertretungQueryWhereDistinct
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByRoom(
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByRaum(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'room', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'raum', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByTeacher(
-      {bool caseSensitive = true}) {
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByStunden() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'teacher', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'stunden');
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByType(
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByVertretungsFach(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'vertretungsFach',
+          caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByVertrSubject(
+  QueryBuilder<Vertretung, Vertretung, QDistinct>
+      distinctByVertretungsLehrkraft({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'vertretungsLehrkraft',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByVertretungsRaum(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'vertrSubject', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'vertretungsRaum',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Vertretung, Vertretung, QDistinct> distinctByWochentag() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'wochentag');
     });
   }
 }
@@ -2326,33 +2560,39 @@ extension VertretungQueryProperty
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> classesProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> artProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'classes');
+      return query.addPropertyName(r'art');
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> dateProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> datumProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'date');
+      return query.addPropertyName(r'datum');
     });
   }
 
-  QueryBuilder<Vertretung, int?, QQueryOperations> dayOfWeekProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> fachProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'dayOfWeek');
+      return query.addPropertyName(r'fach');
     });
   }
 
-  QueryBuilder<Vertretung, int?, QQueryOperations> hourProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> hinweisProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hour');
+      return query.addPropertyName(r'hinweis');
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> noteProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> kursProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'note');
+      return query.addPropertyName(r'kurs');
+    });
+  }
+
+  QueryBuilder<Vertretung, String?, QQueryOperations> lehrkraftProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lehrkraft');
     });
   }
 
@@ -2362,27 +2602,42 @@ extension VertretungQueryProperty
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> roomProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations> raumProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'room');
+      return query.addPropertyName(r'raum');
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> teacherProperty() {
+  QueryBuilder<Vertretung, List<int>, QQueryOperations> stundenProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'teacher');
+      return query.addPropertyName(r'stunden');
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> typeProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations>
+      vertretungsFachProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'type');
+      return query.addPropertyName(r'vertretungsFach');
     });
   }
 
-  QueryBuilder<Vertretung, String?, QQueryOperations> vertrSubjectProperty() {
+  QueryBuilder<Vertretung, String?, QQueryOperations>
+      vertretungsLehrkraftProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'vertrSubject');
+      return query.addPropertyName(r'vertretungsLehrkraft');
+    });
+  }
+
+  QueryBuilder<Vertretung, String?, QQueryOperations>
+      vertretungsRaumProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'vertretungsRaum');
+    });
+  }
+
+  QueryBuilder<Vertretung, int?, QQueryOperations> wochentagProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'wochentag');
     });
   }
 }

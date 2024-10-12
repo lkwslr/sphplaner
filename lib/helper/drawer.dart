@@ -155,6 +155,18 @@ Widget getDrawer() {
               ),
             ),
             ListTile(
+              selected: StorageProvider.settings.viewMode == "stundenplan",
+              title: const Text('Stundenplan'),
+              leading: const Icon(
+                Icons.calendar_month,
+              ),
+              onTap: () {
+                StorageProvider.settings.viewMode = "stundenplan";
+                notify!.notify("main");
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
               selected: StorageProvider.settings.viewMode == "vertretung",
               title: const Text(
                 'Vertretungsplan',
@@ -168,19 +180,7 @@ Widget getDrawer() {
                 Navigator.of(context).pop();
               },
             ),
-            ListTile(
-              selected: StorageProvider.settings.viewMode == "stundenplan",
-              title: const Text('Stundenplan'),
-              leading: const Icon(
-                Icons.calendar_month,
-              ),
-              onTap: () {
-                StorageProvider.settings.viewMode = "stundenplan";
-                notify!.notify("main");
-                Navigator.of(context).pop();
-              },
-            ),
-            ListTile(
+            /*TODO ListTile(
               selected: StorageProvider.settings.viewMode == "hausaufgaben",
               title: const Text('Hausaufgaben'),
               leading: const Icon(
@@ -188,6 +188,34 @@ Widget getDrawer() {
               ),
               onTap: () {
                 StorageProvider.settings.viewMode = "hausaufgaben";
+                notify!.notify("main");
+                Navigator.of(context).pop();
+              },
+            ),*/
+            ListTile(
+              selected: StorageProvider.settings.viewMode == "lerngruppen",
+              title: const Text(
+                'Lerngruppen',
+              ),
+              leading: const Icon(
+                Icons.groups,
+              ),
+              onTap: () {
+                StorageProvider.settings.viewMode = "lerngruppen";
+                notify!.notify("main");
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              selected: StorageProvider.settings.viewMode == "kalender",
+              title: const Text(
+                'Kalender',
+              ),
+              leading: const Icon(
+                Icons.calendar_month,
+              ),
+              onTap: () {
+                StorageProvider.settings.viewMode = "lerngruppen";
                 notify!.notify("main");
                 Navigator.of(context).pop();
               },

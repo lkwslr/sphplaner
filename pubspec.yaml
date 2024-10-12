@@ -52,23 +52,34 @@ dependencies:
   flutter_native_splash: ^2.4.1
   package_info_plus: ^8.0.0
   dynamic_color: ^1.7.0
-  isar: ^3.1.0+1 # dart run build_runner build
-  isar_flutter_libs: ^3.1.0+1
+  # isar: ^3.1.0+1 # dart run build_runner build
+  # isar_flutter_libs: ^3.1.0+1
   fluttertoast: ^8.2.6
-  share_plus: ^9.0.0
+  share_plus: ^10.0.2
   logging: ^1.2.0
+  isar:
+    hosted: https://pub.isar-community.dev
+    version: ^3.1.8
+  isar_flutter_libs:
+    hosted: https://pub.isar-community.dev
+    version: ^3.1.8
+  flutter_neat_and_clean_calendar: ^0.4.15
+  icalendar_parser: ^2.1.0
 
 dev_dependencies:
-  build_runner: ^2.4.11
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
-  isar_generator: ^3.1.0+1
+  flutter_lints: ^5.0.0
+  # isar_generator: ^3.1.0+1
+  isar_generator:
+    version: ^3.1.8
+    hosted: https://pub.isar-community.dev/
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

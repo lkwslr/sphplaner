@@ -1,5 +1,6 @@
 import 'package:isar/isar.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
+
+import 'lerngruppe.dart';
 
 part 'vertretung.g.dart';
 
@@ -7,21 +8,22 @@ part 'vertretung.g.dart';
 class Vertretung {
   Id id = Isar.autoIncrement;
 
-  @Index(
-      unique: true,
-      replace: true,
-      composite: [CompositeIndex('dayOfWeek'), CompositeIndex('hour')])
-  String? date;
-  int? dayOfWeek;
-  int? hour;
-  String? room;
-  String? teacher;
-  String? classes;
-  String? vertrSubject;
-  final subject = IsarLink<Subject>();
+  String? datum;
+  int? wochentag;
+  List<int> stunden = [];
 
-  String? type;
-  String? note;
+  String? raum;
+  String? vertretungsRaum;
+  String? lehrkraft;
+  String? vertretungsLehrkraft;
+  String? kurs;
+  String? vertretungsFach;
+  String? fach;
+
+  String? art;
+  String? hinweis;
+
+  final lerngruppe = IsarLink<Lerngruppe>();
 
   bool placeholder = false;
 }

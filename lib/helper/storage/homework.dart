@@ -1,5 +1,5 @@
 import 'package:isar/isar.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
+import 'package:sphplaner/helper/storage/lerngruppe.dart';
 
 part 'homework.g.dart';
 
@@ -20,5 +20,5 @@ class Homework {
   @Index(unique: true, replace: true)
   String? onlineIdentifier;
 
-  final subject = IsarLink<Subject>();
+  final lerngruppe = IsarLink<Lerngruppe>();
 }
