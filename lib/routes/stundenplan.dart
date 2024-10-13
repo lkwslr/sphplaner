@@ -111,7 +111,7 @@ class _StundenplanState extends State<Stundenplan> {
 
                 Schulstunde? lesson = StorageProvider.isar.schulstundes
                     .where()
-                    .wochentagStundeEqualTo(day - 1, hour)
+                    .wochentagStundeEqualTo(day - 1 + (StorageProvider.settings.lerngruppen ? 0 : 1), hour)
                     .findFirstSync();
 
                 Vertretung? vertretung = StorageProvider.isar.vertretungs

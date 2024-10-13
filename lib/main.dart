@@ -104,6 +104,61 @@ Future<void> main() async {
       value: StorageNotifier(), child: const SPHPlaner()));
 }
 
+class CustomError extends StatelessWidget {
+  final FlutterErrorDetails errorDetails;
+
+  const CustomError({
+    super.key,
+    required this.errorDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            Text(
+              "Es ist ein Fehler aufgetreten",
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Um dabei zu helfen diese App besser zu machen, würde ich mich freuen, "
+                  "wenn du mir die Fehlermeldung per E-Mail (sphplaner@lkwslr.de) oder über ein Github-Issue zu kommen lässt. Danke!",
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  Clipboard.setData(
+                      ClipboardData(text: errorDetails.toString()));
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size.fromHeight(32),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(
+                  "Fehlermeldung kopieren",
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                )),
+            Text(
+              errorDetails.toString(),
+              style: const TextStyle(
+                fontWeight: FontWeight.w200,
+                fontStyle: FontStyle.italic
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class SPHPlaner extends StatefulWidget {
   const SPHPlaner({super.key});
 
@@ -167,9 +222,6 @@ class _SPHPlaner extends State<SPHPlaner> {
               darkColorScheme = defaultDarkColorScheme;
             }
 
-            lightColorScheme = defaultLightColorScheme;
-            darkColorScheme = defaultDarkColorScheme;
-
             InputDecorationTheme customLightInputTheme = InputDecorationTheme(
                 enabledBorder: OutlineInputBorder(
                     borderSide:
@@ -220,6 +272,15 @@ class _SPHPlaner extends State<SPHPlaner> {
                 inputDecorationTheme: customDarkInputTheme,
               ),
               themeMode: StorageProvider.theme,
+              builder: (context, widget) {
+                ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+                  return CustomError(errorDetails: errorDetails);
+                };
+                return widget ??
+                    Center(
+                      child: CircularProgressIndicator(),
+                    );
+              },
               home: PropertyChangeConsumer<StorageNotifier, String>(
                   properties: const ['main'],
                   builder: (context, notify, child) {
@@ -276,7 +337,7 @@ class _SPHPlaner extends State<SPHPlaner> {
                                       "stundenplan";
                                   break;
                                 }
-                                /*TODO case 2:
+                              /*TODO case 2:
                                 {
                                   StorageProvider.settings.viewMode =
                                       "hausaufgaben";
@@ -285,13 +346,13 @@ class _SPHPlaner extends State<SPHPlaner> {
                               case 2: //3, wenn hausaufgaben vorhanden
                                 {
                                   StorageProvider.settings.viewMode =
-                                  "lerngruppen";
+                                      "lerngruppen";
                                   break;
                                 }
                               case 3: //4, wenn hausaufgaben vorhanden
                                 {
                                   StorageProvider.settings.viewMode =
-                                  "kalender";
+                                      "kalender";
                                   break;
                                 }
                             }
@@ -387,22 +448,22 @@ class _SPHPlaner extends State<SPHPlaner> {
   List<Widget>? buildActions(String view, BuildContext context) {
     List<Widget> actions = [
       if (StorageProvider.settings.updateLock)
-      Padding(
-          padding: const EdgeInsets.only(right: 10, left: 10),
-          child: PropertyChangeConsumer<StorageNotifier, String>(
-            properties: const ['updateLock'],
-            builder: (context, notify, child) {
-              return Center(
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ));
-            },
-          )),
+        Padding(
+            padding: const EdgeInsets.only(right: 10, left: 10),
+            child: PropertyChangeConsumer<StorageNotifier, String>(
+              properties: const ['updateLock'],
+              builder: (context, notify, child) {
+                return Center(
+                    child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ));
+              },
+            )),
       Padding(
           padding: const EdgeInsets.only(right: 10, left: 10),
           child: GestureDetector(

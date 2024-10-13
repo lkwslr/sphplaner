@@ -19,6 +19,9 @@ class TimeTable {
       await downloadLerngruppen();
       await downloadStundenplan();
     } else {
+      await StorageProvider.isar.writeTxn(() async {
+        await StorageProvider.isar.schulstundes.filter().syncedEqualTo(true).deleteAll();
+      });
       //TODO: deprecated?
       Isar isar = StorageProvider.isar;
       List<List> availableLesson = [];
