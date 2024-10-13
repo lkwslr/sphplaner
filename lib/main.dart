@@ -308,9 +308,8 @@ class _SPHPlaner extends State<SPHPlaner> {
                     if (credentialError) {
                       return Login(skipUpdate: credentialError);
                     } else if (StorageProvider.loggedIn) {
-                      if (StorageProvider.autoUpdate &&
-                          !StorageProvider.didAutoUpdate) {
-                        StorageProvider.didAutoUpdate = true;
+                      if (!StorageProvider.didUpdate) {
+                        StorageProvider.didUpdate = true;
                         SPH.update(notify!);
                       }
                       return Scaffold(

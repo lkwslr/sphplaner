@@ -93,12 +93,25 @@ saveLerngruppen(dom.Element kurse) async {
 
           String art = klausur.split(" ")[1].substring(0, klausur.split(" ")[1].length -1);
 
-          String zeit = klausur.split(" ")[2];
-          int stundeAnfang = int.parse(zeit.split("-")[0].replaceAll(".", ""));
-          int stundeEnde = int.parse(zeit.split("-")[1].replaceAll(".", ""));
           List<int> stunden = [];
-          for (int i=stundeAnfang;i<=stundeEnde; i++) {
-            stunden.add(i);
+          if (klausur.split(" ").length > 2) {
+            String zeit = klausur.split(" ")[2];
+            int stundeAnfang = 0;
+            int stundeEnde = 0;
+            if (zeit.contains("-")) {
+              stundeAnfang = int.parse(zeit.split("-")[0].replaceAll(".", ""));
+              stundeEnde = int.parse(zeit.split("-")[1].replaceAll(".", ""));
+            } else {
+              try {
+                stundeAnfang = int.parse(zeit.split(" ")[0].replaceAll(".", ""));
+                stundeEnde = int.parse(zeit.split(" ")[zeit.split(" ").length-2].replaceAll(".", ""));
+              } catch (_) {}
+            }
+
+
+            for (int i=stundeAnfang;i<=stundeEnde; i++) {
+              stunden.add(i);
+            }
           }
 
           Leistungskontrolle leistungskontrolle = Leistungskontrolle()

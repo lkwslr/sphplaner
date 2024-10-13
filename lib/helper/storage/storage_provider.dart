@@ -20,7 +20,7 @@ class StorageProvider {
   static SharedPreferences? _prefs;
   static const FlutterSecureStorage _secure = FlutterSecureStorage();
   static SettingsProvider settings = SettingsProvider();
-  static bool didAutoUpdate = false;
+  static bool didUpdate = false;
 
   static Future<void> initializeStorage() async {
     final dir = await getApplicationDocumentsDirectory();

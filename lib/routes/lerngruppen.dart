@@ -122,9 +122,9 @@ class _LerngruppenViewerState extends State<LerngruppenViewer> {
                                 if (leistungskontrolle.datum!.isAfter(DateTime.now()))
                               Row(
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                       flex: 1,
-                                      child: Text("Klausur:",
+                                      child: Text(leistungskontrolle.art ?? "Klausur",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold))),
                                   Expanded(

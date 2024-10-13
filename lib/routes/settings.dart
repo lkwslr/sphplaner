@@ -1,13 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
+import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/main.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -241,7 +241,9 @@ class _Settings extends State<Settings> {
               child: ListTile(
                 title: Text(
                   "Bitte verwende folgende Einstellungen nur, wenn du dazu aufgefordert wirst oder dir der Funktionsweise im Klaren bist.",
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ),
@@ -263,20 +265,22 @@ class _Settings extends State<Settings> {
                 title: Text("Debug Modus"),
                 subtitle: Text(
                   "Ermöglicht das Nachvollziehen von Fehlern.\n"
-                      "Dazu werden an unterschiedlichen Stellen der App Werte aufgezeichnet und gespeichert. Diese können manuell ausgelesen werden.\n"
-                      "Zur bestmöglichen Auswertung werden dabei Informationen gespeichert, wie zum Beispiel die Zeit oder die Ansicht, welche aufgerufen wurde."
-                      "Dabei sind weder das Passwort noch persönliche Daten wie der Benutzername enthalten.",
+                  "Dazu werden an unterschiedlichen Stellen der App Werte aufgezeichnet und gespeichert. Diese können manuell ausgelesen werden.\n"
+                  "Zur bestmöglichen Auswertung werden dabei Informationen gespeichert, wie zum Beispiel die Zeit oder die Ansicht, welche aufgerufen wurde."
+                  "Dabei sind weder das Passwort noch persönliche Daten wie der Benutzername enthalten.",
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),
             ),
             Switch(
               value: StorageProvider.debugLog,
-              onChanged: StorageProvider.advancedDisabled ? null : (changed) {
-                Logger.root.level = changed ? Level.ALL : Level.WARNING;
-                StorageProvider.debugLog = changed;
-                notify?.notify("settings");
-              },
+              onChanged: StorageProvider.advancedDisabled
+                  ? null
+                  : (changed) {
+                      Logger.root.level = changed ? Level.ALL : Level.WARNING;
+                      StorageProvider.debugLog = changed;
+                      notify?.notify("settings");
+                    },
             )
           ],
         ),
@@ -436,19 +440,19 @@ Widget plan(StorageNotifier notify) {
               title: Text("Automatische Aktualisierung"),
               subtitle: Text(
                 "Wenn diese Funktion aktiviert ist,"
-                    " meldet sich die App beim Start automatisch beim Schulportal an "
-                    "und aktualisiert den Stundenplan und die Vertretungen.",
+                " meldet sich die App beim Start automatisch beim Schulportal an "
+                "und aktualisiert den Stundenplan und die Vertretungen.",
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ),
           ),
           Switch(
-            value: StorageProvider.autoUpdate,
-            onChanged: (changed) async {
-              StorageProvider.autoUpdate = changed;
-              notify.notifyAll(["settings"]);
-            },
-          )
+              value: StorageProvider.autoUpdate,
+              onChanged: null //(changed) async {
+              //StorageProvider.autoUpdate = changed;
+              //notify.notifyAll(["settings"]);
+              //},
+              )
         ],
       ),
       Row(
@@ -458,7 +462,7 @@ Widget plan(StorageNotifier notify) {
               title: Text("Vertretung im Stundenplan"),
               subtitle: Text(
                 "Achtung, es kann bei manchen Schulen zu Fehlern kommen, wenn der Vertretungsplan in den Stundenplan integriert wird, da manchmal Vertretung für Fächer angezeigt wird, die nicht belegt sind.\n"
-                    "Bitte berücksichtige dies bei der Aktivierung!",
+                "Bitte berücksichtige dies bei der Aktivierung!",
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ),
@@ -472,14 +476,14 @@ Widget plan(StorageNotifier notify) {
           )
         ],
       ),
-      Row(
+      /*TODO Row(
         children: [
           const Expanded(
             child: ListTile(
               title: Text("Hausaufgaben im Stundenplan"),
               subtitle: Text(
                 "Wenn diese Option aktiviert ist, wird bei allen Fächern, "
-                    "in denen Hausaufgaben vorhanden sind, ein kleines i im Stundenplan angezeigt.",
+                "in denen Hausaufgaben vorhanden sind, ein kleines i im Stundenplan angezeigt.",
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ),
@@ -492,6 +496,30 @@ Widget plan(StorageNotifier notify) {
             },
           )
         ],
+      ),*/
+      Row(
+        children: [
+          const Expanded(
+            child: ListTile(
+              title: Text("Gesamten Stundenplan verwenden"),
+              subtitle: Text(
+                "Falls im Schulportal unter 'Persönlicher Plan' nicht alle Fächer angezeigt werden,"
+                    "kannst du mit dieser Auswahl den 'Gesamtplan' als Grundlage für die Wahl deiner Fächer nehmen."
+                    "Dies funktioniert nur, wenn deine Schule 'Lerngruppen' unterstützt, "
+                    "da diese als Grundlage für die auszuwählenden Fächer verwendet werden.",
+                style: TextStyle(fontStyle: FontStyle.italic),
+              ),
+            ),
+          ),
+          Switch(
+            value: StorageProvider.settings.useAllPage,
+            onChanged: (changed) {
+              StorageProvider.didUpdate = false;
+              StorageProvider.settings.useAllPage = changed;
+              notify.notifyAll(["main", "settings"]);
+            },
+          )
+        ],
       ),
       Row(
         children: [
@@ -500,7 +528,7 @@ Widget plan(StorageNotifier notify) {
               title: Text("Gesamten Vertretungsplan anzeigen"),
               subtitle: Text(
                 "In der Vertretungsplan-Ansicht wird er gesamte verfügbare Vertretungsplan angezeigt.\n"
-                    "Im Stundenplan werden weiterhin nur Vertretungen angezeigt, die auf die angemeldete Person zu treffen.",
+                "Im Stundenplan werden weiterhin nur Vertretungen angezeigt, die auf die angemeldete Person zu treffen.",
                 style: TextStyle(fontStyle: FontStyle.italic),
               ),
             ),

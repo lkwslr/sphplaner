@@ -78,4 +78,8 @@ class SettingsProvider {
   bool get logging => _prefs?.getBool("logging") ?? true;
 
   set logging(bool value) => _prefs?.setBool("logging", value);
+
+  bool get useAllPage => _prefs?.getBool("allPage") ?? false;
+
+  set useAllPage(bool value) => _prefs?.setBool("allPage", value);
 }

@@ -13,8 +13,9 @@ downloadStundenplan() async {
   http.Response response = await SPH.get("/stundenplan.php");
   if (response.statusCode == 200) {
     dom.Document page = parse(response.body);
-    if (page.getElementById("all") != null) {
-      await saveStundenplan(page.getElementById("all")!);
+    String id = StorageProvider.settings.useAllPage ? "all" : "own";
+    if (page.getElementById(id) != null) {
+      await saveStundenplan(page.getElementById(id)!);
     }
   }
 }
@@ -22,9 +23,16 @@ downloadStundenplan() async {
 saveStundenplan(dom.Element gesamtplan) async {
   dom.Element tbody = gesamtplan.getElementsByTagName("tbody")[0];
 
-  if (tbody.getElementsByClassName("stunde")[0].attributes['title']?.contains("bei der Klasse/Stufe/Lerngruppe") ?? false) {
+  if (tbody
+          .getElementsByClassName("stunde")[0]
+          .attributes['title']
+          ?.contains("bei der Klasse/Stufe/Lerngruppe") ??
+      false) {
     await StorageProvider.isar.writeTxn(() async {
-      await StorageProvider.isar.schulstundes.filter().syncedEqualTo(true).deleteAll();
+      await StorageProvider.isar.schulstundes
+          .filter()
+          .syncedEqualTo(true)
+          .deleteAll();
     });
   }
 
@@ -73,7 +81,38 @@ saveStundenplan(dom.Element gesamtplan) async {
           return q.kuerzelContains(lehrkraft);
         }).findFirst();
 
+        //Wenn eigener Plan verwendet wird und Fach tutor kurs ist und dieser
+        //von einer vorhanden lehrkraft unterichtet wird hinzufügen
+        if (!StorageProvider.settings.useAllPage) {
+          if (lerngruppe == null && fach == "TUT") {
+            Lehrkraft? isarLehrkraft =
+                await StorageProvider.isar.lehrkrafts.getByKuerzel(lehrkraft);
+            if (isarLehrkraft != null) {
+              lerngruppe = Lerngruppe()
+                ..gruppenId = "TUT"
+                ..fullName = getDefaultName("TUT")
+                ..generatedName = getDefaultName("TUT")
+                ..name = "TUT"
+                ..halbjahr = ""
+                ..zweig = ""
+                ..farbe = getDefaultColor("TUT") ?? 4294967295
+                ..lehrkraft.value = isarLehrkraft;
+
+              await StorageProvider.isar.writeTxn(() async {
+                await StorageProvider.isar.lerngruppes
+                    .putByGruppenId(lerngruppe!);
+                await lerngruppe.lehrkraft.save();
+              });
+            }
+          }
+        }
+
         int rowspan = int.tryParse(tag.attributes['rowspan'] ?? "1") ?? 1;
+
+        //Verschiebung unabhängig, ob fach hinzugefügt oder nicht
+        for (int iRowspan = 0; iRowspan < rowspan; iRowspan++) {
+          stundenplan[iStunde + iRowspan][iTag + wochentagVerschiebung] = true;
+        }
 
         if (lerngruppe != null) {
           for (int iRowspan = 0; iRowspan < rowspan; iRowspan++) {
@@ -87,10 +126,9 @@ saveStundenplan(dom.Element gesamtplan) async {
               ..stunde = iStunde + 1 + iRowspan
               ..fach.value = lerngruppe;
 
-            stundenplan[iStunde + iRowspan][iTag + wochentagVerschiebung] = true;
-
             await StorageProvider.isar.writeTxn(() async {
-              await StorageProvider.isar.schulstundes.putByWochentagStunde(schulstunde);
+              await StorageProvider.isar.schulstundes
+                  .putByWochentagStunde(schulstunde);
               await schulstunde.fach.save();
             });
           }
