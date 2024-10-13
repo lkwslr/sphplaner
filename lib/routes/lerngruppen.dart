@@ -24,6 +24,20 @@ class _LerngruppenViewerState extends State<LerngruppenViewer> {
           List<Lerngruppe> lerngruppen =
               StorageProvider.isar.lerngruppes.where().findAllSync();
 
+          if (lerngruppen.isEmpty) {
+            return LayoutBuilder(
+                builder: (context, constraints) => Container(
+                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  child: const Text(
+                    "Es sind keine Lerngruppen vorhanden!",
+                    textAlign: TextAlign.center,
+                    style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ));
+          }
+
           return Scaffold(
               body: ListView.builder(
                   itemCount: lerngruppen.length,

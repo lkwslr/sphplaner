@@ -51,6 +51,10 @@ class _StundenplanState extends State<Stundenplan> {
             return element.datum ?? "01.01.1970";
           }).toList();
 
+          if (dates.isEmpty) {
+            dates = ["", ""];
+          }
+
           List<Widget> columns = [buildHeader(dates[0], dates[1])];
           for (int hour = 1; hour <= StorageProvider.timelist.length; hour++) {
             List<Widget> row = [];

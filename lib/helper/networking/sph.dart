@@ -402,15 +402,11 @@ class SPH {
       await getSID(force, notify: notify);
     } catch (error, stacktrace) {
       if ("$error".contains("Demo")) {
-        logger.severe("Der Demo-Account hat begrenzte Möglichkeiten.");
+        logger.shout("Der Demo-Account hat begrenzte Möglichkeiten.");
         return;
       }
       logger.severe("password", error, stacktrace);
       return;
-    }
-    if (force) { //TODO
-      StorageProvider.isar.writeTxn(() async {
-      });
     }
     List errors = [];
     try {
