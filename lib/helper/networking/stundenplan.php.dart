@@ -58,6 +58,8 @@ saveStundenplan(dom.Element gesamtplan) async {
     String zeiten = tage[0].getElementsByClassName("VonBis")[0].text.trim();
     stundenZeiten.add(zeiten);
 
+    StorageProvider.timelist = stundenZeiten;
+
     tage.removeAt(0);
 
     int wochentagVerschiebung = 0;
@@ -92,7 +94,7 @@ saveStundenplan(dom.Element gesamtplan) async {
                 ..gruppenId = "TUT"
                 ..fullName = getDefaultName("TUT")
                 ..generatedName = getDefaultName("TUT")
-                ..name = "TUT"
+                ..name = getDefaultName("TUT")
                 ..halbjahr = ""
                 ..zweig = ""
                 ..farbe = getDefaultColor("TUT") ?? 4294967295
@@ -117,8 +119,8 @@ saveStundenplan(dom.Element gesamtplan) async {
         if (lerngruppe != null) {
           for (int iRowspan = 0; iRowspan < rowspan; iRowspan++) {
             String raum = moeglichesFach.text
-                .replaceAll(fach, "")
                 .replaceAll(lehrkraft, "")
+                .replaceAll(fach, "")
                 .trim();
             Schulstunde schulstunde = Schulstunde()
               ..wochentag = iTag + wochentagVerschiebung

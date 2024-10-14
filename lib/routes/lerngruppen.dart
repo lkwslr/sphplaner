@@ -99,6 +99,7 @@ class _LerngruppenViewerState extends State<LerngruppenViewer> {
                                           maxLines: 1)),
                                 ],
                               ),
+                              if (lerngruppen[index].halbjahr != "")
                               Row(
                                 children: [
                                   const Expanded(
@@ -138,7 +139,7 @@ class _LerngruppenViewerState extends State<LerngruppenViewer> {
                                 children: [
                                   Expanded(
                                       flex: 1,
-                                      child: Text(leistungskontrolle.art ?? "Klausur",
+                                      child: Text("${leistungskontrolle.art ?? "Klausur"}:",
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold))),
                                   Expanded(

@@ -545,22 +545,18 @@ class _StundenplanState extends State<Stundenplan> {
                                                     4294967295),
                                               ),
                                             ]),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                  child: Text(
-                                                "Fach laut Stundenplan:",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleMedium,
-                                                textAlign: TextAlign.center,
-                                              )),
-                                            ],
+                                          Text(
+                                            "Fach laut Stundenplan:",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium,
+                                            textAlign: TextAlign.center,
                                           ),
                                           SizedBox(
                                             height: 8,
                                           ),
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               const Expanded(
                                                   child: Text("Fachname: ")),
@@ -568,6 +564,7 @@ class _StundenplanState extends State<Stundenplan> {
                                             ],
                                           ),
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               const Expanded(
                                                   child: Text(
@@ -578,6 +575,7 @@ class _StundenplanState extends State<Stundenplan> {
                                             ],
                                           ),
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               const Expanded(
                                                   child: Text("Raum: ")),
@@ -587,6 +585,7 @@ class _StundenplanState extends State<Stundenplan> {
                                             ],
                                           ),
                                           Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               const Expanded(
                                                   child: Text("Lehrer: ")),
