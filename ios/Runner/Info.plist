@@ -49,5 +49,7 @@
 		<string>Es wird kein Zugriff auf das Mikrofon benötigt.</string>
 		<key>NSCameraUsageDescription</key>
 		<string>Der Zugriff auf die Kamera wird benötigt, um ein Profilbild erstellen zu können.</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 	</dict>
 </plist>

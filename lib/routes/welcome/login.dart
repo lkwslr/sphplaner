@@ -4,9 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/networking/sph.dart';
+import 'package:sphplaner/helper/school.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
-import 'package:sphplaner/helper/school.dart';
 import 'package:sphplaner/main.dart';
 import 'package:sphplaner/routes/welcome/login_settings.dart';
 
@@ -29,7 +29,8 @@ class _LoginState extends State<Login> {
   String password = "";
   String info = "Anmelden";
   String errormessage = "";
-  String hinweisText = "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.";
+  String hinweisText =
+      "Bitte gib deine Zugangsdaten vom Schulportal Hessen an, um dich anzumelden.";
   List<School> schools = [];
 
   @override
@@ -58,7 +59,10 @@ class _LoginState extends State<Login> {
 
                 if (logicalScreenSize.height > logicalScreenSize.width) {
                   return ListView(children: [
-                    Image.asset('assets/sph_wide.png', color: Theme.of(context).colorScheme.primary,),
+                    Image.asset(
+                      'assets/sph_wide.png',
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     const Divider(height: 32, color: Colors.transparent),
                     Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -133,12 +137,12 @@ class _LoginState extends State<Login> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (widget.skipUpdate ?? false)
-            const Text(
-              "Durch ein Update o.ä. wurden deine Zugangsdaten aus dem App-Speicher entfernt, "
-                  "weswegen du diese jetzt erneut angeben musst.",
-              style: TextStyle(fontSize: 20),
-              textAlign: TextAlign.left,
-            ),
+              const Text(
+                "Durch ein Update o.ä. wurden deine Zugangsdaten aus dem App-Speicher entfernt, "
+                "weswegen du diese jetzt erneut angeben musst.",
+                style: TextStyle(fontSize: 20),
+                textAlign: TextAlign.left,
+              ),
             if (widget.skipUpdate ?? false)
               const Text(
                 "Alle anderen Daten, wie Einstellungen und Hausaufgaben, bleiben erhalten!",
@@ -157,11 +161,22 @@ class _LoginState extends State<Login> {
               child: Autocomplete<School>(
                 optionsBuilder: (TextEditingValue textEditingValue) {
                   if (!_loadingSchools && schools.isEmpty) {
-                    return <School>[const School(name: "Schulen konnten nicht geladen werden.\nGib eine ID an!", city: "", id: "0")];
+                    return <School>[
+                      const School(
+                          name:
+                              "Schulen konnten nicht geladen werden.\nGib eine ID an!",
+                          city: "",
+                          id: "0")
+                    ];
                   }
                   if (textEditingValue.text.isEmpty) {
                     if (_loadingSchools) {
-                      return <School>[const School(name: "Bitte habe einen Moment Geduld...", city: "", id: "0")];
+                      return <School>[
+                        const School(
+                            name: "Bitte habe einen Moment Geduld...",
+                            city: "",
+                            id: "0")
+                      ];
                     }
                     return const Iterable<School>.empty();
                   } else if (textEditingValue.text.length >= 3) {
@@ -177,7 +192,8 @@ class _LoginState extends State<Login> {
                       return contains;
                     }).toList();
                   } else {
-                    return schools.where((School school) => school.name
+                    return schools
+                        .where((School school) => school.name
                             .toLowerCase()
                             .startsWith(textEditingValue.text.toLowerCase()))
                         .toList();
@@ -292,6 +308,8 @@ class _LoginState extends State<Login> {
                             });
                             _formKey.currentState!.save();
 
+                            //TODO fehler falsche zugangsdaten erkennen
+
                             if (username == "TESTUSER") {
                               await testLogin();
                             } else {
@@ -324,7 +342,8 @@ class _LoginState extends State<Login> {
                                     Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => const SPHPlaner()));
+                                            builder: (context) =>
+                                                const SPHPlaner()));
                                   } else {
                                     try {
                                       await SPH.update(notify).then((value) {
@@ -332,11 +351,11 @@ class _LoginState extends State<Login> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                const LoginSettings()));
+                                                    const LoginSettings()));
                                       });
                                     } catch (_) {
                                       errormessage =
-                                      "Es ist ein unerwarteter Fehler aufgetreten";
+                                          "Es ist ein unerwarteter Fehler aufgetreten";
                                     }
                                   }
                                 });
