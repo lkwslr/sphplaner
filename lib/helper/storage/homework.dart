@@ -21,4 +21,6 @@ class Homework {
   String? onlineIdentifier;
 
   final lerngruppe = IsarLink<Lerngruppe>();
+
+  String? fach;
 }

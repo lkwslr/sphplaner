@@ -1,11 +1,11 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:sphplaner/helper/storage/homework.dart';
+import 'package:sphplaner/helper/storage/lerngruppe.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
-import 'package:sphplaner/helper/storage/subject.dart';
 
 class HomeWork extends StatefulWidget {
   const HomeWork({super.key});
@@ -72,7 +72,7 @@ class _HomeWorkState extends State<HomeWork> {
                                     label: "Rückgängig",
                                     onPressed: () async {
                                       Homework restored = Homework()
-                                        ..subject.value = homework.subject.value
+                                        ..lerngruppe.value = homework.lerngruppe.value
                                         ..finished = homework.finished
                                         ..description = homework.description
                                         ..title = homework.title
@@ -84,7 +84,7 @@ class _HomeWorkState extends State<HomeWork> {
                                           .writeTxn(() async {
                                         await StorageProvider.isar.homeworks
                                             .put(restored);
-                                        await restored.subject.save();
+                                        await restored.lerngruppe.save();
                                       }).then((value) =>
                                               notify?.notify("homework"));
                                     }),
@@ -123,7 +123,7 @@ class _HomeWorkState extends State<HomeWork> {
                               children: [
                                 Expanded(
                                     child: Text(
-                                  homework.subject.value?.subjectName ?? "???",
+                                  homework.lerngruppe.value?.generatedName ?? homework.fach ?? "???",
                                   textAlign: TextAlign.left,
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -245,9 +245,9 @@ class _HomeWorkState extends State<HomeWork> {
                                                   onPressed: () async {
                                                     Homework restored =
                                                         Homework()
-                                                          ..subject.value =
+                                                          ..lerngruppe.value =
                                                               homework
-                                                                  .subject.value
+                                                                  .lerngruppe.value
                                                           ..finished =
                                                               homework.finished
                                                           ..description =
@@ -266,7 +266,7 @@ class _HomeWorkState extends State<HomeWork> {
                                                       await StorageProvider
                                                           .isar.homeworks
                                                           .put(restored);
-                                                      await restored.subject
+                                                      await restored.lerngruppe
                                                           .save();
                                                     }).then((value) =>
                                                             notify?.notify(
@@ -328,7 +328,7 @@ class CreateHA extends StatefulWidget {
 }
 
 class _CreateHAState extends State<CreateHA> {
-  Subject? subject;
+  Lerngruppe? subject;
   DateTime? date;
   bool error = false;
   TextEditingController? titel;
@@ -346,8 +346,8 @@ class _CreateHAState extends State<CreateHA> {
     return PropertyChangeConsumer<StorageNotifier, String>(
         properties: const ["homework"],
         builder: (context, notify, child) {
-          List<Subject> subjects =
-              StorageProvider.isar.subjects.where().findAllSync();
+          List<Lerngruppe> subjects =
+              StorageProvider.isar.lerngruppes.where().findAllSync();
 
           if (subjects.isEmpty) {
             return Scaffold(
@@ -364,7 +364,7 @@ class _CreateHAState extends State<CreateHA> {
                   ),
                 ));
           }
-          subject ??= homework?.subject.value ?? subjects.first;
+          subject ??= homework?.lerngruppe.value ?? subjects.first;
           return Scaffold(
             appBar: AppBar(title: const Text('Hausaufgabe erstellen')),
             body: ListView(
@@ -379,7 +379,7 @@ class _CreateHAState extends State<CreateHA> {
                   ),
                   subtitle: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(subject!.color)),
+                        backgroundColor: Color(subject!.farbe)),
                     onPressed: () {
                       showDialog(
                           context: context,
@@ -396,12 +396,12 @@ class _CreateHAState extends State<CreateHA> {
                                       height: 40,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(e.color)),
+                                            backgroundColor: Color(e.farbe)),
                                         onPressed: () {
                                           Navigator.of(context).pop(e);
                                         },
                                         child: Text(
-                                          e.subjectName ?? "???",
+                                          e.generatedName ??  "???",
                                           style: const TextStyle(
                                               color: Colors.black),
                                         ),
@@ -417,7 +417,7 @@ class _CreateHAState extends State<CreateHA> {
                         }
                       });
                     },
-                    child: Text(subject!.subjectName ?? "???",
+                    child: Text(subject!.generatedName ?? "???",
                         style: const TextStyle(color: Colors.black)),
                   ),
                 ),
@@ -476,7 +476,7 @@ class _CreateHAState extends State<CreateHA> {
               onPressed: () async {
                 if (titel!.text.isNotEmpty) {
                   homework
-                    ?..subject.value = subject
+                    ?..lerngruppe.value = subject
                     ..title = titel?.text
                     ..description = beschreibung?.text
                     ..due = date?.millisecondsSinceEpoch
@@ -485,7 +485,7 @@ class _CreateHAState extends State<CreateHA> {
 
                   await StorageProvider.isar.writeTxn(() async {
                     await StorageProvider.isar.homeworks.put(homework!);
-                    await homework?.subject.save();
+                    await homework?.lerngruppe.save();
                   }).then((value) {
                     notify!.notify("homework");
                     Navigator.of(context).pop();
@@ -502,4 +502,3 @@ class _CreateHAState extends State<CreateHA> {
         });
   }
 }
-*/

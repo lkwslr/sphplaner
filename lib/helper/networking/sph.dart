@@ -73,6 +73,11 @@ class SPH {
         logger.info("Versuch: $retry - StatusCode: ${loginResponse.statusCode}");
       }
 
+      if (loginResponse.statusCode == 200) {
+        return throw Exception(
+            "SIDERROR=Der Benutzername, das Passwort oder die Schule sind nicht korrekt.");
+      }
+
       if (loginResponse.statusCode == 302 &&
           loginResponse.headers['location'] != null) {
         if (notify != null && StorageProvider.debugLog) {

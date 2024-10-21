@@ -51,6 +51,7 @@ import 'package:sphplaner/helper/storage/log.dart';
 import 'package:sphplaner/helper/storage/storage_notifier.dart';
 import 'package:sphplaner/helper/storage/storage_provider.dart';
 import 'package:sphplaner/helper/theme.dart';
+import 'package:sphplaner/routes/hausaufgaben.dart';
 import 'package:sphplaner/routes/kalender.dart';
 import 'package:sphplaner/routes/lerngruppen.dart';
 import 'package:sphplaner/routes/settings.dart';
@@ -288,14 +289,11 @@ class _SPHPlaner extends State<SPHPlaner> {
                       case "vertretung":
                         selectedIndex = 0;
                         break;
-                      /*TODO case "hausaufgaben":
+                      case "hausaufgaben":
                         selectedIndex = 2;
-                        break;*/
-                      case "lerngruppen":
-                        selectedIndex = 2; //3, wenn hausaufgaben vorhanden
                         break;
                       case "kalender":
-                        selectedIndex = 3; //4, wenn hausaufgaben vorhanden
+                        selectedIndex = 3;
                         break;
                       default:
                         selectedIndex = 1;
@@ -336,19 +334,13 @@ class _SPHPlaner extends State<SPHPlaner> {
                                       "stundenplan";
                                   break;
                                 }
-                              /*TODO case 2:
+                              case 2:
                                 {
                                   StorageProvider.settings.viewMode =
                                       "hausaufgaben";
                                   break;
-                                }*/
-                              case 2: //3, wenn hausaufgaben vorhanden
-                                {
-                                  StorageProvider.settings.viewMode =
-                                      "lerngruppen";
-                                  break;
                                 }
-                              case 3: //4, wenn hausaufgaben vorhanden
+                              case 3:
                                 {
                                   StorageProvider.settings.viewMode =
                                       "kalender";
@@ -376,21 +368,13 @@ class _SPHPlaner extends State<SPHPlaner> {
                               icon: const Icon(Icons.calendar_month_outlined),
                               label: 'Stundenplan',
                             ),
-                            /*TODO NavigationDestination(
+                            NavigationDestination(
                               selectedIcon: Icon(
                                 Icons.book,
                                 color: Theme.of(context).colorScheme.onPrimary,
                               ),
                               icon: const Icon(Icons.book_outlined),
                               label: 'Hausaufgaben',
-                            ),*/
-                            NavigationDestination(
-                              selectedIcon: Icon(
-                                Icons.groups,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                              icon: const Icon(Icons.groups_outlined),
-                              label: 'Lerngruppen',
                             ),
                             NavigationDestination(
                               selectedIcon: Icon(
@@ -421,8 +405,8 @@ class _SPHPlaner extends State<SPHPlaner> {
         return const VertretungsViewer();
       case "lerngruppen":
         return const LerngruppenViewer();
-      /*TODO case "hausaufgaben":
-        return const HomeWork();*/
+      case "hausaufgaben":
+        return const HomeWork();
       case "kalender":
         return Kalender();
       default:

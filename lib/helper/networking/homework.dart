@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:isar/isar.dart';
 import 'package:sphplaner/helper/storage/homework.dart';
 
+import '../storage/lerngruppe.dart';
+
 class HomeWork {
   static downloadHomework() async {
     Isar isar = StorageProvider.isar;
@@ -30,8 +32,13 @@ class HomeWork {
 
           Homework? homework = await StorageProvider.isar.homeworks.getByOnlineIdentifier(onlineIdentifier);
 
+          Lerngruppe? lerngruppe = await StorageProvider.isar.lerngruppes
+              .filter().fullNameContains(fach).findFirst();
+
           if (homework == null) {
             homework = Homework()
+              ..lerngruppe.value = lerngruppe
+              ..fach = fach
               ..title = title
               ..description = description
               ..online = true
@@ -39,6 +46,7 @@ class HomeWork {
 
             await isar.writeTxn(() async {
               await isar.homeworks.putByOnlineIdentifier(homework!);
+              await homework.lerngruppe.save();
             });
           }
         }

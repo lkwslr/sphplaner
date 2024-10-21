@@ -180,7 +180,7 @@ Widget getDrawer() {
                 Navigator.of(context).pop();
               },
             ),
-            /*TODO ListTile(
+            ListTile(
               selected: StorageProvider.settings.viewMode == "hausaufgaben",
               title: const Text('Hausaufgaben'),
               leading: const Icon(
@@ -191,7 +191,7 @@ Widget getDrawer() {
                 notify!.notify("main");
                 Navigator.of(context).pop();
               },
-            ),*/
+            ),
             ListTile(
               selected: StorageProvider.settings.viewMode == "lerngruppen",
               title: const Text(
